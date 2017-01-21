@@ -1,0 +1,23 @@
+apply plugin: 'idea'
+apply plugin: 'groovy'
+apply plugin: 'java'
+apply plugin: 'scala'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+dependencies {
+	compile 'org.codehaus.groovy:groovy-all:2.0.5'
+    compile 'org.scala-lang:scala-library:2.11.1'
+    compile 'com.google.guava:guava:14.0'
+    compile 'commons-lang:commons-lang:2.6'
+
+    testCompile 'junit:junit:4.10'
+    compile group: 'org.scalatest', name: 'scalatest_2.11', version: '3.0.0-RC4'
+    compile group: 'org.spockframework', name: 'spock-core', version: '1.0-groovy-2.4'
+
+    compile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+}
