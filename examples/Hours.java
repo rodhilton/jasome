@@ -52,7 +52,8 @@ public final class Hours extends BaseSingleFieldPeriod {
     /** Constant representing four hours. */
     public static final Hours FOUR = new Hours(4);
     /** Constant representing five hours. */
-    public static final Hours FIVE = new Hours(5);
+    public static final Hours
+            FIVE = new Hours(5);
     /** Constant representing six hours. */
     public static final Hours SIX = new Hours(6);
     /** Constant representing seven hours. */
