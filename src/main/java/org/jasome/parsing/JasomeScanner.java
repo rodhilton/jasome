@@ -4,7 +4,7 @@ import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import org.jasome.SomeClass;
-import org.jasome.plugins.TotalLinesOfCodePlugin;
+import org.jasome.calculators.TotalLinesOfCodePlugin;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class JasomeScanner {
                     System.out.println(cu.getPackageDeclaration().get().getName());
 
                     for(ClassOrInterfaceDeclaration clazz: classes) {
-                        BigDecimal d = plugin.calculate(new SomeClass(clazz));
+                        BigDecimal d = plugin.calculate(new SomeClass(clazz)).get();
                         System.out.println(clazz.getName());
                         System.out.println(d);
                     }

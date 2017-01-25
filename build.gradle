@@ -1,10 +1,15 @@
 apply plugin: 'idea'
 apply plugin: 'groovy'
 apply plugin: 'java'
-apply plugin: 'scala'
+apply plugin: 'application'
 
 sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
+
+group = 'org.jasome'
+version = '0.1'
+
+mainClassName = "org.jasome.JasomeScanner"
 
 repositories {
     mavenCentral()

@@ -1,4 +1,4 @@
-package org.jasome.plugins
+package org.jasome.calculators
 
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
@@ -6,11 +6,11 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.jasome.SomeClass
 import spock.lang.Specification
 
-class RawTotalLinesOfCodePluginSpec extends Specification {
-    RawTotalLinesOfCodePlugin unit
+class RawTotalLinesOfCodeCalculatorSpec extends Specification {
+    RawTotalLinesOfCodeCalculator unit
 
     def setup() {
-        unit = new RawTotalLinesOfCodePlugin()
+        unit = new RawTotalLinesOfCodeCalculator()
     }
 
     def "calculate simple metric"() {
@@ -30,7 +30,7 @@ class RawTotalLinesOfCodePluginSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.intValue() == 3
+        result.get().intValue() == 3
     }
 
     def "calculate counts raw lines of code in a class including comments"() {
@@ -72,7 +72,7 @@ class RawTotalLinesOfCodePluginSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.intValue() == 22
+        result.get().intValue() == 22
     }
 
     def "calculate class length when only one line"() {
@@ -89,6 +89,41 @@ class RawTotalLinesOfCodePluginSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.intValue() == 1
+        result.get().intValue() == 1
     }
+
+    def "returns an empty Optional if class declaration is missing"() {
+
+        given:
+        def sourceCode = ''''''
+
+        CompilationUnit cu = JavaParser.parse(sourceCode);
+        SomeClass someClass = new SomeClass(null);
+
+        when:
+        def result = unit.calculate(someClass)
+
+        then:
+        !result.isPresent()
+    }
+
+    def "returns an empty Optional if parse is invalid"() {
+
+        given:
+        def sourceCode = '''class Example {}'''
+
+        CompilationUnit cu = JavaParser.parse(sourceCode);
+        ClassOrInterfaceDeclaration node = cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0)
+        node.setRange(null)
+
+        SomeClass someClass = new SomeClass(null);
+
+        when:
+        def result = unit.calculate(someClass)
+
+        then:
+        !result.isPresent()
+    }
+
+
 }
