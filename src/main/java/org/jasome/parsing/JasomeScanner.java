@@ -6,22 +6,23 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import org.jasome.SomeClass;
 import org.jasome.calculators.TotalLinesOfCodePlugin;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 
 public class JasomeScanner {
-    public static void main(String[] args) throws IOException {
-        JasomeScanner scanner = new JasomeScanner();
-        Path path = FileSystems.getDefault().getPath("/Users/air0day/Projects/ucd/calvary_projects/commons-codec/src");
-        scanner.scan(path);
+
+    public void scanFile(File file) {
+
     }
 
-    private void scan(Path path) throws IOException {
+    public void scan(Path path) throws IOException {
+
+        Map<String, List<SomeClass>> packages = new HashMap<String, List<SomeClass>>();
 
         SimpleFileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
             @Override
@@ -44,18 +45,18 @@ public class JasomeScanner {
                     //so if we have 10 plugins and 20 files, we should make ~200 threads.  execute all in parallel and come back together when done
                     //scanning a directory
 
+                    //TODO: this won't get anonymous classes or inline classes will it?
                     List<ClassOrInterfaceDeclaration> classes = cu.getNodesByType(ClassOrInterfaceDeclaration.class);
 
-                    TotalLinesOfCodePlugin plugin = new TotalLinesOfCodePlugin();
+                    String packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString()).orElse("default");
 
-                    System.out.println(cu.getPackageDeclaration().get().getName());
-
-                    for(ClassOrInterfaceDeclaration clazz: classes) {
-                        BigDecimal d = plugin.calculate(new SomeClass(clazz)).get();
-                        System.out.println(clazz.getName());
-                        System.out.println(d);
+                    if(!packages.containsKey(packageName)) {
+                        packages.put(packageName, new ArrayList<SomeClass>());
                     }
 
+                    for(ClassOrInterfaceDeclaration clazz: classes) {
+                        packages.get(packageName).add(new SomeClass(clazz));
+                    }
                 }
 
                 return FileVisitResult.CONTINUE;
@@ -64,6 +65,8 @@ public class JasomeScanner {
         };
 
         Files.walkFileTree(path, EnumSet.of(FileVisitOption.FOLLOW_LINKS), Integer.MAX_VALUE, visitor);
+
+        System.out.println(packages);
 
     }
 
