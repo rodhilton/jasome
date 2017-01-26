@@ -13,4 +13,8 @@ public class SomeClass {
     public ClassOrInterfaceDeclaration getClassDeclaration() {
         return classDeclaration;
     }
+
+    public String toString() {
+        return classDeclaration.getNameAsString();
+    }
 }

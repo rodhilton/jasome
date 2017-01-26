@@ -6,11 +6,11 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.jasome.SomeClass
 import spock.lang.Specification
 
-class RawTotalLinesOfCodeCalculatorSpec extends Specification {
-    RawTotalLinesOfCodeCalculator unit
+class TotalLinesOfCodeCalculatorSpec extends Specification {
+    TotalLinesOfCodeCalculator unit
 
     def setup() {
-        unit = new RawTotalLinesOfCodeCalculator()
+        unit = new TotalLinesOfCodeCalculator()
     }
 
     def "calculate simple metric"() {
@@ -30,8 +30,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.size() == 1
-        result[0].value.intValue() == 3
+        result.get().intValue() == 3
     }
 
     def "calculate counts raw lines of code in a class including comments"() {
@@ -73,8 +72,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.size() == 1
-        result[0].value.intValue() == 22
+        result.get().intValue() == 22
     }
 
     def "calculate class length when only one line"() {
@@ -91,11 +89,10 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.size() == 1
-        result[0].value.intValue() == 1
+        result.get().intValue() == 1
     }
 
-    def "returns an empty set if class declaration is missing"() {
+    def "returns an empty Optional if class declaration is missing"() {
 
         given:
         def sourceCode = ''''''
@@ -107,10 +104,10 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.size() == 0
+        !result.isPresent()
     }
 
-    def "returns an empty set if parse is invalid"() {
+    def "returns an empty Optional if parse is invalid"() {
 
         given:
         def sourceCode = '''class Example {}'''
@@ -125,7 +122,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         def result = unit.calculate(someClass)
 
         then:
-        result.size() == 0
+        !result.isPresent()
     }
 
 

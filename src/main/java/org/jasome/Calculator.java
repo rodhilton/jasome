@@ -1,10 +1,9 @@
 package org.jasome;
 
-import java.math.BigDecimal;
-import java.util.Optional;
+import java.util.Set;
 
 public interface Calculator<T> {
 
-    Optional<BigDecimal> calculate(T t);
+    Set<Calculation> calculate(T t);
 
 }
