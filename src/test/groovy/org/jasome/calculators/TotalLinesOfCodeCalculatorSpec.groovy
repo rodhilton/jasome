@@ -233,5 +233,147 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         result[0].value.intValue() == 3
     }
 
+    def "calculate counts try/catch/finally blocks properly"() {
+
+        given:
+        def sourceCode = '''package com.mkyong;
+
+        import java.io.BufferedReader;
+        import java.io.FileReader;
+        import java.io.IOException;
+
+        public class ReadFileExample1 {
+
+            private static final String FILENAME = "E:\\\\test\\\\filename.txt";
+
+            public static void main(String[] args) {
+
+                BufferedReader br = null;
+                FileReader fr = null;
+
+                try {
+
+                    fr = new FileReader(FILENAME);
+                    br = new BufferedReader(fr);
+
+                    String sCurrentLine;
+
+                    br = new BufferedReader(new FileReader(FILENAME));
+
+                    while ((sCurrentLine = br.readLine()) != null) {
+                        System.out.println(sCurrentLine);
+                    }
+
+                } catch (IOException e) {
+
+                    e.printStackTrace();
+
+                } finally {
+
+                    try {
+
+                        if (br != null)     //This should count as 3 because it omits the braces which is a stylistic difference
+                            br.close();
+
+                        if (fr != null)     //same here
+                            fr.close();
+
+                    } catch (IOException ex) {
+
+                        ex.printStackTrace();
+
+                    }
+
+                }
+
+            }
+
+        }
+        '''
+
+        CompilationUnit cu = JavaParser.parse(sourceCode);
+        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
+
+        when:
+        def result = unit.calculate(someClass)
+
+        then:
+        result.size() == 1
+        result[0].value.intValue() == 29
+    }
+
+    def "calculate counts complex if blocks properly"() {
+
+        given:
+        def sourceCode = '''package com.stuff;
+
+        public class IfExample {
+
+            public static void main(String[] args) {
+                int x = (int)(Math.random() * 100);
+
+                if(x > 79) {
+                    System.out.println("higher than 79!");
+                } else if(x < 4) {
+                    System.out.println("smaller than 4");
+                } else if(x > 50)
+                    System.out.println("omitting braces!");
+                else if(x < 20) {
+                    System.out.println("whatever");
+                } else {
+                    System.out.println("hi");
+                }
+
+            }
+
+        }
+        '''
+
+        //The above is actually syntactic sugar for the below, so we count the lines as below
+        def equivalentSourceCode = '''package com.stuff;
+        public class IfExample {
+
+            public static void main(String[] args) {
+                int x = (int)(Math.random() * 100);
+
+                if(x > 79) {
+                    System.out.println("higher than 79!");
+                } else {
+                    if(x < 4) {
+                        System.out.println("smaller than 4");
+                    } else {
+                        if(x > 50) {
+                            System.out.println("omitting braces!");
+                        } else {
+                            if(x < 20) {
+                                System.out.println("whatever");
+                            } else {
+                                System.out.println("hi");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        '''
+
+        CompilationUnit cu = JavaParser.parse(sourceCode);
+        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
+
+        CompilationUnit equivalentCu = JavaParser.parse(equivalentSourceCode);
+        SomeClass equivalentSomeClass = new SomeClass(equivalentCu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
+
+        when:
+        def result = unit.calculate(someClass)
+        def equivalentResult = unit.calculate(equivalentSomeClass)
+
+        then:
+        result.size() == 1
+        result[0].value.intValue() == 22
+
+        equivalentResult.size() == 1
+        equivalentResult[0].value.intValue() == 22
+    }
+
 
 }

@@ -19,6 +19,66 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
 
+/**
+ * Counts the number of lines of code in a file.  Attempts to normalize for
+ * different formatting styles and whitespace differences so equivalent code
+ * counts as the same number of lines.
+ *
+ * For example:
+ * <code>
+ * import com.library1.Thing;
+ * public class ExampleClass {
+ *
+ *     public int field = 45;
+ *
+ *     public void aMethod() {
+ *         for(int i=0;i<10;i++) {
+ *             System.out.println(new Thing().getOutput());
+ *         }
+ *     }
+ * }
+ * </code>
+ *
+ * will count as the same number of lines (8) as:
+ *
+ * <code>
+ * public class ExampleClass
+ * {
+ *
+ *     public int
+ *         field = 45;
+ *
+ *     public void aMethod()
+ *     {
+ *
+ *         for (
+ *             int i=0;
+ *             i<10;
+ *             i++)
+ *         {
+ *
+ *             System.out.println(
+ *                 new com.library1.Thing().getOutput()
+ *             );
+ *         }
+ *     }
+ *
+ * }
+ * </code>
+ *
+ * This method does make the count susceptible to differences in "code golf"
+ * styles where code is compressed down to a "one-liner".  A one-liner will count
+ * as one line, even if that line is incredibly complex.  For example, an if
+ * statement with a body and an else clause will count as 5 or so lines, whereas
+ * equivalent code using a ternary operator will count as 1.
+ *
+ * Similarly, code that makes use of Java's 1.8 functional features will, if
+ * expressed as a single line of functional code, count as a single line,
+ * regardless of how complexly map and stream functions might be chained together.
+ *
+ * @author Rod Hilton
+ * @since 0.1
+ */
 public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
 
     public Set<Calculation> calculate(SomeClass someClass) {
@@ -105,7 +165,7 @@ public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
                 nodeStack.add(((SynchronizedStmt) node).getBody());
             } else if (node instanceof ExpressionStmt) {
                 count = count + 1;
-                //nodeStack.add(((ExpressionStmt)node).getExpression()); //TODO: maybe be a little smarter, go into more detail here since there can be so much code in an expression.  same for the statements below
+                //nodeStack.add(((ExpressionStmt)node).getExpression()); //TODO: maybe be a little smarter, go into more detail here since there can be so much code in an expression.  same for the statements below?
             } else if (node instanceof EmptyStmt) {
                 //It's empty, ignore.  Usually this is just a double semicolon
             } else if (node instanceof AssertStmt) {
@@ -125,7 +185,7 @@ public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
                 IfStmt ifStmt = (IfStmt) node;
                 nodeStack.add(ifStmt.getThenStmt());
                 if (ifStmt.getElseStmt().isPresent()) {
-                    count = count + 2;
+                    count = count + 1; //Only 1 because the close of the if is the start of the else
                     nodeStack.add(ifStmt.getElseStmt().get());
                 }
             } else if (node instanceof TryStmt) {
@@ -135,12 +195,12 @@ public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
                     nodeStack.add(tryStmt.getTryBlock().get());
                 }
                 for (CatchClause catchClause : tryStmt.getCatchClauses()) {
-                    count = count + 2;
+                    count = count + 1; //Only 1 becuase the close brace of the try is the start of the catch clause
                     nodeStack.add(catchClause.getBody());
                 }
 
                 if (tryStmt.getFinallyBlock().isPresent()) {
-                    count = count + 2;
+                    count = count + 1; //Only 1 because the close brace of the catches/try is the start of the finally clause
                     nodeStack.add(tryStmt.getFinallyBlock().get());
                 }
             } else if (node instanceof SwitchStmt) {
