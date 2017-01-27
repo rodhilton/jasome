@@ -5,6 +5,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.jasome.calculators.RawTotalLinesOfCodeCalculator;
+import org.jasome.calculators.TotalLinesOfCodeCalculator;
 import org.jasome.parsing.JasomeScanner;
 
 import java.io.File;
@@ -47,6 +48,7 @@ public class CommandLineExecutive {
             String fileParam = line.getArgs()[0];
             JasomeScanner scanner = new JasomeScanner();
             scanner.register(new RawTotalLinesOfCodeCalculator());
+            scanner.register(new TotalLinesOfCodeCalculator());
             scanner.scan(gatherFilesFrom(new File(fileParam)));
         }
     }

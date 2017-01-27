@@ -70,6 +70,14 @@ public final class Hours extends BaseSingleFieldPeriod {
     /** Serialization version. */
     private static final long serialVersionUID = 87525275727380864L;
 
+    static{
+        System.out.println("Static");
+    }
+
+    {
+        System.out.println("Non-static block");
+    }
+
     //-----------------------------------------------------------------------
     /**
      * Obtains an instance of <code>Hours</code> that may be cached.

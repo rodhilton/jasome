@@ -127,6 +127,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         then:
         result.size() == 0
     }
+    \
 
 
 }

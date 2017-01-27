@@ -50,6 +50,7 @@ public class JasomeScanner {
         for(Calculator calculator: calculators) {
             for(List<SomeClass> someClasses: packages.values()) {
                 for(SomeClass someClass: someClasses) {
+                    //System.out.println(someClass.getClassDeclaration().getName());
                     Set<Calculation> calcs = calculator.calculate(someClass);
                     System.out.println(someClass);
                     System.out.println("  "+calcs);
