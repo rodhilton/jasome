@@ -22,7 +22,9 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class JasomeScanner {
     private Set<PackageMetricCalculator> packageCalculators;
@@ -168,15 +170,9 @@ class JasomeOutputTree {
     }
 
     private void addCalculations(Set<Calculation> metrics, Node root, String... navigation) {
-        //Look for the first element of navigation under the root
-//        if(root.children.stream().noneMatch(c->c.name.equals(navigation[0]))) {
-//            Node newNode = new Node();
-//            newNode.name = navigation[0];
-//            root.children.add(newNode);
-//        }
 
-        //Now we know it's there, so lets grab it
         Optional<Node> foundNodeOpt = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
+
         Node correctNode;
         if(!foundNodeOpt.isPresent()) {
             correctNode = new Node();
@@ -186,10 +182,8 @@ class JasomeOutputTree {
             correctNode = foundNodeOpt.get();
         }
 
-//        Node correctNode = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
         if(navigation.length == 1) { //at the end
             correctNode.metrics.addAll(metrics);
-            //add the metrics
         } else {
             addCalculations(metrics, correctNode, Arrays.copyOfRange(navigation, 1, navigation.length));
         }
@@ -208,9 +202,18 @@ class JasomeOutputTree {
             sb.append(name);
             sb.append("\n");
             //do all metrics
-            sb.append(StringUtils.repeat(' ', level)+"+");
-            sb.append(metrics.toString());
-            sb.append("\n");
+            List<Calculation> sortedMetrics = metrics.stream().sorted(new Comparator<Calculation>() {
+                @Override
+                public int compare(Calculation o1, Calculation o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            }).collect(Collectors.toList());
+
+            for(Calculation metric: sortedMetrics) {
+                sb.append(StringUtils.repeat(' ', level)+"+");
+                sb.append(metric.getName()+": "+metric.getValue());
+                sb.append("\n");
+            }
             for(Node child: children) {
                 sb.append(child.toString(level+1));
             }
