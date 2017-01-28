@@ -4,13 +4,15 @@ import com.google.common.collect.Sets;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
-import org.jasome.calculators.RawTotalLinesOfCodeCalculator;
-import org.jasome.calculators.TotalLinesOfCodeCalculator;
+import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator;
+import org.jasome.calculators.impl.TotalLinesOfCodeCalculator;
 import org.jasome.parsing.JasomeScanner;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.regex.Pattern;
 
 public class CommandLineExecutive {
 
@@ -19,10 +21,13 @@ public class CommandLineExecutive {
         Option help = new Option("h", "help", false, "print this message");
         Option version = new Option("v", "version", false, "print the version information and exit");
 
+        Option excludetests = new Option("xt", "excludetests", false, "exclude test files from scanning");
+
         Options options = new Options();
 
         options.addOption(help);
         options.addOption(version);
+        options.addOption(excludetests);
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
@@ -47,18 +52,37 @@ public class CommandLineExecutive {
         } else {
             String fileParam = line.getArgs()[0];
             JasomeScanner scanner = new JasomeScanner();
-            scanner.register(new RawTotalLinesOfCodeCalculator());
-            scanner.register(new TotalLinesOfCodeCalculator());
-            scanner.scan(gatherFilesFrom(new File(fileParam)));
+
+            scanner.registerClassCalculator(new RawTotalLinesOfCodeCalculator());
+
+            TotalLinesOfCodeCalculator totalLinesOfCodeCalculator = new TotalLinesOfCodeCalculator();
+            scanner.registerPackageCalculator(totalLinesOfCodeCalculator);
+            scanner.registerClassCalculator(totalLinesOfCodeCalculator);
+            scanner.registerMethodCalculator(totalLinesOfCodeCalculator);
+
+            IOFileFilter readableJavaFiles = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
+
+            IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(new RegexFileFilter(Pattern.compile("(Test|Spec)\\.java$")));
+            IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(new FileFilter() {
+                @Override
+                public boolean accept(File pathname) {
+                    System.out.println(pathname.getPath());
+                    return !pathname.getPath().contains("/src/test/java");
+                }
+            });
+
+            IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(readableJavaFiles, doesNotHaveTestSuffix, isNotInTestSubDirectory) : readableJavaFiles;
+
+
+            scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
         }
     }
 
-    private static Collection<File> gatherFilesFrom(File file) {
-        IOFileFilter javaFilesOnly = new AndFileFilter(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
+    private static Collection<File> gatherFilesFrom(File file, IOFileFilter filter) {
 
         Collection<File> filesToScan;
         if (file.isDirectory()) {
-            Collection<File> javaFiles = FileUtils.listFiles(file, javaFilesOnly, TrueFileFilter.INSTANCE);
+            Collection<File> javaFiles = FileUtils.listFiles(file, filter, TrueFileFilter.INSTANCE);
 
             if (javaFiles.size() == 0) {
                 System.err.println("No .java files found in " + file.toString());
@@ -67,7 +91,7 @@ public class CommandLineExecutive {
 
             filesToScan = javaFiles;
         } else {
-            if (!javaFilesOnly.accept(file)) {
+            if (!filter.accept(file)) {
                 System.err.println("Not a .java source file: " + file.toString());
                 System.exit(-1);
             }

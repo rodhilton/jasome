@@ -1,4 +1,4 @@
-package org.jasome.calculators;
+package org.jasome.calculators.impl;
 
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
@@ -10,11 +10,14 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.google.common.collect.Sets;
-import org.jasome.Calculation;
-import org.jasome.Calculator;
-import org.jasome.SomeClass;
+import org.jasome.calculators.Calculation;
+import org.jasome.calculators.ClassMetricCalculator;
+import org.jasome.calculators.MethodMetricCalculator;
+import org.jasome.calculators.PackageMetricCalculator;
+import org.jasome.calculators.SourceContext;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -79,17 +82,46 @@ import java.util.Stack;
  * @author Rod Hilton
  * @since 0.1
  */
-public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
+public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
 
-    public Set<Calculation> calculate(SomeClass someClass) {
-        if (someClass == null || someClass.getClassDeclaration() == null)
-            return Sets.newHashSet();
-
-        ClassOrInterfaceDeclaration decl = someClass.getClassDeclaration();
+    @Override
+    public Set<Calculation> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+        assert(decl != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.add(decl);
 
+        Calculation result = performCalculation(nodeStack);
+
+        return Sets.newHashSet(result);
+    }
+
+    @Override
+    public Set<Calculation> calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context) {
+        assert(classes != null);
+
+        Stack<Node> nodeStack = new Stack<Node>();
+        nodeStack.addAll(classes);
+
+        Calculation result = performCalculation(nodeStack);
+
+        return Sets.newHashSet(result);
+    }
+
+    @Override
+    public Set<Calculation> calculate(MethodDeclaration declaration, SourceContext context) {
+        assert(declaration != null);
+
+        Stack<Node> nodeStack = new Stack<Node>();
+        nodeStack.add(declaration);
+
+        Calculation result = performCalculation(nodeStack);
+
+        return Sets.newHashSet(result);
+    }
+
+
+    private Calculation performCalculation(Stack<Node> nodeStack) {
         int count = 0;
 
         while (!nodeStack.empty()) {
@@ -143,7 +175,7 @@ public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
                 NodeList<Statement> statements = ((BlockStmt) node).getStatements();
                 nodeStack.addAll(statements);
             } else if (node instanceof ForStmt) {
-                count = count + 2; //2 for the opening and closing of the for statement, we ignore complexity within the loop itself
+                count = count + 2; //2 for the opening and closing of the for statement, we ignore complexity within the loop condition itself
                 nodeStack.add(((ForStmt) node).getBody());
             } else if (node instanceof ForeachStmt) {
                 count = count + 2; //2 for the opening and closing of the foreach statement
@@ -212,17 +244,17 @@ public class TotalLinesOfCodeCalculator implements Calculator<SomeClass> {
                 SwitchEntryStmt switchEntryStmt = (SwitchEntryStmt) node;
                 nodeStack.addAll(switchEntryStmt.getStatements());
             } else {
+                //TODO: logger?
                 System.err.println("Encountered type I'm not ready for: " + node.getClass());
                 System.err.println("Lines " + node.getBegin().get().line + " to " + node.getEnd().get().line + "\n");
             }
         }
 
-        Calculation result = new Calculation(
+        return new Calculation(
                 "TLOC",
                 "Total Lines of Code Count",
                 new BigDecimal(count)
         );
-
-        return Sets.newHashSet(result);
     }
+
 }

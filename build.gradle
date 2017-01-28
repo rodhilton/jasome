@@ -27,7 +27,7 @@ dependencies {
     //General language sugar
     //compile group: 'io.javaslang', name: 'javaslang', version: '2.0.5'
     compile 'com.google.guava:guava:14.0'
-    compile 'commons-lang:commons-lang:2.6'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.5'
 
     //Libraries
     compile group: 'commons-io', name: 'commons-io', version: '2.5'

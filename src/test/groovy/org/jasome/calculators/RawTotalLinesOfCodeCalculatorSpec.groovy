@@ -3,7 +3,7 @@ package org.jasome.calculators
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import org.jasome.SomeClass
+import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator
 import spock.lang.Specification
 
 class RawTotalLinesOfCodeCalculatorSpec extends Specification {
@@ -24,10 +24,9 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -67,10 +66,9 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -85,49 +83,28 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
         result[0].value.intValue() == 1
     }
 
-    def "returns an empty set if class declaration is missing"() {
+    def "throws error if class declaration is missing"() {
 
         given:
         def sourceCode = ''''''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(null);
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(null, SourceContext.NONE)
 
         then:
-        result.size() == 0
+        thrown AssertionError
     }
-
-    def "returns an empty set if parse is invalid"() {
-
-        given:
-        def sourceCode = '''class Example {}'''
-
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-        ClassOrInterfaceDeclaration node = cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0)
-        node.setRange(null)
-
-        SomeClass someClass = new SomeClass(null);
-
-        when:
-        def result = unit.calculate(someClass)
-
-        then:
-        result.size() == 0
-    }
-    \
 
 
 }

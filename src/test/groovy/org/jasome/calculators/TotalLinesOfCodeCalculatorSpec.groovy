@@ -5,6 +5,7 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.apache.commons.io.IOUtils
 import org.jasome.SomeClass
+import org.jasome.calculators.impl.TotalLinesOfCodeCalculator
 import spock.lang.Specification
 
 class TotalLinesOfCodeCalculatorSpec extends Specification {
@@ -25,10 +26,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -68,10 +68,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -86,47 +85,27 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
         result[0].value.intValue() == 2
     }
 
-    def "returns an empty Optional if class declaration is missing"() {
+    def "returns an empty if class declaration is missing"() {
 
         given:
         def sourceCode = ''''''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(null);
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(null, SourceContext.NONE)
 
         then:
-        result.size() == 0
-    }
-
-    def "returns an empty Optional if parse is invalid"() {
-
-        given:
-        def sourceCode = '''class Example {}'''
-
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-        ClassOrInterfaceDeclaration node = cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0)
-        node.setRange(null)
-
-        SomeClass someClass = new SomeClass(null);
-
-        when:
-        def result = unit.calculate(someClass)
-
-        then:
-        result.size() == 0
+        thrown AssertionError
     }
 
     def "calculate counts for complex file"() {
@@ -136,10 +115,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         def sourceCode = IOUtils.toString(stream, "UTF-8");
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -170,10 +148,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -194,10 +171,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -223,10 +199,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -292,10 +267,9 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1
@@ -358,14 +332,11 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         CompilationUnit cu = JavaParser.parse(sourceCode);
-        SomeClass someClass = new SomeClass(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
-
         CompilationUnit equivalentCu = JavaParser.parse(equivalentSourceCode);
-        SomeClass equivalentSomeClass = new SomeClass(equivalentCu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0));
 
         when:
-        def result = unit.calculate(someClass)
-        def equivalentResult = unit.calculate(equivalentSomeClass)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def equivalentResult = unit.calculate(equivalentCu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
 
         then:
         result.size() == 1

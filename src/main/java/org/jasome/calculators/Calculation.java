@@ -1,4 +1,4 @@
-package org.jasome;
+package org.jasome.calculators;
 
 import com.google.common.base.Objects;
 
