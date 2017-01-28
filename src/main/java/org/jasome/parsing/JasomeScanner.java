@@ -3,13 +3,20 @@ package org.jasome.parsing;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.*;
 import org.jasome.SomeClass;
 import org.jasome.SomeMethod;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -44,6 +51,8 @@ public class JasomeScanner {
 
         Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = gatherPackages(sourceFiles);
 
+        JasomeOutputTree output = new JasomeOutputTree();
+
         for(Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> entry: packages.entrySet()) {
             String packageName = entry.getKey();
 
@@ -52,34 +61,38 @@ public class JasomeScanner {
                 SourceContext packageContext = new SourceContext();
                 packageContext.setPackageName(packageName);
 
-                HashSet<Calculation> packageMetrics = new HashSet<Calculation>();
-
                 for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
                     List<ClassOrInterfaceDeclaration> classes = entry.getValue().stream().map(Pair::getKey).collect(Collectors.toList());
-                    packageMetrics.addAll(packageMetricCalculator.calculate(classes, packageContext));
+                    Set<Calculation> calculations = packageMetricCalculator.calculate(classes, packageContext);
+                    output.addCalculations(calculations, packageName);
                 }
 
-                System.out.println("Package " + packageName);
-                System.out.println("   " + packageMetrics);
             }
 
 
             //Now the class metrics
             for(Pair<ClassOrInterfaceDeclaration, SourceContext> classAndContext: entry.getValue()) {
                 ClassOrInterfaceDeclaration classDefinition = classAndContext.getLeft();
+
+                String className = classDefinition.getNameAsString();
+
+                if(classDefinition.getParentNode().isPresent()) {
+                    Node parentNode  = classDefinition.getParentNode().get();
+                    if(parentNode instanceof ClassOrInterfaceDeclaration) {
+                        className = ((ClassOrInterfaceDeclaration)parentNode).getNameAsString() + "." +
+                                classDefinition.getNameAsString();
+                    }
+                }
+
                 SourceContext classContext = classAndContext.getRight();
 
                 {
-                    HashSet<Calculation> classMetrics = new HashSet<Calculation>();
-
                     for (ClassMetricCalculator classMetricCalculator : classCalculators) {
-                        classMetrics.addAll(classMetricCalculator.calculate(classDefinition, classContext));
+                        Set<Calculation> calculations = classMetricCalculator.calculate(classDefinition, classContext);
+                        output.addCalculations(calculations, packageName, className);
                     }
 
-                    System.out.println(" Class " + classDefinition.getNameAsString());
-                    System.out.println("   " + classMetrics);
                 }
-
 
                 //And finally the method metrics
                 for(MethodDeclaration methodDeclaration: classDefinition.getMethods()) {
@@ -88,37 +101,17 @@ public class JasomeScanner {
                     methodContext.setImports(classContext.getImports());
                     methodContext.setClassDefinition(Optional.of(classDefinition));
 
-                    HashSet<Calculation> methodMetrics = new HashSet<Calculation>();
                     for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
-                        methodMetrics.addAll(methodMetricCalculator.calculate(methodDeclaration, methodContext));
+                        Set<Calculation> calculations = methodMetricCalculator.calculate(methodDeclaration, methodContext);
+                        output.addCalculations(calculations, packageName, className, methodDeclaration.getDeclarationAsString());
                     }
 
-                    System.out.println("  Method " + methodDeclaration.getNameAsString());
-                    System.out.println("   " + methodMetrics);
                 }
 
             }
-
-
         }
 
-
-        //System.out.println(packages);
-
-        //TODO: handle exceptions here.  a calculator can throw a runtime exception, want it to simply not be tablulated if that happens
-//            for(List<SomeClass> someClasses: packages.values()) {
-//                for(SomeClass someClass: someClasses) {
-//                    for(ClassMetricCalculator calculator: classCalculators) {
-//                    //System.out.println(someClass.getClassDeclaration().getName());
-//                    Set<Calculation> calcs = calculator.calculate(someClass.getClassDeclaration(), SourceContext.NONE);
-//                    System.out.println(someClass);
-//                    System.out.println("  "+calcs);
-//                }
-//
-//            }
-        //}
-
-//        System.out.println(packages);
+        System.out.println(output);
 
     }
 
@@ -152,5 +145,76 @@ public class JasomeScanner {
         return packages;
     }
 
+}
 
+//TODO: this is awful, write some tests against it and refactor heavily
+class JasomeOutputTree {
+    private Node root;
+
+    public JasomeOutputTree() {
+        root = new Node();
+        root.name = "root";
+        //root.sourceContext = SourceContext.NONE;
+    }
+
+    public String toString() {
+        return root.toString(0);
+    }
+
+    public void addCalculations(Set<Calculation> metrics, String... navigation) {
+        synchronized (root) {
+            addCalculations(metrics, root, navigation);
+        }
+    }
+
+    private void addCalculations(Set<Calculation> metrics, Node root, String... navigation) {
+        //Look for the first element of navigation under the root
+//        if(root.children.stream().noneMatch(c->c.name.equals(navigation[0]))) {
+//            Node newNode = new Node();
+//            newNode.name = navigation[0];
+//            root.children.add(newNode);
+//        }
+
+        //Now we know it's there, so lets grab it
+        Optional<Node> foundNodeOpt = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
+        Node correctNode;
+        if(!foundNodeOpt.isPresent()) {
+            correctNode = new Node();
+            correctNode.name = navigation[0];
+            root.children.add(correctNode);
+        } else {
+            correctNode = foundNodeOpt.get();
+        }
+
+//        Node correctNode = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
+        if(navigation.length == 1) { //at the end
+            correctNode.metrics.addAll(metrics);
+            //add the metrics
+        } else {
+            addCalculations(metrics, correctNode, Arrays.copyOfRange(navigation, 1, navigation.length));
+        }
+    }
+
+
+    private static class Node {
+        private String name;
+        //private SourceContext sourceContext;
+        private Set<Node> children = new HashSet<Node>();
+        private Set<Calculation> metrics = new HashSet<Calculation>();
+
+        public String toString(int level) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(StringUtils.repeat(' ', level));
+            sb.append(name);
+            sb.append("\n");
+            //do all metrics
+            sb.append(StringUtils.repeat(' ', level)+"+");
+            sb.append(metrics.toString());
+            sb.append("\n");
+            for(Node child: children) {
+                sb.append(child.toString(level+1));
+            }
+            return sb.toString();
+        }
+    }
 }
