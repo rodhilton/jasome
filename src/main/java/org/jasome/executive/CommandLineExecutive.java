@@ -6,10 +6,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator;
 import org.jasome.calculators.impl.TotalLinesOfCodeCalculator;
-import org.jasome.parsing.JasomeScanner;
+import org.jasome.output.Output;
+import org.jasome.output.XMLOutputter;
+import org.jasome.parsing.Scanner;
+import org.w3c.dom.Document;
 
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.regex.Pattern;
@@ -51,7 +56,7 @@ public class CommandLineExecutive {
             System.exit(0);
         } else {
             String fileParam = line.getArgs()[0];
-            JasomeScanner scanner = new JasomeScanner();
+            Scanner scanner = new Scanner();
 
             scanner.registerClassCalculator(new RawTotalLinesOfCodeCalculator());
 
@@ -63,18 +68,32 @@ public class CommandLineExecutive {
             IOFileFilter readableJavaFiles = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
 
             IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(new RegexFileFilter(Pattern.compile("(Test|Spec)\\.java$")));
-            IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(new FileFilter() {
-                @Override
-                public boolean accept(File pathname) {
-                    System.out.println(pathname.getPath());
-                    return !pathname.getPath().contains("/src/test/java");
-                }
+            IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(pathname -> {
+                return !pathname.getPath().contains("/src/test/java");
             });
 
             IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(readableJavaFiles, doesNotHaveTestSuffix, isNotInTestSubDirectory) : readableJavaFiles;
 
 
-            scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
+            Output output = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
+
+            try {
+                Document outputDocument = new XMLOutputter().output(output);
+
+                Transformer transformer = TransformerFactory.newInstance().newTransformer();
+                transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
+
+                DOMSource source = new DOMSource(outputDocument);
+                StreamResult result =  new StreamResult(System.out);
+                transformer.transform(source, result);
+            } catch (TransformerConfigurationException e) {
+                e.printStackTrace();
+            } catch (TransformerException e) {
+                e.printStackTrace();
+            }
+
+
         }
     }
 

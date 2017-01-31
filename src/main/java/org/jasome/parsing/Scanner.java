@@ -6,32 +6,24 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import org.apache.commons.lang3.StringUtils;
+import com.google.common.collect.Maps;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.*;
-import org.jasome.SomeClass;
-import org.jasome.SomeMethod;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import org.jasome.output.Output;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class JasomeScanner {
+public class Scanner {
     private Set<PackageMetricCalculator> packageCalculators;
     private Set<ClassMetricCalculator> classCalculators;
     private Set<MethodMetricCalculator> methodCalculators;
 
-    public JasomeScanner() {
+    public Scanner() {
         packageCalculators = new HashSet<PackageMetricCalculator>();
         classCalculators = new HashSet<ClassMetricCalculator>();
         methodCalculators = new HashSet<MethodMetricCalculator>();
@@ -49,11 +41,11 @@ public class JasomeScanner {
         methodCalculators.add(calculator);
     }
 
-    public void scan(Collection<File> sourceFiles) throws IOException {
+    public Output scan(Collection<File> inputFiles) throws IOException {
 
-        Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = gatherPackages(sourceFiles);
+        Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = gatherPackages(inputFiles);
 
-        JasomeOutputTree output = new JasomeOutputTree();
+        Output output = new Output();
 
         for(Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> entry: packages.entrySet()) {
             String packageName = entry.getKey();
@@ -91,7 +83,9 @@ public class JasomeScanner {
                 {
                     for (ClassMetricCalculator classMetricCalculator : classCalculators) {
                         Set<Calculation> calculations = classMetricCalculator.calculate(classDefinition, classContext);
-                        output.addCalculations(calculations, packageName, className);
+                        Map<String, String> attributes = Maps.newHashMap();
+                        attributes.put("sourceFile", classContext.getSourceFile().getName());
+                        output.addCalculations(calculations, attributes, packageName, className);
                     }
 
                 }
@@ -101,7 +95,7 @@ public class JasomeScanner {
                     SourceContext methodContext = new SourceContext();
                     methodContext.setPackageName(classContext.getPackageName());
                     methodContext.setImports(classContext.getImports());
-                    methodContext.setClassDefinition(Optional.of(classDefinition));
+                    methodContext.setClassDefinition(classDefinition);
 
                     for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
                         Set<Calculation> calculations = methodMetricCalculator.calculate(methodDeclaration, methodContext);
@@ -113,7 +107,7 @@ public class JasomeScanner {
             }
         }
 
-        System.out.println(output);
+        return output;
 
     }
 
@@ -132,6 +126,7 @@ public class JasomeScanner {
             SourceContext sourceContext = new SourceContext();
             sourceContext.setPackageName(packageName);
             sourceContext.setImports(imports);
+            sourceContext.setSourceFile(sourceFile);
 
             List<ClassOrInterfaceDeclaration> classes = cu.getNodesByType(ClassOrInterfaceDeclaration.class);
 
@@ -149,75 +144,3 @@ public class JasomeScanner {
 
 }
 
-//TODO: this is awful, write some tests against it and refactor heavily
-class JasomeOutputTree {
-    private Node root;
-
-    public JasomeOutputTree() {
-        root = new Node();
-        root.name = "root";
-        //root.sourceContext = SourceContext.NONE;
-    }
-
-    public String toString() {
-        return root.toString(0);
-    }
-
-    public void addCalculations(Set<Calculation> metrics, String... navigation) {
-        synchronized (root) {
-            addCalculations(metrics, root, navigation);
-        }
-    }
-
-    private void addCalculations(Set<Calculation> metrics, Node root, String... navigation) {
-
-        Optional<Node> foundNodeOpt = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
-
-        Node correctNode;
-        if(!foundNodeOpt.isPresent()) {
-            correctNode = new Node();
-            correctNode.name = navigation[0];
-            root.children.add(correctNode);
-        } else {
-            correctNode = foundNodeOpt.get();
-        }
-
-        if(navigation.length == 1) { //at the end
-            correctNode.metrics.addAll(metrics);
-        } else {
-            addCalculations(metrics, correctNode, Arrays.copyOfRange(navigation, 1, navigation.length));
-        }
-    }
-
-
-    private static class Node {
-        private String name;
-        //private SourceContext sourceContext;
-        private Set<Node> children = new HashSet<Node>();
-        private Set<Calculation> metrics = new HashSet<Calculation>();
-
-        public String toString(int level) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(StringUtils.repeat(' ', level));
-            sb.append(name);
-            sb.append("\n");
-            //do all metrics
-            List<Calculation> sortedMetrics = metrics.stream().sorted(new Comparator<Calculation>() {
-                @Override
-                public int compare(Calculation o1, Calculation o2) {
-                    return o1.getName().compareTo(o2.getName());
-                }
-            }).collect(Collectors.toList());
-
-            for(Calculation metric: sortedMetrics) {
-                sb.append(StringUtils.repeat(' ', level)+"+");
-                sb.append(metric.getName()+": "+metric.getValue());
-                sb.append("\n");
-            }
-            for(Node child: children) {
-                sb.append(child.toString(level+1));
-            }
-            return sb.toString();
-        }
-    }
-}

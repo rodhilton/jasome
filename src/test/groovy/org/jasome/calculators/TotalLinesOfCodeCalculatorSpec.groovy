@@ -4,7 +4,6 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.apache.commons.io.IOUtils
-import org.jasome.SomeClass
 import org.jasome.calculators.impl.TotalLinesOfCodeCalculator
 import spock.lang.Specification
 

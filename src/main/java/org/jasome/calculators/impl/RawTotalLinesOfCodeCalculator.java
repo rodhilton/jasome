@@ -5,7 +5,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Sets;
 import org.jasome.calculators.Calculation;
 import org.jasome.calculators.Calculator;
-import org.jasome.SomeClass;
 import org.jasome.calculators.ClassMetricCalculator;
 import org.jasome.calculators.SourceContext;
 
