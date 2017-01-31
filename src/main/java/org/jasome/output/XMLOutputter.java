@@ -37,7 +37,7 @@ public class XMLOutputter implements Outputter<Document> {
                 rootElement.appendChild(packageElement);
 
                 addAttributes(packageNode, packageElement);
-                addMetricsForNode(doc, packageElement, packageNode, "PackageMetrics");
+                addMetricsForNode(doc, packageElement, packageNode);
 
                 //if(packageNode.getChildren().size() > 0) {
                     Element classesElement = doc.createElement("Classes");
@@ -49,7 +49,7 @@ public class XMLOutputter implements Outputter<Document> {
                         classesElement.appendChild(classElement);
 
                         addAttributes(classNode, classElement);
-                        addMetricsForNode(doc, classElement, classNode, "ClassMetrics");
+                        addMetricsForNode(doc, classElement, classNode);
 
                        // if(classNode.getChildren().size() > 0) {
                             Element methodsElement = doc.createElement("Methods");
@@ -61,7 +61,7 @@ public class XMLOutputter implements Outputter<Document> {
                                 methodsElement.appendChild(methodElement);
 
                                 addAttributes(methodNode, methodElement);
-                                addMetricsForNode(doc, methodElement, methodNode, "MethodMetrics");
+                                addMetricsForNode(doc, methodElement, methodNode);
                             }
                         //}
                     }
@@ -92,9 +92,9 @@ public class XMLOutputter implements Outputter<Document> {
         }
     }
 
-    private void addMetricsForNode(Document doc, Node parentElement, Output.Node node, String metricsContainerName) {
+    private void addMetricsForNode(Document doc, Node parentElement, Output.Node node) {
 //        if(node.getMetrics().size() > 0) {
-            Element metricsContainer = doc.createElement(metricsContainerName);
+            Element metricsContainer = doc.createElement("Metrics");
             for (Calculation metric : node.getMetrics()) {
                 Element metrics = doc.createElement("Metric");
 

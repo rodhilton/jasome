@@ -252,7 +252,7 @@ public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, Packag
 
         return new Calculation(
                 "TLOC",
-                "Total Lines of Code Count",
+                "Total Lines of Code",
                 new BigDecimal(count)
         );
     }

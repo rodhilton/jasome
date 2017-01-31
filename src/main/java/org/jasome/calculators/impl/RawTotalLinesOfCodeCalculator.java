@@ -35,7 +35,7 @@ public class RawTotalLinesOfCodeCalculator implements ClassMetricCalculator {
 
         Calculation result = new Calculation(
                 "RTLOC",
-                "Raw Total Lines of Code Count",
+                "Raw Total Lines of Code",
                 new BigDecimal(
                         end.get().line
                                 - begin.get().line

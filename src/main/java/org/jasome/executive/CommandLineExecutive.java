@@ -28,11 +28,14 @@ public class CommandLineExecutive {
 
         Option excludetests = new Option("xt", "excludetests", false, "exclude test files from scanning");
 
+        Option output = new Option("o", "output", true, "where to save output (default is print to STDOUT");
+
         Options options = new Options();
 
         options.addOption(help);
         options.addOption(version);
         options.addOption(excludetests);
+        options.addOption(output);
 
         // create the parser
         CommandLineParser parser = new DefaultParser();
@@ -75,17 +78,25 @@ public class CommandLineExecutive {
             IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(readableJavaFiles, doesNotHaveTestSuffix, isNotInTestSubDirectory) : readableJavaFiles;
 
 
-            Output output = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
+            Output scannerOutput = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
 
             try {
-                Document outputDocument = new XMLOutputter().output(output);
+                Document outputDocument = new XMLOutputter().output(scannerOutput);
 
                 Transformer transformer = TransformerFactory.newInstance().newTransformer();
                 transformer.setOutputProperty(OutputKeys.INDENT, "yes");
                 transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
                 DOMSource source = new DOMSource(outputDocument);
-                StreamResult result =  new StreamResult(System.out);
+
+                StreamResult result;
+                if(line.hasOption("output")) {
+                    String outputLocation = line.getOptionValue("output");
+                    result = new StreamResult(new File(outputLocation));
+                } else {
+                    result = new StreamResult(System.out);
+                }
+
                 transformer.transform(source, result);
             } catch (TransformerConfigurationException e) {
                 e.printStackTrace();

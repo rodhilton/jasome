@@ -85,6 +85,7 @@ public class Scanner {
                         Set<Calculation> calculations = classMetricCalculator.calculate(classDefinition, classContext);
                         Map<String, String> attributes = Maps.newHashMap();
                         attributes.put("sourceFile", classContext.getSourceFile().getName());
+                        attributes.put("sourceDir", classContext.getSourceFile().getParent());
                         output.addCalculations(calculations, attributes, packageName, className);
                     }
 
