@@ -6,5 +6,5 @@ import java.util.Collection;
 import java.util.Set;
 
 public interface PackageMetricCalculator {
-    Set<Calculation> calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context);
+    Metrics calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context);
 }

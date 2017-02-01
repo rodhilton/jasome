@@ -30,7 +30,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 3
+        result["RTLOC"].value == 3
     }
 
     def "calculate counts raw lines of code in a class including comments"() {
@@ -72,7 +72,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 22
+        result["RTLOC"].value == 22
     }
 
     def "calculate class length when only one line"() {
@@ -89,7 +89,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 1
+        result["RTLOC"].value == 1
     }
 
     def "throws error if class declaration is missing"() {

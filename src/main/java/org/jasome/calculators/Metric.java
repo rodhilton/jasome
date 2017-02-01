@@ -4,12 +4,12 @@ import com.google.common.base.Objects;
 
 import java.math.BigDecimal;
 
-public class Calculation {
+public class Metric {
     private String name;
     private String description;
     private BigDecimal value;
 
-    public Calculation(String name, String description, BigDecimal value) {
+    public Metric(String name, String description, BigDecimal value) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -35,8 +35,8 @@ public class Calculation {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Calculation)) return false;
-        Calculation that = (Calculation) o;
+        if (!(o instanceof Metric)) return false;
+        Metric that = (Metric) o;
         return Objects.equal(name, that.name) &&
                 Objects.equal(description, that.description) &&
                 Objects.equal(value, that.value);

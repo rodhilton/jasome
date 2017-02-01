@@ -3,9 +3,9 @@ package org.jasome.calculators.impl;
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.Sets;
-import org.jasome.calculators.Calculation;
-import org.jasome.calculators.Calculator;
+import org.jasome.calculators.Metric;
 import org.jasome.calculators.ClassMetricCalculator;
+import org.jasome.calculators.Metrics;
 import org.jasome.calculators.SourceContext;
 
 import java.math.BigDecimal;
@@ -24,25 +24,20 @@ import java.util.Set;
 public class RawTotalLinesOfCodeCalculator implements ClassMetricCalculator {
 
     @Override
-    public Set<Calculation> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+    public Metrics calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
         assert decl != null;
 
         Optional<Position> end = decl.getEnd();
         Optional<Position> begin = decl.getBegin();
 
-        if (!begin.isPresent()) return Sets.newHashSet();
-        if (!end.isPresent()) return Sets.newHashSet();
+        if (!begin.isPresent()) return Metrics.EMPTY;
+        if (!end.isPresent()) return Metrics.EMPTY;
 
-        Calculation result = new Calculation(
-                "RTLOC",
-                "Raw Total Lines of Code",
-                new BigDecimal(
-                        end.get().line
-                                - begin.get().line
-                                + 1
-                )
-        );
 
-        return Sets.newHashSet(result);
+        return Metrics.of("RTLOC", "Raw Total Lines of Code", new BigDecimal(
+                end.get().line
+                        - begin.get().line
+                        + 1
+        ));
     }
 }

@@ -31,7 +31,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 3
+        result["TLOC"].value == 3
     }
 
     def "calculate counts lines"() {
@@ -73,7 +73,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 9
+        result["TLOC"].value == 9
     }
 
     def "calculate class length when only two lines (open and close)"() {
@@ -90,7 +90,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 2
+        result["TLOC"].value == 2
     }
 
     def "returns an empty if class declaration is missing"() {
@@ -120,7 +120,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 159
+        result["TLOC"].value == 159
     }
 
     def "calculate counts lines in a synchronized block, but not for a synchronized variable or method"() {
@@ -153,7 +153,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 11
+        result["TLOC"].value == 11
     }
 
     def "calculate counts lines and can handle an empty declaration"() {
@@ -176,7 +176,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 4
+        result["TLOC"].value == 4
     }
 
     def "calculate counts lines handles interfaces properly"() {
@@ -204,7 +204,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 3
+        result["TLOC"].value == 3
     }
 
     def "calculate counts try/catch/finally blocks properly"() {
@@ -272,7 +272,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 29
+        result["TLOC"].value == 29
     }
 
     def "calculate counts complex if blocks properly"() {
@@ -339,10 +339,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
         then:
         result.size() == 1
-        result[0].value.intValue() == 22
+        result["TLOC"].value == 22
 
         equivalentResult.size() == 1
-        equivalentResult[0].value.intValue() == 22
+        equivalentResult["TLOC"].value == 22
     }
 
 

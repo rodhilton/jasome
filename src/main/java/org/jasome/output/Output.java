@@ -2,7 +2,8 @@ package org.jasome.output;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.StringUtils;
-import org.jasome.calculators.Calculation;
+import org.jasome.calculators.Metric;
+import org.jasome.calculators.Metrics;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,18 +21,18 @@ public class Output {
         return root.toString(0);
     }
 
-    public void addCalculations(Set<Calculation> metrics, String... navigation) {
+    public void addCalculations(Metrics metrics, String... navigation) {
         addCalculations(metrics, Maps.newHashMap(), navigation);
     }
 
 
-    public void addCalculations(Set<Calculation> metrics, Map<String, String> attributes, String... navigation) {
+    public void addCalculations(Metrics metrics, Map<String, String> attributes, String... navigation) {
         synchronized (root) {
             addCalculations(metrics, attributes, root, navigation);
         }
     }
 
-    private void addCalculations(Set<Calculation> metrics, Map<String, String> attributes, Node root, String... navigation) {
+    private void addCalculations(Metrics metrics, Map<String, String> attributes, Node root, String... navigation) {
 
         Optional<Node> foundNodeOpt = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
 
@@ -46,7 +47,7 @@ public class Output {
         }
 
         if(navigation.length == 1) { //at the end
-            correctNode.metrics.addAll(metrics);
+            correctNode.metrics.putAll(metrics);
         } else {
             addCalculations(metrics, attributes, correctNode, Arrays.copyOfRange(navigation, 1, navigation.length));
         }
@@ -61,7 +62,7 @@ public class Output {
         private String name;
         //private SourceContext sourceContext;
         private Set<Node> children = new HashSet<Node>();
-        private Set<Calculation> metrics = new HashSet<Calculation>();
+        private Metrics metrics = new Metrics();
         private Map<String, String> attributes = new HashMap<String, String>();
 
         public String getName() {
@@ -72,7 +73,7 @@ public class Output {
             return children;
         }
 
-        public Set<Calculation> getMetrics() {
+        public Metrics getMetrics() {
             return metrics;
         }
 
@@ -90,14 +91,14 @@ public class Output {
             sb.append("");
             sb.append("\n");
             //do all metrics
-            List<Calculation> sortedMetrics = metrics.stream().sorted(new Comparator<Calculation>() {
+            List<Metric> sortedMetrics = metrics.values().stream().sorted(new Comparator<Metric>() {
                 @Override
-                public int compare(Calculation o1, Calculation o2) {
+                public int compare(Metric o1, Metric o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
             }).collect(Collectors.toList());
 
-            for(Calculation metric: sortedMetrics) {
+            for(Metric metric: sortedMetrics) {
                 sb.append(StringUtils.repeat(' ', level)+"+");
                 sb.append(metric.getName()+": "+metric.getValue());
                 sb.append("\n");

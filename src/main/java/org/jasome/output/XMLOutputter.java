@@ -1,9 +1,7 @@
 package org.jasome.output;
 
-import org.jasome.calculators.Calculation;
+import org.jasome.calculators.Metric;
 import org.jasome.executive.Outputter;
-import org.jasome.output.Output;
-import org.w3c.dom.Attr;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -95,7 +93,7 @@ public class XMLOutputter implements Outputter<Document> {
     private void addMetricsForNode(Document doc, Node parentElement, Output.Node node) {
 //        if(node.getMetrics().size() > 0) {
             Element metricsContainer = doc.createElement("Metrics");
-            for (Calculation metric : node.getMetrics()) {
+            for (Metric metric : node.getMetrics().values()) {
                 Element metrics = doc.createElement("Metric");
 
                 metrics.setAttribute("name", metric.getName());

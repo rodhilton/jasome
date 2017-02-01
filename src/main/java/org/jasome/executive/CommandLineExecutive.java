@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
+import org.jasome.calculators.impl.NumberOfFieldsCalculator;
 import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator;
 import org.jasome.calculators.impl.TotalLinesOfCodeCalculator;
 import org.jasome.output.Output;
@@ -23,26 +24,22 @@ public class CommandLineExecutive {
 
     public static void main(String[] args) throws IOException, ParseException {
 
-        Option help = new Option("h", "help", false, "print this message");
-        Option version = new Option("v", "version", false, "print the version information and exit");
-
-        Option excludetests = new Option("xt", "excludetests", false, "exclude test files from scanning");
-
-        Option output = new Option("o", "output", true, "where to save output (default is print to STDOUT");
-
         Options options = new Options();
 
-        options.addOption(help);
-        options.addOption(version);
-        options.addOption(excludetests);
-        options.addOption(output);
+        {
+            Option help = new Option("h", "help", false, "print this message");
+            Option version = new Option("v", "version", false, "print the version information and exit");
+            Option excludetests = new Option("xt", "excludetests", false, "exclude test files from scanning");
+            Option output = new Option("o", "output", true, "where to save output (default is print to STDOUT");
 
-        // create the parser
+            options.addOption(help);
+            options.addOption(version);
+            options.addOption(excludetests);
+            options.addOption(output);
+        }
+
         CommandLineParser parser = new DefaultParser();
-        // parse the command line arguments
         CommandLine line = parser.parse(options, args);
-
-        //TODO: option to exclude by suffix or regex, just some way to exclude test files
 
         if (line.hasOption("help")) {
             HelpFormatter formatter = new HelpFormatter();
@@ -62,6 +59,7 @@ public class CommandLineExecutive {
             Scanner scanner = new Scanner();
 
             scanner.registerClassCalculator(new RawTotalLinesOfCodeCalculator());
+            scanner.registerClassCalculator(new NumberOfFieldsCalculator());
 
             TotalLinesOfCodeCalculator totalLinesOfCodeCalculator = new TotalLinesOfCodeCalculator();
             scanner.registerPackageCalculator(totalLinesOfCodeCalculator);

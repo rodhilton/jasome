@@ -57,8 +57,8 @@ public class Scanner {
 
                 for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
                     List<ClassOrInterfaceDeclaration> classes = entry.getValue().stream().map(Pair::getKey).collect(Collectors.toList());
-                    Set<Calculation> calculations = packageMetricCalculator.calculate(classes, packageContext);
-                    output.addCalculations(calculations, packageName);
+                    Metrics metrics = packageMetricCalculator.calculate(classes, packageContext);
+                    output.addCalculations(metrics, packageName);
                 }
 
             }
@@ -82,11 +82,11 @@ public class Scanner {
 
                 {
                     for (ClassMetricCalculator classMetricCalculator : classCalculators) {
-                        Set<Calculation> calculations = classMetricCalculator.calculate(classDefinition, classContext);
+                        Metrics metrics = classMetricCalculator.calculate(classDefinition, classContext);
                         Map<String, String> attributes = Maps.newHashMap();
                         attributes.put("sourceFile", classContext.getSourceFile().getName());
                         attributes.put("sourceDir", classContext.getSourceFile().getParent());
-                        output.addCalculations(calculations, attributes, packageName, className);
+                        output.addCalculations(metrics, attributes, packageName, className);
                     }
 
                 }
@@ -99,8 +99,8 @@ public class Scanner {
                     methodContext.setClassDefinition(classDefinition);
 
                     for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
-                        Set<Calculation> calculations = methodMetricCalculator.calculate(methodDeclaration, methodContext);
-                        output.addCalculations(calculations, packageName, className, methodDeclaration.getDeclarationAsString());
+                        Metrics metrics = methodMetricCalculator.calculate(methodDeclaration, methodContext);
+                        output.addCalculations(metrics, packageName, className, methodDeclaration.getDeclarationAsString());
                     }
 
                 }
