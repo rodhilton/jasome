@@ -17,25 +17,25 @@ import java.io.IOException;
 import java.util.*;
 
 public class Scanner {
-    private Set<PackageMetricCalculator> packageCalculators;
-    private Set<TypeMetricCalculator> typeCalculators;
-    private Set<MethodMetricCalculator> methodCalculators;
+    private Set<Calculator<Package>> packageCalculators;
+    private Set<Calculator<Type>> typeCalculators;
+    private Set<Calculator<Method>> methodCalculators;
 
     public Scanner() {
-        packageCalculators = new HashSet<PackageMetricCalculator>();
-        typeCalculators = new HashSet<TypeMetricCalculator>();
-        methodCalculators = new HashSet<MethodMetricCalculator>();
+        packageCalculators = new HashSet<>();
+        typeCalculators = new HashSet<>();
+        methodCalculators = new HashSet<>();
     }
 
-    public void registerPackageCalculator(PackageMetricCalculator calculator) {
+    public void registerPackageCalculator(Calculator<Package> calculator) {
         packageCalculators.add(calculator);
     }
 
-    public void registerTypeCalculator(TypeMetricCalculator calculator) {
+    public void registerTypeCalculator(Calculator<Type> calculator) {
         typeCalculators.add(calculator);
     }
 
-    public void registerMethodCalculator(MethodMetricCalculator calculator) {
+    public void registerMethodCalculator(Calculator<Method> calculator) {
         methodCalculators.add(calculator);
     }
 
@@ -73,21 +73,21 @@ public class Scanner {
 
         for (Package aPackage : project.getPackages()) {
 
-            for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
+            for (Calculator<Package> packageMetricCalculator : packageCalculators) {
                 Set<Metric> packageMetrics = packageMetricCalculator.calculate(aPackage);
                 metrics.putAll(aPackage, packageMetrics);
             }
 
             for (Type type : aPackage.getTypes()) {
 
-                for (TypeMetricCalculator typeMetricCalculator : typeCalculators) {
+                for (Calculator<Type> typeMetricCalculator : typeCalculators) {
                     Set<Metric> classMetrics = typeMetricCalculator.calculate(type);
                     metrics.putAll(type, classMetrics);
                 }
 
                 for (Method method : type.getMethods()) {
 
-                    for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
+                    for (Calculator<Method> methodMetricCalculator : methodCalculators) {
                         Set<Metric> methodMetrics = methodMetricCalculator.calculate(method);
                         metrics.putAll(method, methodMetrics);
                     }

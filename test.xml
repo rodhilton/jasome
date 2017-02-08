@@ -2,8 +2,8 @@
 <Packages>
     <Package name="org.joda.example.time">
         <Metrics>
-            <Metric description="Total Lines of Code" name="TLOC" value="2307"/>
             <Metric description="Number of Classes" name="NOC" value="21"/>
+            <Metric description="Total Lines of Code" name="TLOC" value="2307"/>
         </Metrics>
         <Classes>
             <Class name="AgeCalculator" sourceFile="/Users/air0day/Projects/ucd/calvary_projects/joda-time/src/example/org/joda/example/time/AgeCalculator.java">

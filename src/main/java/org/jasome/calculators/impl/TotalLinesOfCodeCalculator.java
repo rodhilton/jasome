@@ -9,10 +9,11 @@ import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
-import org.jasome.calculators.*;
-import org.jasome.parsing.Type;
+import org.jasome.calculators.Calculator;
+import org.jasome.calculators.Metric;
 import org.jasome.parsing.Method;
 import org.jasome.parsing.Package;
+import org.jasome.parsing.Type;
 
 import java.util.Optional;
 import java.util.Set;
@@ -23,55 +24,55 @@ import java.util.stream.Collectors;
  * Counts the number of lines of code in a file.  Attempts to normalize for
  * different formatting styles and whitespace differences so equivalent code
  * counts as the same number of lines.
- *
+ * <p>
  * For example:
  * <code>
  * import com.library1.Thing;
  * public class ExampleClass {
- *
- *     public int field = 45;
- *
- *     public void aMethod() {
- *         for(int i=0;i<10;i++) {
- *             System.out.println(new Thing().getOutput());
- *         }
- *     }
+ * <p>
+ * public int field = 45;
+ * <p>
+ * public void aMethod() {
+ * for(int i=0;i<10;i++) {
+ * System.out.println(new Thing().getOutput());
+ * }
+ * }
  * }
  * </code>
- *
+ * <p>
  * will count as the same number of lines (8) as:
- *
+ * <p>
  * <code>
  * public class ExampleClass
  * {
- *
- *     public int
- *         field = 45;
- *
- *     public void aMethod()
- *     {
- *
- *         for (
- *             int i=0;
- *             i<10;
- *             i++)
- *         {
- *
- *             System.out.println(
- *                 new com.library1.Thing().getOutput()
- *             );
- *         }
- *     }
- *
+ * <p>
+ * public int
+ * field = 45;
+ * <p>
+ * public void aMethod()
+ * {
+ * <p>
+ * for (
+ * int i=0;
+ * i<10;
+ * i++)
+ * {
+ * <p>
+ * System.out.println(
+ * new com.library1.Thing().getOutput()
+ * );
+ * }
+ * }
+ * <p>
  * }
  * </code>
- *
+ * <p>
  * This method does make the count susceptible to differences in "code golf"
  * styles where code is compressed down to a "one-liner".  A one-liner will count
  * as one line, even if that line is incredibly complex.  For example, an if
  * statement with a body and an else clause will count as 5 or so lines, whereas
  * equivalent code using a ternary operator will count as 1.
- *
+ * <p>
  * Similarly, code that makes use of Java's 1.8 functional features will, if
  * expressed as a single line of functional code, count as a single line,
  * regardless of how complexly map and stream functions might be chained together.
@@ -79,35 +80,48 @@ import java.util.stream.Collectors;
  * @author Rod Hilton
  * @since 0.1
  */
-public class TotalLinesOfCodeCalculator implements TypeMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
+public class TotalLinesOfCodeCalculator {
 
-    @Override
-    public Set<Metric> calculate(Type type) {
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.add(type.getSource());
+    public static Calculator<Type> forType() {
+        return new Calculator<Type>() {
 
-        return performCalculation(nodeStack);
+            @Override
+            public Set<Metric> calculate(Type type) {
+                Stack<Node> nodeStack = new Stack<Node>();
+                nodeStack.add(type.getSource());
+
+                return performCalculation(nodeStack);
+            }
+        };
     }
 
-    @Override
-    public Set<Metric> calculate(Package aPackage) {
+    public static Calculator<Package> forPackage() {
+        return new Calculator<Package>() {
 
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.addAll(aPackage.getTypes().stream().map(Type::getSource).collect(Collectors.toList()));
+            public Set<Metric> calculate(Package aPackage) {
 
-        return performCalculation(nodeStack);
+                Stack<Node> nodeStack = new Stack<Node>();
+                nodeStack.addAll(aPackage.getTypes().stream().map(Type::getSource).collect(Collectors.toList()));
+
+                return performCalculation(nodeStack);
+            }
+        };
     }
 
-    @Override
-    public Set<Metric> calculate(Method method) {
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.add(method.getSource());
+    public static Calculator<Method> forMethod() {
+        return new Calculator<Method>() {
+            @Override
+            public Set<Metric> calculate(Method method) {
+                Stack<Node> nodeStack = new Stack<Node>();
+                nodeStack.add(method.getSource());
 
-        return performCalculation(nodeStack);
+                return performCalculation(nodeStack);
+            }
+        };
     }
 
 
-    private Set<Metric> performCalculation(Stack<Node> nodeStack) {
+    private static Set<Metric> performCalculation(Stack<Node> nodeStack) {
         int count = 0;
 
         while (!nodeStack.empty()) {
@@ -236,7 +250,7 @@ public class TotalLinesOfCodeCalculator implements TypeMetricCalculator, Package
             }
         }
 
-        return Metrics.builder().with("TLOC", "Total Lines of Code", count).build();
+        return Metric.builder().with("TLOC", "Total Lines of Code", count).build();
     }
 
 }

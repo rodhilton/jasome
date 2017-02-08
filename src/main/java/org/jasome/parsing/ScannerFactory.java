@@ -9,10 +9,9 @@ public class ScannerFactory {
         scanner.registerTypeCalculator(new RawTotalLinesOfCodeCalculator());
         scanner.registerTypeCalculator(new NumberOfFieldsCalculator());
 
-        TotalLinesOfCodeCalculator totalLinesOfCodeCalculator = new TotalLinesOfCodeCalculator();
-        scanner.registerPackageCalculator(totalLinesOfCodeCalculator);
-        scanner.registerTypeCalculator(totalLinesOfCodeCalculator);
-        scanner.registerMethodCalculator(totalLinesOfCodeCalculator);
+        scanner.registerPackageCalculator(TotalLinesOfCodeCalculator.forPackage());
+        scanner.registerTypeCalculator(TotalLinesOfCodeCalculator.forType());
+        scanner.registerMethodCalculator(TotalLinesOfCodeCalculator.forMethod());
 
         scanner.registerMethodCalculator(new NumberOfParametersCalculator());
         scanner.registerPackageCalculator(new NumberOfClassesCalculator());

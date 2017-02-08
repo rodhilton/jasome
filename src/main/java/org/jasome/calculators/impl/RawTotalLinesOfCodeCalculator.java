@@ -2,9 +2,8 @@ package org.jasome.calculators.impl;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import org.jasome.calculators.TypeMetricCalculator;
+import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
-import org.jasome.calculators.Metrics;
 import org.jasome.parsing.Type;
 
 import java.util.Optional;
@@ -19,7 +18,7 @@ import java.util.Set;
  * @author Rod Hilton
  * @since 0.1
  */
-public class RawTotalLinesOfCodeCalculator implements TypeMetricCalculator {
+public class RawTotalLinesOfCodeCalculator implements Calculator<Type> {
 
     @Override
     public Set<Metric> calculate(Type type) {
@@ -29,9 +28,9 @@ public class RawTotalLinesOfCodeCalculator implements TypeMetricCalculator {
         Optional<Position> end = decl.getEnd();
         Optional<Position> begin = decl.getBegin();
 
-        if (!begin.isPresent()) return Metrics.EMPTY;
-        if (!end.isPresent()) return Metrics.EMPTY;
+        if (!begin.isPresent()) return Metric.NONE;
+        if (!end.isPresent()) return Metric.NONE;
 
-        return Metrics.builder().with("RTLOC", "Raw Total Lines of Code", end.get().line - begin.get().line + 1).build();
+        return Metric.builder().with("RTLOC", "Raw Total Lines of Code", end.get().line - begin.get().line + 1).build();
     }
 }

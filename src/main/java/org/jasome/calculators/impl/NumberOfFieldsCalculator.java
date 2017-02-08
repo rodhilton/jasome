@@ -2,14 +2,13 @@ package org.jasome.calculators.impl;
 
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import org.jasome.calculators.TypeMetricCalculator;
+import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
-import org.jasome.calculators.Metrics;
 import org.jasome.parsing.Type;
 
 import java.util.Set;
 
-public class NumberOfFieldsCalculator implements TypeMetricCalculator {
+public class NumberOfFieldsCalculator implements Calculator<Type> {
 
     @Override
     public Set<Metric> calculate(Type type) {
@@ -24,7 +23,7 @@ public class NumberOfFieldsCalculator implements TypeMetricCalculator {
         long numStaticMethods = declaration.getMethods().stream().filter(f -> f.getModifiers().contains(Modifier.STATIC)).count();
         long numPublicMethods = declaration.getMethods().stream().filter(f -> f.getModifiers().contains(Modifier.PUBLIC)).count();
 
-        return Metrics.builder()
+        return Metric.builder()
                 .with("NF", "Number of Attributes", numAttributes)
                 .with("NSF", "Number of Static Attributes", numStaticAttributes)
                 .with("NPF", "Number of Public Attributes", numPublicAttributes)
