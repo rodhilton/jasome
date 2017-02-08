@@ -8,6 +8,21 @@ import org.jasome.parsing.Type;
 
 import java.util.Set;
 
+/**
+ * Counts the number of fields and methods in a class.
+ *
+ * <ul>
+ *     <li>NF - Number of Attributes (fields)</li>
+ *     <li>NSF - Number of Static Attributes (fields)</li>
+ *     <li>NPF - Number of Public Attributes (fields)</li>
+ *     <li>NM - Number of Methods</li>
+ *     <li>NSM - Number of Static Methods</li>
+ *     <li>NPM - Number of Public Methods</li>
+ * </ul>
+ *
+ * @author Rod Hilton
+ * @since 0.2
+ */
 public class NumberOfFieldsCalculator implements Calculator<Type> {
 
     @Override
