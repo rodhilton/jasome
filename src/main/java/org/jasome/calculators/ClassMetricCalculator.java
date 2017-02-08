@@ -2,8 +2,10 @@ package org.jasome.calculators;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
+import java.util.Set;
+
 public interface ClassMetricCalculator {
 
-    Metrics calculate(ClassOrInterfaceDeclaration declaration, SourceContext context);
+    Set<Metric> calculate(ClassOrInterfaceDeclaration declaration, SourceContext context);
 
 }

@@ -1,79 +1,69 @@
 package org.jasome.output;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.Metric;
-import org.jasome.calculators.Metrics;
+import org.jasome.parsing.TreeNode;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
-//TODO: this is awful, write some tests against it and refactor heavily
+//Decorates the treenode stuff so it's all got attributes and whatnot
 public class Output {
-    private Node root;
 
-    public Output() {
-        root = new Node();
-        root.name = "root";
-    }
+    private final TreeNode treeNode;
+    private final Multimap<TreeNode, Metric> metrics;
+    private final Multimap<TreeNode, Pair<String, String>> attributes;
 
-    public String toString() {
-        return root.toString(0);
-    }
-
-    public void addCalculations(Metrics metrics, String... navigation) {
-        addCalculations(metrics, Maps.newHashMap(), navigation);
-    }
-
-
-    public void addCalculations(Metrics metrics, Map<String, String> attributes, String... navigation) {
-        synchronized (root) {
-            addCalculations(metrics, attributes, root, navigation);
-        }
-    }
-
-    private void addCalculations(Metrics metrics, Map<String, String> attributes, Node root, String... navigation) {
-
-        Optional<Node> foundNodeOpt = root.children.stream().filter(c->c.name.equals(navigation[0])).findFirst();
-
-        Node correctNode;
-        if(!foundNodeOpt.isPresent()) {
-            correctNode = new Node();
-            correctNode.name = navigation[0];
-            correctNode.attributes.putAll(attributes);
-            root.children.add(correctNode);
-        } else {
-            correctNode = foundNodeOpt.get();
-        }
-
-        if(navigation.length == 1) { //at the end
-            correctNode.metrics.putAll(metrics);
-        } else {
-            addCalculations(metrics, attributes, correctNode, Arrays.copyOfRange(navigation, 1, navigation.length));
-        }
+    public Output(TreeNode treeNode, Multimap<TreeNode, Metric> metrics, Multimap<TreeNode, Pair<String, String>> attributes) {
+        this.treeNode = treeNode;
+        this.metrics = metrics;
+        this.attributes = attributes;
     }
 
     Node getRoot() {
-        return root;
+        return augmentNode(treeNode);
+    }
+
+    private Node augmentNode(TreeNode nodeToAugment) {
+        Node node = new Node();
+        node.name = nodeToAugment.getName();
+
+        Map<String, String> attributesToSet = new HashMap<String, String>();
+        for (Pair<String, String> pair : attributes.get(nodeToAugment)) {
+            attributesToSet.put(pair.getKey(), pair.getValue());
+        }
+
+        node.attributes = attributesToSet;
+        node.metrics = metrics.get(nodeToAugment);
+
+        List<Node> childrenToSet = new ArrayList<Node>();
+        for (TreeNode childNode : nodeToAugment.getChildren()) {
+            childrenToSet.add(augmentNode(childNode));
+        }
+        node.children = childrenToSet;
+
+        return node;
     }
 
 
     static class Node {
         private String name;
         //private SourceContext sourceContext;
-        private Set<Node> children = new HashSet<Node>();
-        private Metrics metrics = new Metrics();
+        private Collection<Node> children = new HashSet<Node>();
+        private Collection<Metric> metrics = new HashSet<Metric>();
         private Map<String, String> attributes = new HashMap<String, String>();
 
         public String getName() {
             return name;
         }
 
-        public Set<Node> getChildren() {
+        public Collection<Node> getChildren() {
             return children;
         }
 
-        public Metrics getMetrics() {
+        public Collection<Metric> getMetrics() {
             return metrics;
         }
 
@@ -85,26 +75,26 @@ public class Output {
             StringBuilder sb = new StringBuilder();
             sb.append(StringUtils.repeat(' ', level));
             sb.append(name);
-            if(!this.attributes.isEmpty()) {
-                sb.append(" "+this.attributes.toString()+"");
+            if (!this.attributes.isEmpty()) {
+                sb.append(" " + this.attributes.toString() + "");
             }
             sb.append("");
             sb.append("\n");
             //do all metrics
-            List<Metric> sortedMetrics = metrics.values().stream().sorted(new Comparator<Metric>() {
+            List<Metric> sortedMetrics = metrics.stream().sorted(new Comparator<Metric>() {
                 @Override
                 public int compare(Metric o1, Metric o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
             }).collect(Collectors.toList());
 
-            for(Metric metric: sortedMetrics) {
-                sb.append(StringUtils.repeat(' ', level)+"+");
-                sb.append(metric.getName()+": "+metric.getValue());
+            for (Metric metric : sortedMetrics) {
+                sb.append(StringUtils.repeat(' ', level) + "+");
+                sb.append(metric.getName() + ": " + metric.getValue());
                 sb.append("\n");
             }
-            for(Node child: children) {
-                sb.append(child.toString(level+1));
+            for (Node child : children) {
+                sb.append(child.toString(level + 1));
             }
             return sb.toString();
         }

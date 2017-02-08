@@ -5,11 +5,13 @@ import com.google.common.collect.Maps;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 public class Metrics extends HashMap<String, Metric> {
 
-    public static final Metrics EMPTY = new Metrics(ImmutableMap.of());
+    public static final HashSet<Metric> EMPTY = new HashSet<Metric>();
 
     public Metrics() {
         super();
@@ -19,13 +21,13 @@ public class Metrics extends HashMap<String, Metric> {
         super(collection);
     }
 
-    public static Metrics of(Metric result) {
-        Map<String, Metric> map = new HashMap<String, Metric>();
-        map.put(result.getName(), result);
-        return new Metrics(map);
+    public static Set<Metric> of(Metric result) {
+        HashSet<Metric> metrics = new HashSet<>();
+        metrics.add(result);
+        return metrics;
     }
 
-    public static Metrics of(String name, String description, BigDecimal value) {
+    public static Set<Metric> of(String name, String description, BigDecimal value) {
         return Metrics.of(new Metric(name, description, value));
     }
 
@@ -49,8 +51,8 @@ public class Metrics extends HashMap<String, Metric> {
             return with(name, description, new BigDecimal(value));
         }
 
-        public Metrics build() {
-            return new Metrics(metrics);
+        public Set<Metric> build() {
+            return new HashSet<Metric>(metrics.values());
         }
 
     }

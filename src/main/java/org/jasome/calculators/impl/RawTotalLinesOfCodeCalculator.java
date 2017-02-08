@@ -24,7 +24,7 @@ import java.util.Set;
 public class RawTotalLinesOfCodeCalculator implements ClassMetricCalculator {
 
     @Override
-    public Metrics calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
         assert decl != null;
 
         Optional<Position> end = decl.getEnd();
@@ -33,11 +33,6 @@ public class RawTotalLinesOfCodeCalculator implements ClassMetricCalculator {
         if (!begin.isPresent()) return Metrics.EMPTY;
         if (!end.isPresent()) return Metrics.EMPTY;
 
-
-        return Metrics.of("RTLOC", "Raw Total Lines of Code", new BigDecimal(
-                end.get().line
-                        - begin.get().line
-                        + 1
-        ));
+        return Metrics.builder().with("RTLOC", "Raw Total Lines of Code", end.get().line - begin.get().line + 1).build();
     }
 }

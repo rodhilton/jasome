@@ -81,7 +81,7 @@ import java.util.Stack;
 public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
 
     @Override
-    public Metrics calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
         assert(decl != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
@@ -93,7 +93,7 @@ public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, Packag
     }
 
     @Override
-    public Metrics calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context) {
+    public Set<Metric> calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context) {
         assert(classes != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
@@ -105,7 +105,7 @@ public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, Packag
     }
 
     @Override
-    public Metrics calculate(MethodDeclaration declaration, SourceContext context) {
+    public Set<Metric> calculate(MethodDeclaration declaration, SourceContext context) {
         assert(declaration != null);
 
         Stack<Node> nodeStack = new Stack<Node>();

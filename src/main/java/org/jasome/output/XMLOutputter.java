@@ -9,10 +9,7 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
@@ -74,7 +71,7 @@ public class XMLOutputter implements Outputter<Document> {
 
     }
 
-    private List<Output.Node> sortChildren(Set<Output.Node> children) {
+    private List<Output.Node> sortChildren(Collection<Output.Node> children) {
         return children.stream().sorted(new Comparator<Output.Node>() {
                             @Override
                             public int compare(Output.Node o1, Output.Node o2) {
@@ -93,7 +90,7 @@ public class XMLOutputter implements Outputter<Document> {
     private void addMetricsForNode(Document doc, Node parentElement, Output.Node node) {
 //        if(node.getMetrics().size() > 0) {
             Element metricsContainer = doc.createElement("Metrics");
-            for (Metric metric : node.getMetrics().values()) {
+            for (Metric metric : node.getMetrics()) {
                 Element metrics = doc.createElement("Metric");
 
                 metrics.setAttribute("name", metric.getName());

@@ -6,5 +6,5 @@ import java.util.Set;
 
 public interface MethodMetricCalculator {
 
-    Metrics calculate(MethodDeclaration declaration, SourceContext context);
+    Set<Metric> calculate(MethodDeclaration declaration, SourceContext context);
 }

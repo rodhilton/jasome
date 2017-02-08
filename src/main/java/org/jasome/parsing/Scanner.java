@@ -6,7 +6,8 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.google.common.collect.Maps;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.*;
 import org.jasome.output.Output;
@@ -16,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Scanner {
     private Set<PackageMetricCalculator> packageCalculators;
@@ -42,74 +42,104 @@ public class Scanner {
     }
 
     public Output scan(Collection<File> inputFiles) throws IOException {
+        Map<TreeNode, Node> sourceCode = new HashMap<TreeNode, Node>();
+
+        Multimap<TreeNode, Pair<String, String>> attributes = HashMultimap.create();
+
+        ProjectNode projectNode = new ProjectNode();
 
         Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = gatherPackages(inputFiles);
 
-        Output output = new Output();
+        for (Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> entry : packages.entrySet()) {
 
-        for(Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> entry: packages.entrySet()) {
-            String packageName = entry.getKey();
+            PackageNode packageNode = new PackageNode(entry.getKey());
+            projectNode.addPackage(packageNode);
 
-
-            { //First, get the package metrics
-                SourceContext packageContext = new SourceContext();
-                packageContext.setPackageName(packageName);
-
-                for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
-                    List<ClassOrInterfaceDeclaration> classes = entry.getValue().stream().map(Pair::getKey).collect(Collectors.toList());
-                    Metrics metrics = packageMetricCalculator.calculate(classes, packageContext);
-                    output.addCalculations(metrics, packageName);
-                }
-
-            }
-
-
-            //Now the class metrics
-            for(Pair<ClassOrInterfaceDeclaration, SourceContext> classAndContext: entry.getValue()) {
+            for (Pair<ClassOrInterfaceDeclaration, SourceContext> classAndContext : entry.getValue()) {
                 ClassOrInterfaceDeclaration classDefinition = classAndContext.getLeft();
 
-                String className = classDefinition.getNameAsString();
+                ClassNode classNode = new ClassNode(getClassNameFromDeclaration(classDefinition));
+                packageNode.addClass(classNode);
 
-                if(classDefinition.getParentNode().isPresent()) {
-                    Node parentNode  = classDefinition.getParentNode().get();
-                    if(parentNode instanceof ClassOrInterfaceDeclaration) {
-                        className = ((ClassOrInterfaceDeclaration)parentNode).getNameAsString() + "." +
-                                classDefinition.getNameAsString();
-                    }
-                }
+                sourceCode.put(classNode, classDefinition);
+                attributes.put(classNode, Pair.of("sourceFile", classAndContext.getValue().getSourceFile().getPath()));
 
-                SourceContext classContext = classAndContext.getRight();
+                for (MethodDeclaration methodDeclaration : classDefinition.getMethods()) {
+                    MethodNode methodNode = new MethodNode(methodDeclaration.getDeclarationAsString());
+                    classNode.addMethod(methodNode);
 
-                {
-                    for (ClassMetricCalculator classMetricCalculator : classCalculators) {
-                        Metrics metrics = classMetricCalculator.calculate(classDefinition, classContext);
-                        Map<String, String> attributes = Maps.newHashMap();
-                        attributes.put("sourceFile", classContext.getSourceFile().getName());
-                        attributes.put("sourceDir", classContext.getSourceFile().getParent());
-                        output.addCalculations(metrics, attributes, packageName, className);
-                    }
-
-                }
-
-                //And finally the method metrics
-                for(MethodDeclaration methodDeclaration: classDefinition.getMethods()) {
-                    SourceContext methodContext = new SourceContext();
-                    methodContext.setPackageName(classContext.getPackageName());
-                    methodContext.setImports(classContext.getImports());
-                    methodContext.setClassDefinition(classDefinition);
-
-                    for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
-                        Metrics metrics = methodMetricCalculator.calculate(methodDeclaration, methodContext);
-                        output.addCalculations(metrics, packageName, className, methodDeclaration.getDeclarationAsString());
-                    }
+                    sourceCode.put(methodNode, methodDeclaration);
 
                 }
 
             }
         }
 
-        return output;
+        Multimap<TreeNode, Metric> metrics = HashMultimap.create();
 
+        for (PackageNode packageNode : projectNode.getPackages()) {
+
+            List<ClassOrInterfaceDeclaration> classCodeInPackage = new ArrayList<ClassOrInterfaceDeclaration>();
+
+            for (ClassNode classNode : packageNode.getClasses()) {
+                ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) sourceCode.get(classNode);
+                classCodeInPackage.add(classOrInterfaceDeclaration);
+
+                for (ClassMetricCalculator classMetricCalculator : classCalculators) {
+                    Set<Metric> classMetrics = classMetricCalculator.calculate(classOrInterfaceDeclaration, null);
+                    metrics.putAll(classNode, classMetrics);
+                }
+
+                for (MethodNode methodNode : classNode.getMethods()) {
+                    for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
+                        Set<Metric> methodMetrics = methodMetricCalculator.calculate((MethodDeclaration) sourceCode.get(methodNode), null);
+                        metrics.putAll(methodNode, methodMetrics);
+                    }
+                }
+            }
+
+            //We collected all the classes in the package above, so now we can get the package metrics
+            for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
+                Set<Metric> packageMetrics = packageMetricCalculator.calculate(classCodeInPackage, null);
+                metrics.putAll(packageNode, packageMetrics);
+            }
+        }
+
+
+        for (PackageNode packageNode : projectNode.getPackages()) {
+            System.out.println(packageNode.getName());
+            System.out.println("+" + metrics.get(packageNode));
+
+            for (ClassNode classNode : packageNode.getClasses()) {
+
+                System.out.println("  " + classNode.getName());
+                System.out.println("  +" + metrics.get(classNode));
+
+                for (MethodNode methodNode : classNode.getMethods()) {
+
+                    System.out.println("    " + methodNode.getName());
+                    System.out.println("    +" + metrics.get(methodNode));
+
+                }
+            }
+
+        }
+
+        return new Output(projectNode, metrics, attributes);
+
+    }
+
+    private String getClassNameFromDeclaration(ClassOrInterfaceDeclaration classDefinition) {
+        String className = classDefinition.getNameAsString();
+
+        if (classDefinition.getParentNode().isPresent()) {
+            Node parentNode = classDefinition.getParentNode().get();
+            if (parentNode instanceof ClassOrInterfaceDeclaration) {
+                className = ((ClassOrInterfaceDeclaration) parentNode).getNameAsString() + "." +
+                        classDefinition.getNameAsString();
+            }
+        }
+        return className;
     }
 
     private Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> gatherPackages(Collection<File> sourceFiles) throws FileNotFoundException {
