@@ -6,12 +6,12 @@ public class ScannerFactory {
     public static Scanner getScanner() {
         Scanner scanner = new Scanner();
 
-        scanner.registerClassCalculator(new RawTotalLinesOfCodeCalculator());
-        scanner.registerClassCalculator(new NumberOfFieldsCalculator());
+        scanner.registerTypeCalculator(new RawTotalLinesOfCodeCalculator());
+        scanner.registerTypeCalculator(new NumberOfFieldsCalculator());
 
         TotalLinesOfCodeCalculator totalLinesOfCodeCalculator = new TotalLinesOfCodeCalculator();
         scanner.registerPackageCalculator(totalLinesOfCodeCalculator);
-        scanner.registerClassCalculator(totalLinesOfCodeCalculator);
+        scanner.registerTypeCalculator(totalLinesOfCodeCalculator);
         scanner.registerMethodCalculator(totalLinesOfCodeCalculator);
 
         scanner.registerMethodCalculator(new NumberOfParametersCalculator());

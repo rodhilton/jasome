@@ -10,14 +10,14 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
 import org.jasome.calculators.*;
-import org.jasome.parsing.ProjectClass;
-import org.jasome.parsing.ProjectMethod;
-import org.jasome.parsing.ProjectPackage;
+import org.jasome.parsing.Type;
+import org.jasome.parsing.Method;
+import org.jasome.parsing.Package;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 /**
  * Counts the number of lines of code in a file.  Attempts to normalize for
@@ -79,34 +79,29 @@ import java.util.Stack;
  * @author Rod Hilton
  * @since 0.1
  */
-public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
+public class TotalLinesOfCodeCalculator implements TypeMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
 
     @Override
-    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, ProjectClass projectClass) {
-        assert(decl != null);
-
+    public Set<Metric> calculate(Type type) {
         Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.add(decl);
+        nodeStack.add(type.getSource());
 
         return performCalculation(nodeStack);
     }
 
     @Override
-    public Set<Metric> calculate(Collection<ClassOrInterfaceDeclaration> classes, ProjectPackage projectPackage) {
-        assert(classes != null);
+    public Set<Metric> calculate(Package aPackage) {
 
         Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.addAll(classes);
+        nodeStack.addAll(aPackage.getTypes().stream().map(Type::getSource).collect(Collectors.toList()));
 
         return performCalculation(nodeStack);
     }
 
     @Override
-    public Set<Metric> calculate(MethodDeclaration declaration, ProjectMethod projectMethod) {
-        assert(declaration != null);
-
+    public Set<Metric> calculate(Method method) {
         Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.add(declaration);
+        nodeStack.add(method.getSource());
 
         return performCalculation(nodeStack);
     }

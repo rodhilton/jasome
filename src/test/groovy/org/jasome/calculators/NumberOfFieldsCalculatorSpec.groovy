@@ -1,14 +1,10 @@
 package org.jasome.calculators
 
-import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import org.apache.commons.io.IOUtils
 import org.jasome.calculators.impl.NumberOfFieldsCalculator
-import org.jasome.calculators.impl.TotalLinesOfCodeCalculator
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
+import static org.jasome.util.TestUtil.typeFromSnippet
 import static spock.util.matcher.HamcrestSupport.expect
 
 class NumberOfFieldsCalculatorSpec extends Specification {
@@ -21,7 +17,7 @@ class NumberOfFieldsCalculatorSpec extends Specification {
     def "calculate simple metric"() {
 
         given:
-        def sourceCode = '''
+        def type = typeFromSnippet '''
             class Example {
                 public int stuff;
                 public static int stuff2;
@@ -41,10 +37,8 @@ class NumberOfFieldsCalculatorSpec extends Specification {
             }
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("NF", 3)
@@ -58,7 +52,7 @@ class NumberOfFieldsCalculatorSpec extends Specification {
     def "calculate simple metric with nested class"() {
 
         given:
-        def sourceCode = '''
+        def type = typeFromSnippet '''
             class Example {
                 public int stuff;
                 public static int stuff2;
@@ -87,10 +81,8 @@ class NumberOfFieldsCalculatorSpec extends Specification {
             }
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("NF", 3)
@@ -104,7 +96,7 @@ class NumberOfFieldsCalculatorSpec extends Specification {
     def "calculate simple metric with anonymous class"() {
 
         given:
-        def sourceCode = '''
+        def type = typeFromSnippet '''
             class Example {
                 public int stuff;
                 public static int stuff2;
@@ -133,10 +125,8 @@ class NumberOfFieldsCalculatorSpec extends Specification {
             }
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("NF", 3)

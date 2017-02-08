@@ -8,8 +8,8 @@ public class Project extends TreeNode {
     }
 
     @SuppressWarnings("unchecked")
-    public Set<ProjectPackage> getPackages() {
-        return (Set<ProjectPackage>)(Set<?>)getChildren();
+    public Set<Package> getPackages() {
+        return (Set<Package>)(Set<?>)getChildren();
     }
 
     @Override
@@ -17,8 +17,8 @@ public class Project extends TreeNode {
         return NodeType.PROJECT;
     }
 
-    public void addPackage(ProjectPackage projectPackage) {
-        addChild(projectPackage);
+    public void addPackage(Package aPackage) {
+        addChild(aPackage);
     }
 
     @Override

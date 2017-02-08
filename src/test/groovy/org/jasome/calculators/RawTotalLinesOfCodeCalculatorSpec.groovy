@@ -1,12 +1,10 @@
 package org.jasome.calculators
 
-import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
+import static org.jasome.util.TestUtil.typeFromSnippet
 import static spock.util.matcher.HamcrestSupport.expect
 
 class RawTotalLinesOfCodeCalculatorSpec extends Specification {
@@ -19,17 +17,15 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
     def "calculate simple metric"() {
 
         given:
-        def sourceCode = '''
+        def type = typeFromSnippet '''
             class Example {
                 public int stuff;
             }
 
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("RTLOC", 3)
@@ -38,7 +34,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
     def "calculate counts raw lines of code in a class including comments"() {
 
         given:
-        def sourceCode = '''package org.whatever.stuff;
+        def type = typeFromSnippet '''package org.whatever.stuff;
 
             import lineone;
             import line2.stuff.junk;
@@ -67,10 +63,8 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
             }                                            //22
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("RTLOC", 22)
@@ -79,32 +73,15 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
     def "calculate class length when only one line"() {
 
         given:
-        def sourceCode = '''
+        def type = typeFromSnippet '''
             interface Exampleable {}
         '''
 
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def result = unit.calculate(type)
 
         then:
         expect result, containsMetric("RTLOC", 1)
     }
-
-    def "throws error if class declaration is missing"() {
-
-        given:
-        def sourceCode = ''''''
-
-        CompilationUnit cu = JavaParser.parse(sourceCode);
-
-        when:
-        def result = unit.calculate(null, null)
-
-        then:
-        thrown AssertionError
-    }
-
 
 }

@@ -9,7 +9,7 @@ import java.util.Set;
 public abstract class TreeNode {
     private String name;
     protected Set<TreeNode> children = new HashSet<TreeNode>();
-    private TreeNode parent;
+    private TreeNode parent = null;
 
     public TreeNode(String name) {
         this.name = name;
@@ -50,18 +50,19 @@ public abstract class TreeNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TreeNode that = (TreeNode) o;
-        return Objects.equal(getName(), that.getName()) &&
-                getNodeType() == that.getNodeType();
+        TreeNode treeNode = (TreeNode) o;
+        return Objects.equal(getName(), treeNode.getName()) &&
+                getNodeType() == treeNode.getNodeType() &&
+                Objects.equal(getParent(), treeNode.getParent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getName(), getNodeType());
+        return Objects.hashCode(getName(), getParent(), getNodeType());
     }
 
     enum NodeType {
-        PROJECT, PACKAGE, CLASS, METHOD;
+        PROJECT, PACKAGE, TYPE, METHOD;
 
         public static NodeType fromDepth(int depth) {
             switch (depth) {
@@ -70,7 +71,7 @@ public abstract class TreeNode {
                 case 1:
                     return PACKAGE;
                 case 2:
-                    return CLASS;
+                    return TYPE;
                 case 3:
                     return METHOD;
                 default:

@@ -2,14 +2,14 @@ package org.jasome.parsing;
 
 import java.util.Set;
 
-public class ProjectPackage extends TreeNode {
-    public ProjectPackage(String name) {
+public class Package extends TreeNode {
+    public Package(String name) {
         super(name);
     }
 
     @SuppressWarnings("unchecked")
-    public Set<ProjectClass> getClasses() {
-        return (Set<ProjectClass>)(Set<?>)getChildren();
+    public Set<Type> getTypes() {
+        return (Set<Type>)(Set<?>)getChildren();
     }
 
     @Override
@@ -17,8 +17,8 @@ public class ProjectPackage extends TreeNode {
         return NodeType.PACKAGE;
     }
 
-    public void addClass(ProjectClass projectClass) {
-        addChild(projectClass);
+    public void addType(Type type) {
+        addChild(type);
     }
 
     public Project getParentProject() {
