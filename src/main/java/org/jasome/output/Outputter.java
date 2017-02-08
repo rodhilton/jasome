@@ -1,4 +1,4 @@
-package org.jasome.executive;
+package org.jasome.output;
 
 import org.jasome.output.Output;
 

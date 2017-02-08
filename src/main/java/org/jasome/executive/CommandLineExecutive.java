@@ -4,12 +4,10 @@ import com.google.common.collect.Sets;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
-import org.jasome.calculators.impl.NumberOfFieldsCalculator;
-import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator;
-import org.jasome.calculators.impl.TotalLinesOfCodeCalculator;
 import org.jasome.output.Output;
 import org.jasome.output.XMLOutputter;
 import org.jasome.parsing.Scanner;
+import org.jasome.parsing.ScannerFactory;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.*;
@@ -56,15 +54,7 @@ public class CommandLineExecutive {
             System.exit(0);
         } else {
             String fileParam = line.getArgs()[0];
-            Scanner scanner = new Scanner();
-
-            scanner.registerClassCalculator(new RawTotalLinesOfCodeCalculator());
-            scanner.registerClassCalculator(new NumberOfFieldsCalculator());
-
-            TotalLinesOfCodeCalculator totalLinesOfCodeCalculator = new TotalLinesOfCodeCalculator();
-            scanner.registerPackageCalculator(totalLinesOfCodeCalculator);
-            scanner.registerClassCalculator(totalLinesOfCodeCalculator);
-            scanner.registerMethodCalculator(totalLinesOfCodeCalculator);
+            Scanner scanner = ScannerFactory.getScanner();
 
             IOFileFilter readableJavaFiles = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
 

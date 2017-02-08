@@ -7,6 +7,10 @@ import org.apache.commons.io.IOUtils
 import org.jasome.calculators.impl.TotalLinesOfCodeCalculator
 import spock.lang.Specification
 
+import static org.jasome.util.Matchers.containsMetric
+import static spock.util.matcher.HamcrestSupport.expect;
+
+
 class TotalLinesOfCodeCalculatorSpec extends Specification {
     TotalLinesOfCodeCalculator unit
 
@@ -27,11 +31,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 3
+        expect result, containsMetric("TLOC", 3)
     }
 
     def "calculate counts lines"() {
@@ -69,11 +72,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 9
+        expect result, containsMetric("TLOC", 9)
     }
 
     def "calculate class length when only two lines (open and close)"() {
@@ -86,11 +88,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 2
+        expect result, containsMetric("TLOC", 2)
     }
 
     def "returns an empty if class declaration is missing"() {
@@ -101,7 +102,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(null, SourceContext.NONE)
+        def result = unit.calculate(null, null)
 
         then:
         thrown AssertionError
@@ -116,11 +117,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 159
+        expect result, containsMetric("TLOC", 159)
     }
 
     def "calculate counts lines in a synchronized block, but not for a synchronized variable or method"() {
@@ -149,11 +149,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 11
+        expect result, containsMetric("TLOC", 11)
     }
 
     def "calculate counts lines and can handle an empty declaration"() {
@@ -172,11 +171,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 4
+        expect result, containsMetric("TLOC", 4)
     }
 
     def "calculate counts lines handles interfaces properly"() {
@@ -200,11 +198,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 3
+        expect result, containsMetric("TLOC", 3)
     }
 
     def "calculate counts try/catch/finally blocks properly"() {
@@ -268,11 +265,10 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 29
+        expect result, containsMetric("TLOC", 29)
     }
 
     def "calculate counts complex if blocks properly"() {
@@ -334,15 +330,13 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit equivalentCu = JavaParser.parse(equivalentSourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
-        def equivalentResult = unit.calculate(equivalentCu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
+        def equivalentResult = unit.calculate(equivalentCu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["TLOC"].value == 22
+        expect result, containsMetric("TLOC", 22)
+        expect equivalentResult, containsMetric("TLOC", 22)
 
-        equivalentResult.size() == 1
-        equivalentResult["TLOC"].value == 22
     }
 
 

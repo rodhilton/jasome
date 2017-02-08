@@ -13,24 +13,6 @@ public class Metrics extends HashMap<String, Metric> {
 
     public static final HashSet<Metric> EMPTY = new HashSet<Metric>();
 
-    public Metrics() {
-        super();
-    }
-
-    private Metrics(Map<String, Metric> collection) {
-        super(collection);
-    }
-
-    public static Set<Metric> of(Metric result) {
-        HashSet<Metric> metrics = new HashSet<>();
-        metrics.add(result);
-        return metrics;
-    }
-
-    public static Set<Metric> of(String name, String description, BigDecimal value) {
-        return Metrics.of(new Metric(name, description, value));
-    }
-
     public static Metrics.Builder builder() {
         return new Metrics.Builder();
     }

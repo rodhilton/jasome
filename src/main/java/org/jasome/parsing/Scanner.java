@@ -2,7 +2,6 @@ package org.jasome.parsing;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
@@ -42,58 +41,56 @@ public class Scanner {
     }
 
     public Output scan(Collection<File> inputFiles) throws IOException {
-        Map<TreeNode, Node> sourceCode = new HashMap<TreeNode, Node>();
-
+        Map<TreeNode, Node> sourceCode = new HashMap<>();
         Multimap<TreeNode, Pair<String, String>> attributes = HashMultimap.create();
+        Multimap<TreeNode, Metric> metrics = HashMultimap.create();
 
-        ProjectNode projectNode = new ProjectNode();
+        Project project = new Project();
 
-        Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = gatherPackages(inputFiles);
+        Map<String, List<Pair<ClassOrInterfaceDeclaration, File>>> packages = gatherPackages(inputFiles);
 
-        for (Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> entry : packages.entrySet()) {
+        for (Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, File>>> entry : packages.entrySet()) {
 
-            PackageNode packageNode = new PackageNode(entry.getKey());
-            projectNode.addPackage(packageNode);
+            ProjectPackage projectPackage = new ProjectPackage(entry.getKey());
+            project.addPackage(projectPackage);
 
-            for (Pair<ClassOrInterfaceDeclaration, SourceContext> classAndContext : entry.getValue()) {
-                ClassOrInterfaceDeclaration classDefinition = classAndContext.getLeft();
+            for (Pair<ClassOrInterfaceDeclaration, File> classAndSourceFile : entry.getValue()) {
+                ClassOrInterfaceDeclaration classDefinition = classAndSourceFile.getLeft();
 
-                ClassNode classNode = new ClassNode(getClassNameFromDeclaration(classDefinition));
-                packageNode.addClass(classNode);
+                ProjectClass projectClass = new ProjectClass(getClassNameFromDeclaration(classDefinition));
+                projectPackage.addClass(projectClass);
 
-                sourceCode.put(classNode, classDefinition);
-                attributes.put(classNode, Pair.of("sourceFile", classAndContext.getValue().getSourceFile().getPath()));
+                sourceCode.put(projectClass, classDefinition);
+                attributes.put(projectClass, Pair.of("sourceFile", classAndSourceFile.getValue().getPath()));
 
                 for (MethodDeclaration methodDeclaration : classDefinition.getMethods()) {
-                    MethodNode methodNode = new MethodNode(methodDeclaration.getDeclarationAsString());
-                    classNode.addMethod(methodNode);
+                    ProjectMethod projectMethod = new ProjectMethod(methodDeclaration.getDeclarationAsString());
+                    projectClass.addMethod(projectMethod);
 
-                    sourceCode.put(methodNode, methodDeclaration);
+                    sourceCode.put(projectMethod, methodDeclaration);
 
                 }
 
             }
         }
 
-        Multimap<TreeNode, Metric> metrics = HashMultimap.create();
-
-        for (PackageNode packageNode : projectNode.getPackages()) {
+        for (ProjectPackage projectPackage : project.getPackages()) {
 
             List<ClassOrInterfaceDeclaration> classCodeInPackage = new ArrayList<ClassOrInterfaceDeclaration>();
 
-            for (ClassNode classNode : packageNode.getClasses()) {
-                ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) sourceCode.get(classNode);
+            for (ProjectClass projectClass : projectPackage.getClasses()) {
+                ClassOrInterfaceDeclaration classOrInterfaceDeclaration = (ClassOrInterfaceDeclaration) sourceCode.get(projectClass);
                 classCodeInPackage.add(classOrInterfaceDeclaration);
 
                 for (ClassMetricCalculator classMetricCalculator : classCalculators) {
                     Set<Metric> classMetrics = classMetricCalculator.calculate(classOrInterfaceDeclaration, null);
-                    metrics.putAll(classNode, classMetrics);
+                    metrics.putAll(projectClass, classMetrics);
                 }
 
-                for (MethodNode methodNode : classNode.getMethods()) {
+                for (ProjectMethod projectMethod : projectClass.getMethods()) {
                     for (MethodMetricCalculator methodMetricCalculator : methodCalculators) {
-                        Set<Metric> methodMetrics = methodMetricCalculator.calculate((MethodDeclaration) sourceCode.get(methodNode), null);
-                        metrics.putAll(methodNode, methodMetrics);
+                        Set<Metric> methodMetrics = methodMetricCalculator.calculate((MethodDeclaration) sourceCode.get(projectMethod), null);
+                        metrics.putAll(projectMethod, methodMetrics);
                     }
                 }
             }
@@ -101,31 +98,31 @@ public class Scanner {
             //We collected all the classes in the package above, so now we can get the package metrics
             for (PackageMetricCalculator packageMetricCalculator : packageCalculators) {
                 Set<Metric> packageMetrics = packageMetricCalculator.calculate(classCodeInPackage, null);
-                metrics.putAll(packageNode, packageMetrics);
+                metrics.putAll(projectPackage, packageMetrics);
             }
         }
 
 
-        for (PackageNode packageNode : projectNode.getPackages()) {
-            System.out.println(packageNode.getName());
-            System.out.println("+" + metrics.get(packageNode));
+        for (ProjectPackage projectPackage : project.getPackages()) {
+            System.out.println(projectPackage.getName());
+            System.out.println("+" + metrics.get(projectPackage));
 
-            for (ClassNode classNode : packageNode.getClasses()) {
+            for (ProjectClass projectClass : projectPackage.getClasses()) {
 
-                System.out.println("  " + classNode.getName());
-                System.out.println("  +" + metrics.get(classNode));
+                System.out.println("  " + projectClass.getName());
+                System.out.println("  +" + metrics.get(projectClass));
 
-                for (MethodNode methodNode : classNode.getMethods()) {
+                for (ProjectMethod projectMethod : projectClass.getMethods()) {
 
-                    System.out.println("    " + methodNode.getName());
-                    System.out.println("    +" + metrics.get(methodNode));
+                    System.out.println("    " + projectMethod.getName());
+                    System.out.println("    +" + metrics.get(projectMethod));
 
                 }
             }
 
         }
 
-        return new Output(projectNode, metrics, attributes);
+        return new Output(project, metrics, attributes);
 
     }
 
@@ -142,9 +139,9 @@ public class Scanner {
         return className;
     }
 
-    private Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> gatherPackages(Collection<File> sourceFiles) throws FileNotFoundException {
+    private Map<String, List<Pair<ClassOrInterfaceDeclaration, File>>> gatherPackages(Collection<File> sourceFiles) throws FileNotFoundException {
 
-        Map<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>> packages = new HashMap<String, List<Pair<ClassOrInterfaceDeclaration, SourceContext>>>();
+        Map<String, List<Pair<ClassOrInterfaceDeclaration, File>>> packages = new HashMap<String, List<Pair<ClassOrInterfaceDeclaration, File>>>();
 
         for (File sourceFile : sourceFiles) {
             FileInputStream in = new FileInputStream(sourceFile);
@@ -152,21 +149,16 @@ public class Scanner {
             CompilationUnit cu = JavaParser.parse(in);
 
             String packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString()).orElse("default");
-            List<ImportDeclaration> imports = cu.getImports();
-
-            SourceContext sourceContext = new SourceContext();
-            sourceContext.setPackageName(packageName);
-            sourceContext.setImports(imports);
-            sourceContext.setSourceFile(sourceFile);
+            //List<ImportDeclaration> imports = cu.getImports();
 
             List<ClassOrInterfaceDeclaration> classes = cu.getNodesByType(ClassOrInterfaceDeclaration.class);
 
             if (!packages.containsKey(packageName)) {
-                packages.put(packageName, new ArrayList<Pair<ClassOrInterfaceDeclaration, SourceContext>>());
+                packages.put(packageName, new ArrayList<Pair<ClassOrInterfaceDeclaration, File>>());
             }
 
             for (ClassOrInterfaceDeclaration clazz : classes) {
-                packages.get(packageName).add(Pair.of(clazz, sourceContext));
+                packages.get(packageName).add(Pair.of(clazz, sourceFile));
             }
         }
 

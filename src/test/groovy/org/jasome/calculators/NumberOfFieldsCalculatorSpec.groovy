@@ -8,6 +8,9 @@ import org.jasome.calculators.impl.NumberOfFieldsCalculator
 import org.jasome.calculators.impl.TotalLinesOfCodeCalculator
 import spock.lang.Specification
 
+import static org.jasome.util.Matchers.containsMetric
+import static spock.util.matcher.HamcrestSupport.expect
+
 class NumberOfFieldsCalculatorSpec extends Specification {
     NumberOfFieldsCalculator unit
 
@@ -41,15 +44,15 @@ class NumberOfFieldsCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result["NF"].value == 3
-        result["NSF"].value == 1
-        result["NPF"].value == 2
-        result["NM"].value == 3
-        result["NSM"].value == 1
-        result["NPM"].value == 1
+        expect result, containsMetric("NF", 3)
+        expect result, containsMetric("NSF", 1)
+        expect result, containsMetric("NPF", 2)
+        expect result, containsMetric("NM", 3)
+        expect result, containsMetric("NSM", 1)
+        expect result, containsMetric("NPM", 1)
     }
 
     def "calculate simple metric with nested class"() {
@@ -87,15 +90,15 @@ class NumberOfFieldsCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result["NF"].value == 3
-        result["NSF"].value == 1
-        result["NPF"].value == 2
-        result["NM"].value == 3
-        result["NSM"].value == 1
-        result["NPM"].value == 1
+        expect result, containsMetric("NF", 3)
+        expect result, containsMetric("NSF", 1)
+        expect result, containsMetric("NPF", 2)
+        expect result, containsMetric("NM", 3)
+        expect result, containsMetric("NSM", 1)
+        expect result, containsMetric("NPM", 1)
     }
 
     def "calculate simple metric with anonymous class"() {
@@ -133,15 +136,15 @@ class NumberOfFieldsCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result["NF"].value == 3
-        result["NSF"].value == 1
-        result["NPF"].value == 2
-        result["NM"].value == 3
-        result["NSM"].value == 1
-        result["NPM"].value == 1
+        expect result, containsMetric("NF", 3)
+        expect result, containsMetric("NSF", 1)
+        expect result, containsMetric("NPF", 2)
+        expect result, containsMetric("NM", 3)
+        expect result, containsMetric("NSM", 1)
+        expect result, containsMetric("NPM", 1)
     }
 
 }

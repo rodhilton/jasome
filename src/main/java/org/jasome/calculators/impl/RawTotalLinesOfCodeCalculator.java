@@ -2,13 +2,11 @@ package org.jasome.calculators.impl;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.google.common.collect.Sets;
-import org.jasome.calculators.Metric;
 import org.jasome.calculators.ClassMetricCalculator;
+import org.jasome.calculators.Metric;
 import org.jasome.calculators.Metrics;
-import org.jasome.calculators.SourceContext;
+import org.jasome.parsing.ProjectClass;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 
@@ -24,7 +22,7 @@ import java.util.Set;
 public class RawTotalLinesOfCodeCalculator implements ClassMetricCalculator {
 
     @Override
-    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, ProjectClass projectClass) {
         assert decl != null;
 
         Optional<Position> end = decl.getEnd();

@@ -6,6 +6,9 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator
 import spock.lang.Specification
 
+import static org.jasome.util.Matchers.containsMetric
+import static spock.util.matcher.HamcrestSupport.expect
+
 class RawTotalLinesOfCodeCalculatorSpec extends Specification {
     RawTotalLinesOfCodeCalculator unit
 
@@ -26,11 +29,10 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["RTLOC"].value == 3
+        expect result, containsMetric("RTLOC", 3)
     }
 
     def "calculate counts raw lines of code in a class including comments"() {
@@ -68,11 +70,10 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["RTLOC"].value == 22
+        expect result, containsMetric("RTLOC", 22)
     }
 
     def "calculate class length when only one line"() {
@@ -85,11 +86,10 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), SourceContext.NONE)
+        def result = unit.calculate(cu.getNodesByType(ClassOrInterfaceDeclaration.class).get(0), null)
 
         then:
-        result.size() == 1
-        result["RTLOC"].value == 1
+        expect result, containsMetric("RTLOC", 1)
     }
 
     def "throws error if class declaration is missing"() {
@@ -100,7 +100,7 @@ class RawTotalLinesOfCodeCalculatorSpec extends Specification {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 
         when:
-        def result = unit.calculate(null, SourceContext.NONE)
+        def result = unit.calculate(null, null)
 
         then:
         thrown AssertionError

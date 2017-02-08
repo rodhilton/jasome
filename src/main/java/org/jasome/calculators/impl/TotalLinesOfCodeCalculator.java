@@ -9,10 +9,11 @@ import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
-import com.google.common.collect.Sets;
 import org.jasome.calculators.*;
+import org.jasome.parsing.ProjectClass;
+import org.jasome.parsing.ProjectMethod;
+import org.jasome.parsing.ProjectPackage;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
@@ -81,43 +82,37 @@ import java.util.Stack;
 public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, PackageMetricCalculator, MethodMetricCalculator {
 
     @Override
-    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, SourceContext context) {
+    public Set<Metric> calculate(ClassOrInterfaceDeclaration decl, ProjectClass projectClass) {
         assert(decl != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.add(decl);
 
-        Metric result = performCalculation(nodeStack);
-
-        return Metrics.of(result);
+        return performCalculation(nodeStack);
     }
 
     @Override
-    public Set<Metric> calculate(Collection<ClassOrInterfaceDeclaration> classes, SourceContext context) {
+    public Set<Metric> calculate(Collection<ClassOrInterfaceDeclaration> classes, ProjectPackage projectPackage) {
         assert(classes != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.addAll(classes);
 
-        Metric result = performCalculation(nodeStack);
-
-        return Metrics.of(result);
+        return performCalculation(nodeStack);
     }
 
     @Override
-    public Set<Metric> calculate(MethodDeclaration declaration, SourceContext context) {
+    public Set<Metric> calculate(MethodDeclaration declaration, ProjectMethod projectMethod) {
         assert(declaration != null);
 
         Stack<Node> nodeStack = new Stack<Node>();
         nodeStack.add(declaration);
 
-        Metric result = performCalculation(nodeStack);
-
-        return Metrics.of(result);
+        return performCalculation(nodeStack);
     }
 
 
-    private Metric performCalculation(Stack<Node> nodeStack) {
+    private Set<Metric> performCalculation(Stack<Node> nodeStack) {
         int count = 0;
 
         while (!nodeStack.empty()) {
@@ -246,11 +241,7 @@ public class TotalLinesOfCodeCalculator implements ClassMetricCalculator, Packag
             }
         }
 
-        return new Metric(
-                "TLOC",
-                "Total Lines of Code",
-                new BigDecimal(count)
-        );
+        return Metrics.builder().with("TLOC", "Total Lines of Code", count).build();
     }
 
 }
