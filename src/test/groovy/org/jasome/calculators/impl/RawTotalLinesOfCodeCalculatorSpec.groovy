@@ -1,4 +1,4 @@
-package org.jasome.calculators
+package org.jasome.calculators.impl
 
 import org.jasome.calculators.impl.RawTotalLinesOfCodeCalculator
 import spock.lang.Specification

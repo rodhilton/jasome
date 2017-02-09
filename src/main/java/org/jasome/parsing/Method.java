@@ -14,7 +14,7 @@ public class Method extends TreeNode {
         return declaration;
     }
 
-    public Type getParentClass() {
+    public Type getParentType() {
         return (Type)getParent();
     }
 

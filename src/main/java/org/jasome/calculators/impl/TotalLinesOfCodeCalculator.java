@@ -20,6 +20,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
+//TODO: auto formatting fucked up this code, reformat
 /**
  * Counts the number of lines of code in a file.  Attempts to normalize for
  * different formatting styles and whitespace differences so equivalent code

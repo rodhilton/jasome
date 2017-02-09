@@ -2,8 +2,12 @@ package org.jasome.util
 
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.Modifier
+import com.github.javaparser.ast.body.BodyDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.MethodDeclaration
 import org.apache.commons.io.IOUtils
+import org.jasome.parsing.Method
 import org.jasome.parsing.Type
 
 class TestUtil {
@@ -24,6 +28,25 @@ class TestUtil {
         aPackage.addType(t)
 
         return t;
+    }
+
+    public static Method methodFromSnippet(String sourceCode) {
+        BodyDeclaration<MethodDeclaration> methodDeclaration = (BodyDeclaration<MethodDeclaration>)JavaParser.parseClassBodyDeclaration(sourceCode)
+
+        Method m = new Method((MethodDeclaration)methodDeclaration);
+
+        org.jasome.parsing.Package p = new org.jasome.parsing.Package("org.test.example")
+
+        ClassOrInterfaceDeclaration myClass = new ClassOrInterfaceDeclaration(
+            EnumSet.of(Modifier.PUBLIC), false, "MyClass");
+
+        myClass.addMember((MethodDeclaration)methodDeclaration);
+
+        Type t = new Type(myClass)
+        t.addMethod(m)
+        p.addType(t)
+
+        return m;
     }
 
     public static Type typeFromStream(InputStream stream) {
