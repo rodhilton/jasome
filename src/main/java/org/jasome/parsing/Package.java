@@ -12,16 +12,16 @@ public class Package extends TreeNode {
         return (Set<Type>)(Set<?>)getChildren();
     }
 
-    @Override
-    public NodeType getNodeType() {
-        return NodeType.PACKAGE;
-    }
-
     public void addType(Type type) {
         addChild(type);
     }
 
     public Project getParentProject() {
         return (Project)getParent();
+    }
+
+    @Override
+    public String toString() {
+        return "Package("+this.getName()+")";
     }
 }

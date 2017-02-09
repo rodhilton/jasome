@@ -12,17 +12,12 @@ public class Project extends TreeNode {
         return (Set<Package>)(Set<?>)getChildren();
     }
 
-    @Override
-    public NodeType getNodeType() {
-        return NodeType.PROJECT;
-    }
-
     public void addPackage(Package aPackage) {
         addChild(aPackage);
     }
 
     @Override
     public String toString() {
-        return this.toString(0);
+        return "Project";
     }
 }

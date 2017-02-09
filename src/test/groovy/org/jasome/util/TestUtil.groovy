@@ -6,8 +6,12 @@ import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.BodyDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.google.common.collect.HashMultimap
+import com.google.common.collect.Multimap
 import org.apache.commons.io.IOUtils
 import org.jasome.parsing.Method
+import org.jasome.parsing.Package
+import org.jasome.parsing.Project
 import org.jasome.parsing.Type
 
 class TestUtil {
@@ -64,6 +68,40 @@ class TestUtil {
         }
 
         return aPackage;
+    }
+
+    //TODO: lots of repeated code here from the parser, can probably refactor to a common place
+    public static Project projectFromSnippet(String... sourceCodes) {
+        Multimap<String, ClassOrInterfaceDeclaration> packagesToClasses = HashMultimap.create()
+
+        for(String sourceCode: sourceCodes) {
+            CompilationUnit cu = JavaParser.parse(sourceCode);
+            String packageName = cu.getPackageDeclaration().map{decl -> decl.getName().asString()}.orElseGet{"default"}
+            List<ClassOrInterfaceDeclaration> nodes = cu.getNodesByType(ClassOrInterfaceDeclaration.class)
+            packagesToClasses.putAll(packageName, nodes)
+        }
+
+        Project project = new Project()
+
+        for(String packageName: packagesToClasses.keySet()) {
+
+            Package aPackage = new Package(packageName);
+            project.addPackage(aPackage);
+
+            for (ClassOrInterfaceDeclaration classDefinition : packagesToClasses.get(packageName)) {
+
+                Type type = new Type(classDefinition);
+                aPackage.addType(type);
+
+                for (MethodDeclaration methodDeclaration : classDefinition.getMethods()) {
+                    Method method = new Method(methodDeclaration);
+                    type.addMethod(method);
+                }
+
+            }
+        }
+
+        return project;
     }
 
     public static Type typeFromStream(InputStream stream) {

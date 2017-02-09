@@ -19,7 +19,7 @@ public class Method extends TreeNode {
     }
 
     @Override
-    public NodeType getNodeType() {
-        return NodeType.METHOD;
+    public String toString() {
+        return "Method("+this.getName()+")";
     }
 }

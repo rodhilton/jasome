@@ -35,16 +35,16 @@ public class Type extends TreeNode {
         return (Set<Method>)(Set<?>)getChildren();
     }
 
-    @Override
-    public NodeType getNodeType() {
-        return NodeType.TYPE;
-    }
-
     public void addMethod(Method method) {
         addChild(method);
     }
 
     public Package getParentPackage() {
         return (Package)getParent();
+    }
+
+    @Override
+    public String toString() {
+        return "Type("+this.getName()+")";
     }
 }

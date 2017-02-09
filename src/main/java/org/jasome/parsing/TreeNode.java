@@ -15,8 +15,6 @@ public abstract class TreeNode {
         this.name = name;
     }
 
-    public abstract NodeType getNodeType();
-
     public String getName() {
         return name;
     }
@@ -34,50 +32,18 @@ public abstract class TreeNode {
         this.children.add(child);
     }
 
-    public String toString(int level) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(StringUtils.repeat(' ', level));
-        sb.append(name);
-        sb.append("");
-        sb.append("\n");
-        for (TreeNode child : children) {
-            sb.append(child.toString(level + 1));
-        }
-        return sb.toString();
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TreeNode treeNode = (TreeNode) o;
         return Objects.equal(getName(), treeNode.getName()) &&
-                getNodeType() == treeNode.getNodeType() &&
                 Objects.equal(getParent(), treeNode.getParent());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getName(), getParent(), getNodeType());
-    }
-
-    enum NodeType {
-        PROJECT, PACKAGE, TYPE, METHOD;
-
-        public static NodeType fromDepth(int depth) {
-            switch (depth) {
-                case 0:
-                    return PROJECT;
-                case 1:
-                    return PACKAGE;
-                case 2:
-                    return TYPE;
-                case 3:
-                    return METHOD;
-                default:
-                    throw new RuntimeException("Not a valid tree depth");
-            }
-        }
+        return Objects.hashCode(getName(), getParent());
     }
 }
 
