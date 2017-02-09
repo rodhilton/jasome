@@ -4,11 +4,10 @@ import org.jasome.parsing.Type
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
-import static org.jasome.util.TestUtil.packageFromSnippet
 import static org.jasome.util.TestUtil.projectFromSnippet
 import static spock.util.matcher.HamcrestSupport.expect
 
-class SpecializationIndexCalculatorSpec extends Specification {
+class InheritanceMetricsCalculatorSpec extends Specification {
 
     def "calculate simple metric"() {
 
@@ -44,9 +43,9 @@ class SpecializationIndexCalculatorSpec extends Specification {
         Type typeD = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
 
         when:
-        def resultA = new SpecializationIndexCalculator().calculate(typeA);
-        def resultC = new SpecializationIndexCalculator().calculate(typeC);
-        def resultD = new SpecializationIndexCalculator().calculate(typeD);
+        def resultA = new InheritanceMetricsCalculator().calculate(typeA);
+        def resultC = new InheritanceMetricsCalculator().calculate(typeC);
+        def resultD = new InheritanceMetricsCalculator().calculate(typeD);
 
         then:
         expect resultA, containsMetric("DIT", 1)
@@ -91,8 +90,8 @@ class SpecializationIndexCalculatorSpec extends Specification {
         Type typeTwo = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "ShouldBeTwo"}
 
         when:
-        def resultFour = new SpecializationIndexCalculator().calculate(typeFour);
-        def resultTwo = new SpecializationIndexCalculator().calculate(typeTwo);
+        def resultFour = new InheritanceMetricsCalculator().calculate(typeFour);
+        def resultTwo = new InheritanceMetricsCalculator().calculate(typeTwo);
 
         then:
         expect resultFour, containsMetric("DIT", 4)
@@ -136,7 +135,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         Type typeA = (secondPackage.getTypes() as List<Type>).find{ type -> type.name == "A"}
 
         when:
-        def result = new SpecializationIndexCalculator().calculate(typeA);
+        def result = new InheritanceMetricsCalculator().calculate(typeA);
 
         then:
         expect result, containsMetric("DIT", 4)
@@ -145,6 +144,64 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
 
     //TODO: need to make sure static inner classes work, I think they currently won't
+
+    def "calculate number of overridden methods"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        interface I {
+            public void methodOne(int i);
+        }
+
+        abstract class A implements I {
+            public void methodTwo(int i) {
+
+            }
+        }
+
+        abstract class B extends A {
+            public void methodThree(int i) {
+
+            }
+        }
+
+        abstract class C extends B {
+            public void methodFour(int i) {
+
+            }
+        }
+
+        class D extends C {
+            public void methodOne(int i) {
+
+            }
+
+            public void methodTwo(int i) {
+
+            }
+
+            public void methodFour(int i) {
+
+            }
+
+            public void methodFive(int i) {
+
+            }
+        }
+        '''
+
+        org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
+
+        Type typeD = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
+
+        when:
+        def result = new InheritanceMetricsCalculator().calculate(typeD);
+
+        then:
+        expect result, containsMetric("NORM", 2)
+    }
 
 }
 

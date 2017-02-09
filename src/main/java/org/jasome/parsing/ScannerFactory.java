@@ -17,7 +17,7 @@ public class ScannerFactory {
         scanner.registerMethodCalculator(new NumberOfParametersCalculator());
         scanner.registerPackageCalculator(new NumberOfClassesCalculator());
 
-        scanner.registerTypeCalculator(new SpecializationIndexCalculator());
+        scanner.registerTypeCalculator(new InheritanceMetricsCalculator());
         return scanner;
     }
 }
