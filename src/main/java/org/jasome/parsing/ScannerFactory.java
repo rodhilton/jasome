@@ -7,6 +7,7 @@ public class ScannerFactory {
         Scanner scanner = new Scanner();
 
         scanner.registerTypeCalculator(new RawTotalLinesOfCodeCalculator());
+
         scanner.registerTypeCalculator(new NumberOfFieldsCalculator());
 
         scanner.registerPackageCalculator(TotalLinesOfCodeCalculator.forPackage());
@@ -15,6 +16,8 @@ public class ScannerFactory {
 
         scanner.registerMethodCalculator(new NumberOfParametersCalculator());
         scanner.registerPackageCalculator(new NumberOfClassesCalculator());
+
+        scanner.registerTypeCalculator(new SpecializationIndexCalculator());
         return scanner;
     }
 }
