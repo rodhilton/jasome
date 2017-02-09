@@ -49,6 +49,23 @@ class TestUtil {
         return m;
     }
 
+    public static org.jasome.parsing.Package packageFromSnippet(String sourceCode) {
+        CompilationUnit cu = JavaParser.parse(sourceCode.trim());
+
+        String packageName = cu.getPackageDeclaration().map{decl -> decl.getName().asString()}.orElseGet{"default"}
+
+        org.jasome.parsing.Package aPackage = new org.jasome.parsing.Package(packageName);
+
+        List<ClassOrInterfaceDeclaration> nodes = cu.getNodesByType(ClassOrInterfaceDeclaration.class)
+
+        for(ClassOrInterfaceDeclaration classOrInterfaceDeclaration: nodes) {
+            Type t = new Type(classOrInterfaceDeclaration)
+            aPackage.addType(t);
+        }
+
+        return aPackage;
+    }
+
     public static Type typeFromStream(InputStream stream) {
         String snippet = IOUtils.toString(stream, "UTF-8");
         return typeFromSnippet(snippet);
