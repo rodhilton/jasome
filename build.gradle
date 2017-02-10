@@ -7,15 +7,15 @@ sourceCompatibility = JavaVersion.VERSION_1_8
 targetCompatibility = JavaVersion.VERSION_1_8
 
 group = 'org.jasome'
-version = '0.3'
+//version = '0.3'
 
 mainClassName = "org.jasome.executive.CommandLineExecutive"
 
-jar {
-    manifest {
-        attributes("Implementation-Version": version)
-    }
-}
+//jar {
+//    manifest {
+//        attributes("Implementation-Version": version)
+//    }
+//}
 
 repositories {
     mavenCentral()

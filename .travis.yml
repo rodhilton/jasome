@@ -14,7 +14,3 @@ deploy:
   on:
     repo: rodhilton/jasome
     tags: true
-# branches:
-#   only:
-#   - master
-#   - /^v.*$/
