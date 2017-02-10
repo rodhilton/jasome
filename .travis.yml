@@ -1,6 +1,8 @@
 language: java
 jdk:
 - oraclejdk8
+env:
+- PACKAGE_VERSION="0.3"
 deploy:
   provider: releases
   overwrite: true
@@ -9,6 +11,6 @@ deploy:
   file: "jasome/build/distributions/jasome*.tar"
   file_glob: "true"
   skip_cleanup: true
-  release-number: ${BUILDTAG}-alpha-build${TRAVIS_BUILD_NUMBER}
+  release-number: ${PACKAGE_VERSION}
   on:
     repo: rodhilton/jasome
