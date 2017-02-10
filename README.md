@@ -71,10 +71,10 @@ And a lot more
   
 # Running
 
-Download and install the latest distribution and unzip, then run:
+Download the latest distribution and unzip, change into directory, then run:
 
   ```
-  ./bin/jasome <directory to analyze>
+  bin/jasome <directory to analyze>
   ```
   
 JaSoMe will gather metrics and output them to the console.  You can save the XML
