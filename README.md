@@ -34,16 +34,38 @@ for metrics, but by and large on a normal project Jasome will be accurate.
 ## Metrics
 
 Jasome is currently tracking the following metrics:
+   
+ * **Raw Total Lines of Code (RTLOC)** - The actual number of lines of code in a
+   class, using the line numbers of the file itself.  Comments, whitespace, and
+   everything else is counted. _(class)_
+ * **Total Lines of Code (TLOC)** - The total number of lines of code, ignoring
+   comments, whitespace, and formatting differences _(package, class, method)_
+ * **Number of Attributes (NF)** - The number of fields/attributes _(class)_
+ * **Number of Static Attributes (NSF)** - The number of static attributes _(class)_
+ * **Number of Public Attributes (NPF)** - The number of public attributes _(class)_
+ * **Number of Methods (NM, NOM)** - The number of methods _(class)_
+ * **Number of Static Methods (NSM)** - The number of static methods _(class)_
+ * **Number of Public Methods (NPM)** - The number of public methods _(class)_
+ * **Number of Classes (NOC)** - The number of classes within a package _(package)_
+ * **Number of Parameters (NOP)** - The number of parameters a method takes _(method)_ 
+ * **Depth of Inheritance Tree (DIT)** - The maximum depth of the inheritance
+   hierarchy for a class.  _(class)_
+ * **Number of Overridden Methods (NORM)** - The number of methods a class overrides
+   or implements from a parent class _(class)_
+ * **Number of Inherited Methods (NMI)** - The number of methods a class inherits
+   from parent classes _(class)_
+ * **Number of Methods Added to Inheritance (NMA)** - The number of methods a
+   class inherits adds to the inheritance hierarchy; methods defined on the class
+   that it did not override or inherit _(class)_
+ * **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
+  
+# Running
 
- * Package Level:
-   * List
-   * Coming
-   * Soon
- * Class Level:
-   * Coming
-   * Soon
- * Method Level:
-   * Coming
-   * Soon
+Download and install the latest distribution and unzip, then run:
 
-It also outputs a best guess project diagram of packages, which classes are in those packages, how classes relate to each other (is-a vs has-a), and what methods are in each class.
+  ```
+  ./bin/jasome <directory to analyze>
+  ```
+  
+JaSoMe will gather metrics and output them to the console.  You can save the XML
+to a file using the `--output <file>` option.
