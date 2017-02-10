@@ -11,6 +11,9 @@ deploy:
   file: "jasome/build/distributions/jasome*.tar"
   file_glob: "true"
   skip_cleanup: true
-  release-number: "0.3"
   on:
     repo: rodhilton/jasome
+branches:
+  only:
+  - master
+  - /^v.*$/
