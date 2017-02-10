@@ -1,4 +1,4 @@
-# JaSoMe: Java Source Metrics
+# JaSoMe: Java Source Metrics [![Build Status](https://travis-ci.org/rodhilton/jasome.svg?branch=master)](https://travis-ci.org/rodhilton/jasome)
 
 Jasome (JAH-suhm, rhymes with awesome) is a source code analyzer that mines 
 internal quality metrics from projects based on source code alone.  This 

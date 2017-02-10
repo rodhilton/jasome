@@ -1,14 +1,14 @@
 language: java
 jdk:
 - oraclejdk8
-env:
-- PACKAGE_VERSION="0.3"
 deploy:
   provider: releases
   overwrite: true
   api_key:
     secure: SqrF/lvxoVGKOioBhEzzRlwdmf34AE8/R8+rvemvmsT9e2Pec6gOlVFmzony71M5DbSWRG+nJiTxa5EtaHTo/zbSBa39CI7aK363V08iKWSnmuyFmZ2QiijNWh26mY350yg8yHNrPbEu2SX7PvsGRawBSLMGP/vauITN+5MMgSiZd6pAvFTBHIqZCL+eQ9kOpgpT0e2FIA1ObYL9D7fiR0QXQkHxbImrZ4B0gpOpsnKtDgrnp2dHOk7nsOBONVlKIX/jh+pTRt3YIkYxaI2wlgZVN6Y0WF+7vOvf13YcuUuTotBHATOYFUPF+FDXMHm2PLUWZ34ixEoivtjSR4c8SeBatmFZinoz5iQFZygeTbAtR7Tj6WOuBAYUkq9I2p23TevyJmOHfPWCzlNdW3h+H5J0b1tGz1w5SS3hsJsIZCR6Gq3uaV73qCAODek1ihEniUV5G3NFmwNeP3UYTdkBJfs/LmvD0JVmjiMA3XdmJole0lgy2KmAS+9uu+/POuWuo+BFrVJlASPNLG4/rcoJh8JxRR+GhKzuFV99ZKrGilurOOLcsC5cXixNPgSc6Q0/Mq0zDrOUEtnIA0UpQWDUyDDRkjRSjan444Ryw7FuNKlFnRct27E4CIhkENdqtQRq3hSVmxE04lrw+zVxOEA87VEuvpRckPm8EF1yDXNsm04=
-  file: "/home/travis/build/rodhilton/jasome/build/distributions/jasome.zip"
+  file: 
+    - "/home/travis/build/rodhilton/jasome/build/distributions/jasome.zip"
+    - "/home/travis/build/rodhilton/jasome/build/distributions/jasome.tar"
   skip_cleanup: true
   on:
     repo: rodhilton/jasome
