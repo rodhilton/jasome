@@ -323,7 +323,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         def result = new SpecializationIndexCalculator().calculate(typeC);
 
         then:
-        expect result, containsMetric("SIX", 1.5)
+        expect result, containsMetric("SIX", new BigDecimal(1.5))
         expect result, containsMetric("NMA", 1)
         expect result, containsMetric("NMI", 1)
     }
