@@ -13,7 +13,8 @@ deploy:
   skip_cleanup: true
   on:
     repo: rodhilton/jasome
-branches:
-  only:
-  - master
-  - /^v.*$/
+    tags: true
+# branches:
+#   only:
+#   - master
+#   - /^v.*$/
