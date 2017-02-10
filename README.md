@@ -59,6 +59,16 @@ Jasome is currently tracking the following metrics:
    that it did not override or inherit _(class)_
  * **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
   
+More metrics coming soon, I plan to gather every metric outlined in the following sources:
+
+ * http://support.objecteering.com/objecteering6.1/help/us/metrics/toc.htm
+ * http://metrics.sourceforge.net/
+ * http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
+ * http://www.alibris.com/Object-Oriented-Metrics-Measures-of-Complexity-Brian-Henderson-Sellers/book/29695100
+ * http://www.objectmentor.com/resources/articles/oodmetrc.pdf
+ 
+And a lot more
+  
 # Running
 
 Download and install the latest distribution and unzip, then run:
