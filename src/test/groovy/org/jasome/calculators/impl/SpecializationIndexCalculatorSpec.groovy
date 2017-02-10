@@ -5,9 +5,10 @@ import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
 import static org.jasome.util.TestUtil.projectFromSnippet
+import static org.jasome.util.TestUtil.typeFromStream
 import static spock.util.matcher.HamcrestSupport.expect
 
-class InheritanceMetricsCalculatorSpec extends Specification {
+class SpecializationIndexCalculatorSpec extends Specification {
 
     def "calculate simple metric"() {
 
@@ -43,9 +44,9 @@ class InheritanceMetricsCalculatorSpec extends Specification {
         Type typeD = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
 
         when:
-        def resultA = new InheritanceMetricsCalculator().calculate(typeA);
-        def resultC = new InheritanceMetricsCalculator().calculate(typeC);
-        def resultD = new InheritanceMetricsCalculator().calculate(typeD);
+        def resultA = new SpecializationIndexCalculator().calculate(typeA);
+        def resultC = new SpecializationIndexCalculator().calculate(typeC);
+        def resultD = new SpecializationIndexCalculator().calculate(typeD);
 
         then:
         expect resultA, containsMetric("DIT", 1)
@@ -90,8 +91,8 @@ class InheritanceMetricsCalculatorSpec extends Specification {
         Type typeTwo = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "ShouldBeTwo"}
 
         when:
-        def resultFour = new InheritanceMetricsCalculator().calculate(typeFour);
-        def resultTwo = new InheritanceMetricsCalculator().calculate(typeTwo);
+        def resultFour = new SpecializationIndexCalculator().calculate(typeFour);
+        def resultTwo = new SpecializationIndexCalculator().calculate(typeTwo);
 
         then:
         expect resultFour, containsMetric("DIT", 4)
@@ -135,7 +136,7 @@ class InheritanceMetricsCalculatorSpec extends Specification {
         Type typeA = (secondPackage.getTypes() as List<Type>).find{ type -> type.name == "A"}
 
         when:
-        def result = new InheritanceMetricsCalculator().calculate(typeA);
+        def result = new SpecializationIndexCalculator().calculate(typeA);
 
         then:
         expect result, containsMetric("DIT", 4)
@@ -171,6 +172,10 @@ class InheritanceMetricsCalculatorSpec extends Specification {
             public void methodFour(int i) {
 
             }
+            
+            public void methodSix(int i) {
+            
+            }
         }
 
         class D extends C {
@@ -197,11 +202,132 @@ class InheritanceMetricsCalculatorSpec extends Specification {
         Type typeD = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
 
         when:
-        def result = new InheritanceMetricsCalculator().calculate(typeD);
+        def result = new SpecializationIndexCalculator().calculate(typeD);
+
+        then:
+        expect result, containsMetric("NORM", 3)
+        expect result, containsMetric("NOM", 4)
+        expect result, containsMetric("NMA", 1)
+        expect result, containsMetric("NMI", 2)
+    }
+
+    def "calculate number of overridden methods works when the overriding method doesn't use the same parameter names"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        abstract class A {
+            public abstract void methodOne(int i) {
+            
+            }
+            public String methodTwo(int i) {
+            
+            }
+        }
+
+        class C extends A {
+            public void methodOne(int i) {
+
+            }
+
+            public String methodTwo(int integer) {
+
+            }
+        }
+        '''
+
+        org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
+
+        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+
+        when:
+        def result = new SpecializationIndexCalculator().calculate(typeC);
 
         then:
         expect result, containsMetric("NORM", 2)
+        expect result, containsMetric("NOM", 2)
     }
+
+    def "does not double count methods in the inheritance hierarchy"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        abstract class A {
+            public abstract void methodOne(int i) {
+            
+            }
+        }
+        
+        class B extends A {
+            public void methodOne(int i) {
+            
+            }
+        }
+
+        class C extends B {
+            public void methodOne(int i) {
+
+            }
+        }
+        '''
+
+        org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
+
+        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+
+        when:
+        def result = new SpecializationIndexCalculator().calculate(typeC);
+
+        then:
+        expect result, containsMetric("NORM", 1)
+        expect result, containsMetric("NOM", 1)
+    }
+
+    def "calculate specialization index"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        abstract class A {
+            public abstract void methodOne(int i) {
+            
+            }
+        }
+        
+        class B extends A {
+            public void methodTwo(int i) {
+                
+            }
+        }
+
+        class C extends B {
+            public void methodOne(int i) {
+            
+            }
+            
+            public void methodThree(int i) {
+            
+            }
+        }
+        '''
+
+        org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
+
+        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+
+        when:
+        def result = new SpecializationIndexCalculator().calculate(typeC);
+
+        then:
+        expect result, containsMetric("SIX", 1.5)
+        expect result, containsMetric("NMA", 1)
+        expect result, containsMetric("NMI", 1)
+    }
+
 
 }
 
