@@ -1,6 +1,9 @@
 package org.jasome.output;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.Metric;
+import org.jasome.parsing.*;
+import org.jasome.parsing.Package;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -8,58 +11,61 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.util.*;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
 
     @Override
-    public Document output(Output output) {
+    public Document output(Project project) {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 
             Document doc = docBuilder.newDocument();
-            Element rootElement = doc.createElement("Packages");
-            doc.appendChild(rootElement);
+            Element projectElement = doc.createElement("Project");
+            doc.appendChild(projectElement);
+            
+            Element packagesElement = doc.createElement("Packages");
+            projectElement.appendChild(packagesElement);
 
-            Output.Node rootNode = output.getRoot();
+            addAttributes(project, projectElement);
+            addMetricsForNode(doc, projectElement, project);
 
-            for(Output.Node packageNode: sortChildren(rootNode.getChildren())) {
+            for (Package packageNode : sortChildren(project.getPackages())) {
                 Element packageElement = doc.createElement("Package");
                 packageElement.setAttribute("name", packageNode.getName());
-                rootElement.appendChild(packageElement);
+                packagesElement.appendChild(packageElement);
 
                 addAttributes(packageNode, packageElement);
                 addMetricsForNode(doc, packageElement, packageNode);
 
-                //if(packageNode.getChildren().size() > 0) {
-                    Element classesElement = doc.createElement("Classes");
-                    packageElement.appendChild(classesElement);
+                Element classesElement = doc.createElement("Classes");
+                packageElement.appendChild(classesElement);
 
-                    for (Output.Node classNode : sortChildren(packageNode.getChildren())) {
-                        Element classElement = doc.createElement("Class");
-                        classElement.setAttribute("name", classNode.getName());
-                        classesElement.appendChild(classElement);
+                for (Type classNode : sortChildren(packageNode.getTypes())) {
+                    Element classElement = doc.createElement("Class");
+                    classElement.setAttribute("name", classNode.getName());
+                    classesElement.appendChild(classElement);
 
-                        addAttributes(classNode, classElement);
-                        addMetricsForNode(doc, classElement, classNode);
+                    addAttributes(classNode, classElement);
+                    addMetricsForNode(doc, classElement, classNode);
 
-                       // if(classNode.getChildren().size() > 0) {
-                            Element methodsElement = doc.createElement("Methods");
-                            classElement.appendChild(methodsElement);
+                    Element methodsElement = doc.createElement("Methods");
+                    classElement.appendChild(methodsElement);
 
-                            for (Output.Node methodNode : sortChildren(classNode.getChildren())) {
-                                Element methodElement = doc.createElement("Method");
-                                methodElement.setAttribute("name", methodNode.getName());
-                                methodsElement.appendChild(methodElement);
+                    for (Method methodNode : sortChildren(classNode.getMethods())) {
+                        Element methodElement = doc.createElement("Method");
+                        methodElement.setAttribute("name", methodNode.getName());
+                        methodsElement.appendChild(methodElement);
 
-                                addAttributes(methodNode, methodElement);
-                                addMetricsForNode(doc, methodElement, methodNode);
-                            }
-                        //}
+                        addAttributes(methodNode, methodElement);
+                        addMetricsForNode(doc, methodElement, methodNode);
                     }
-                //}
+                }
             }
 
             return doc;
@@ -70,35 +76,35 @@ public class XMLOutputter implements Outputter<Document> {
 
     }
 
-    private List<Output.Node> sortChildren(Collection<Output.Node> children) {
-        return children.stream().sorted(new Comparator<Output.Node>() {
-                            @Override
-                            public int compare(Output.Node o1, Output.Node o2) {
-                                return o1.getName().compareTo(o2.getName());
-                            }
+    private <T extends Code> List<T> sortChildren(Collection<T> children) {
+        return children.stream().sorted(new Comparator<Code>() {
+            @Override
+            public int compare(Code o1, Code o2) {
+                return o1.getName().compareTo(o2.getName());
+            }
 
-                        }).collect(Collectors.toList());
+        }).collect(Collectors.toList());
     }
 
-    private void addAttributes(Output.Node classNode, Element classElement) {
-        for(Map.Entry<String, String> attribute: classNode.getAttributes().entrySet()) {
+    private void addAttributes(Code classNode, Element classElement) {
+        for (Pair<String, String> attribute : classNode.getAttributes()) {
             classElement.setAttribute(attribute.getKey(), attribute.getValue());
         }
     }
 
-    private void addMetricsForNode(Document doc, Node parentElement, Output.Node node) {
-//        if(node.getMetrics().size() > 0) {
-            Element metricsContainer = doc.createElement("Metrics");
-            for (Metric metric : node.getMetrics()) {
-                Element metrics = doc.createElement("Metric");
+    private void addMetricsForNode(Document doc, Node parentElement, Code node) {
+        Element metricsContainer = doc.createElement("Metrics");
+        Set<Metric> metrics = node.getMetrics();
+        List<Metric> sortedMetrics = metrics.stream().sorted((m1, m2) -> m1.getName().compareTo(m2.getName())).collect(Collectors.toList());
+        for (Metric metric : sortedMetrics) {
+            Element metricsElement = doc.createElement("Metric");
 
-                metrics.setAttribute("name", metric.getName());
-                metrics.setAttribute("description", metric.getDescription());
-                metrics.setAttribute("value", metric.getValue().toString());
+            metricsElement.setAttribute("name", metric.getName());
+            metricsElement.setAttribute("description", metric.getDescription());
+            metricsElement.setAttribute("value", metric.getValue().toString());
 
-                metricsContainer.appendChild(metrics);
-            }
-            parentElement.appendChild(metricsContainer);
-//        }
+            metricsContainer.appendChild(metricsElement);
+        }
+        parentElement.appendChild(metricsContainer);
     }
 }

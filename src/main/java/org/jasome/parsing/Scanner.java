@@ -8,7 +8,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.*;
-import org.jasome.output.Output;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -39,9 +38,9 @@ public class Scanner {
         methodCalculators.add(calculator);
     }
 
-    public Output scan(Collection<File> inputFiles) throws IOException {
-        Multimap<TreeNode, Pair<String, String>> attributes = HashMultimap.create();
-        Multimap<TreeNode, Metric> metrics = HashMultimap.create();
+    public Project scan(Collection<File> inputFiles) throws IOException {
+        Multimap<Code, Pair<String, String>> attributes = HashMultimap.create();
+        Multimap<Code, Metric> metrics = HashMultimap.create();
 
         Project project = new Project();
 
@@ -58,7 +57,7 @@ public class Scanner {
                 Type type = new Type(classDefinition);
                 aPackage.addType(type);
 
-                attributes.put(type, Pair.of("sourceFile", classAndSourceFile.getValue().getPath()));
+                type.addAttribute("sourceFile", classAndSourceFile.getValue().getPath());
 
                 for (MethodDeclaration methodDeclaration : classDefinition.getMethods()) {
                     Method method = new Method(methodDeclaration);
@@ -71,28 +70,29 @@ public class Scanner {
             }
         }
 
+
+        //TODO gather project metrics, go "recursively" so that class-level metrics can reference method metrics and so on
         for (Package aPackage : project.getPackages()) {
 
-            for (Calculator<Package> packageMetricCalculator : packageCalculators) {
-                Set<Metric> packageMetrics = packageMetricCalculator.calculate(aPackage);
-                metrics.putAll(aPackage, packageMetrics);
-            }
-
             for (Type type : aPackage.getTypes()) {
-
-                for (Calculator<Type> typeMetricCalculator : typeCalculators) {
-                    Set<Metric> classMetrics = typeMetricCalculator.calculate(type);
-                    metrics.putAll(type, classMetrics);
-                }
 
                 for (Method method : type.getMethods()) {
 
                     for (Calculator<Method> methodMetricCalculator : methodCalculators) {
                         Set<Metric> methodMetrics = methodMetricCalculator.calculate(method);
-                        metrics.putAll(method, methodMetrics);
+                        method.addMetrics(methodMetrics);
                     }
-
                 }
+
+                for (Calculator<Type> typeMetricCalculator : typeCalculators) {
+                    Set<Metric> classMetrics = typeMetricCalculator.calculate(type);
+                    type.addMetrics(classMetrics);
+                }
+            }
+
+            for (Calculator<Package> packageMetricCalculator : packageCalculators) {
+                Set<Metric> packageMetrics = packageMetricCalculator.calculate(aPackage);
+                aPackage.addMetrics(packageMetrics);
             }
 
         }
@@ -117,7 +117,7 @@ public class Scanner {
 
         }
 
-        return new Output(project, metrics, attributes);
+        return project;
 
     }
 

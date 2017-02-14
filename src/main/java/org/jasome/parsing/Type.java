@@ -5,7 +5,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
 import java.util.Set;
 
-public class Type extends TreeNode {
+public class Type extends Code {
     private final ClassOrInterfaceDeclaration declaration;
 
     public Type(ClassOrInterfaceDeclaration declaration) {

@@ -2,7 +2,7 @@ package org.jasome.parsing;
 
 import com.github.javaparser.ast.body.MethodDeclaration;
 
-public class Method extends TreeNode {
+public class Method extends Code {
     private final MethodDeclaration declaration;
 
     public Method(MethodDeclaration declaration) {

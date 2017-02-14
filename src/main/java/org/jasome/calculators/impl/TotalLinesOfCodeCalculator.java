@@ -81,47 +81,15 @@ import java.util.stream.Collectors;
  * @author Rod Hilton
  * @since 0.1
  */
-public class TotalLinesOfCodeCalculator {
+public class TotalLinesOfCodeCalculator implements Calculator<Type> {
 
-    public static Calculator<Type> forType() {
-        return new Calculator<Type>() {
+    public Set<Metric> calculate(Type type) {
+        Stack<Node> nodeStack = new Stack<Node>();
+        nodeStack.add(type.getSource());
 
-            @Override
-            public Set<Metric> calculate(Type type) {
-                Stack<Node> nodeStack = new Stack<Node>();
-                nodeStack.add(type.getSource());
-
-                return performCalculation(nodeStack);
-            }
-        };
+        return performCalculation(nodeStack);
     }
-
-    public static Calculator<Package> forPackage() {
-        return new Calculator<Package>() {
-
-            public Set<Metric> calculate(Package aPackage) {
-
-                Stack<Node> nodeStack = new Stack<Node>();
-                nodeStack.addAll(aPackage.getTypes().stream().map(Type::getSource).collect(Collectors.toList()));
-
-                return performCalculation(nodeStack);
-            }
-        };
-    }
-
-    public static Calculator<Method> forMethod() {
-        return new Calculator<Method>() {
-            @Override
-            public Set<Metric> calculate(Method method) {
-                Stack<Node> nodeStack = new Stack<Node>();
-                nodeStack.add(method.getSource());
-
-                return performCalculation(nodeStack);
-            }
-        };
-    }
-
-
+    
     private static Set<Metric> performCalculation(Stack<Node> nodeStack) {
         int count = 0;
 

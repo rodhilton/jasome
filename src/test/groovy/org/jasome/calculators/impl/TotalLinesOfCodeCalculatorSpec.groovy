@@ -27,7 +27,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         ''')
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         type.parentPackage.name == "default"
@@ -68,7 +68,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
 
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         type.parentPackage.name == "org.whatever.stuff"
@@ -83,7 +83,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         ''')
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 2)
@@ -96,7 +96,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         def type = typeFromStream(stream)
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 159)
@@ -126,7 +126,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         ''')
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 11)
@@ -146,7 +146,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         ''')
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 4)
@@ -171,7 +171,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         ''')
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 3)
@@ -236,7 +236,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
 
         then:
         expect result, containsMetric("TLOC", 29)
@@ -298,37 +298,13 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         '''
 
         when:
-        def result = TotalLinesOfCodeCalculator.forType().calculate(type)
-        def equivalentResult = TotalLinesOfCodeCalculator.forType().calculate(equivalentType)
+        def result = new TotalLinesOfCodeCalculator().calculate(type)
+        def equivalentResult = new TotalLinesOfCodeCalculator().calculate(equivalentType)
 
         then:
         expect result, containsMetric("TLOC", 22)
         expect equivalentResult, containsMetric("TLOC", 22)
 
     }
-
-
-    def "calculate counts for methods"() {
-
-        given:
-        def method = methodFromSnippet '''
-            public void doStuff(String x, int y) {
-                if(y > 10) {
-                    System.out.println(x+" > 10!");
-                } else {
-                    System.out.println(x+" < 10 :(");
-                }
-            }
-        '''
-
-        when:
-        def result = TotalLinesOfCodeCalculator.forMethod().calculate(method)
-
-        then:
-        expect result, containsMetric("TLOC", 7)
-    }
-
-
-    //TODO tests for package
 
 }

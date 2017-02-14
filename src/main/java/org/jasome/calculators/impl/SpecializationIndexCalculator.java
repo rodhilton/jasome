@@ -48,7 +48,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         Metric.Builder metricBuilder =  Metric.builder()
                 .with("DIT", "Depth of Inheritance Tree", depth)
                 .with("NORM", "Number of Overridden Methods", overriddenMethods)
-                .with("NOM", "Number of Methods", numberOfMethods)
+                .with("NM", "Number of Methods", numberOfMethods)
                 .with("NMI", "Number of Inherited Methods", inheritedMethods)
                 .with("NMA", "Number of Methods Added to Inheritance", numberOfMethods.subtract(overriddenMethods));
 

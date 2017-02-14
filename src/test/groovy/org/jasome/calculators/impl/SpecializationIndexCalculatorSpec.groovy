@@ -206,7 +206,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         then:
         expect result, containsMetric("NORM", 3)
-        expect result, containsMetric("NOM", 4)
+        expect result, containsMetric("NM", 4)
         expect result, containsMetric("NMA", 1)
         expect result, containsMetric("NMI", 2)
     }
@@ -246,7 +246,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         then:
         expect result, containsMetric("NORM", 2)
-        expect result, containsMetric("NOM", 2)
+        expect result, containsMetric("NM", 2)
     }
 
     def "does not double count methods in the inheritance hierarchy"() {
@@ -283,7 +283,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         then:
         expect result, containsMetric("NORM", 1)
-        expect result, containsMetric("NOM", 1)
+        expect result, containsMetric("NM", 1)
     }
 
     def "calculate specialization index"() {
@@ -315,6 +315,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
+        //TODO do we need to worrry about cycles
         org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
 
         Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}

@@ -1,7 +1,7 @@
 package org.jasome.output;
 
-import org.jasome.output.Output;
+import org.jasome.parsing.Project;
 
 public interface Outputter<T> {
-    public T output(Output output);
+    T output(Project project);
 }

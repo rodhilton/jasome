@@ -2,7 +2,7 @@ package org.jasome.parsing;
 
 import java.util.Set;
 
-public class Project extends TreeNode {
+public class Project extends Code {
     public Project() {
         super("root");
     }

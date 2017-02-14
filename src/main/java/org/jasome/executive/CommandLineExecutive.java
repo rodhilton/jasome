@@ -4,8 +4,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
-import org.jasome.output.Output;
 import org.jasome.output.XMLOutputter;
+import org.jasome.parsing.Project;
 import org.jasome.parsing.Scanner;
 import org.jasome.parsing.ScannerFactory;
 import org.w3c.dom.Document;
@@ -69,7 +69,7 @@ public class CommandLineExecutive {
             IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(readableJavaFiles, doesNotHaveTestSuffix, isNotInTestSubDirectory) : readableJavaFiles;
 
 
-            Output scannerOutput = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
+            Project scannerOutput = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
 
             try {
                 Document outputDocument = new XMLOutputter().output(scannerOutput);
