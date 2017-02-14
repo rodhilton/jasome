@@ -39,11 +39,11 @@ Jasome is currently tracking the following metrics:
    class, using the line numbers of the file itself.  Comments, whitespace, and
    everything else is counted. _(class)_
  * **Total Lines of Code (TLOC)** - The total number of lines of code, ignoring
-   comments, whitespace, and formatting differences _(package, class, method)_
+   comments, whitespace, and formatting differences _(project, package, class, method)_
  * **Number of Attributes (NF)** - The number of fields/attributes _(class)_
  * **Number of Static Attributes (NSF)** - The number of static attributes _(class)_
  * **Number of Public Attributes (NPF)** - The number of public attributes _(class)_
- * **Number of Methods (NM, NOM)** - The number of methods _(class)_
+ * **Number of Methods (NM)** - The number of methods _(class)_
  * **Number of Static Methods (NSM)** - The number of static methods _(class)_
  * **Number of Public Methods (NPM)** - The number of public methods _(class)_
  * **Number of Classes (NOC)** - The number of classes within a package _(package)_
@@ -58,6 +58,8 @@ Jasome is currently tracking the following metrics:
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
  * **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
+ * **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths through code _(method)_
+ * **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic complexities of all methods on a class _(class)_
   
 More metrics coming soon, I plan to gather every metric outlined in the following sources:
 

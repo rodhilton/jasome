@@ -2,7 +2,6 @@ package org.jasome.parsing;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.Metric;
 
@@ -59,21 +58,21 @@ public abstract class Code {
     }
 
     void addAttribute(String key, String value) {
-        addAttributes(Pair.of(key, value));
+        addAttribute(Pair.of(key, value));
     }
 
-    void addAttributes(Pair<String, String>... attributes) {
-        this.attributes.addAll(Arrays.asList(attributes));
+    void addAttribute(Pair<String, String> attribute) {
+        this.attributes.add(attribute);
     }
 
     void addMetrics(Set<Metric> metrics) {
-        for(Metric metric: metrics) {
+        for (Metric metric : metrics) {
             this.addMetric(metric);
         }
     }
 
     //* * * Protected, only subclasses should be able to directly add/access parent and children, other callers should use addMethod, addPackage, etc
-    
+
     protected Set<Code> getChildren() {
         return children;
     }

@@ -10,7 +10,13 @@ public class ScannerFactory {
 
         scanner.registerTypeCalculator(new NumberOfFieldsCalculator());
 
-        scanner.registerTypeCalculator(new TotalLinesOfCodeCalculator());
+        scanner.registerProjectCalculator(new TotalLinesOfCodeCalculator.ProjectCalculator());
+        scanner.registerPackageCalculator(new TotalLinesOfCodeCalculator.PackageCalculator());
+        scanner.registerTypeCalculator(new TotalLinesOfCodeCalculator.TypeCalculator());
+        scanner.registerMethodCalculator(new TotalLinesOfCodeCalculator.MethodCalculator());
+
+        scanner.registerMethodCalculator(new CyclomaticComplexityCalculator());
+        scanner.registerTypeCalculator(new WeightedMethodsCalculator());
 
         scanner.registerMethodCalculator(new NumberOfParametersCalculator());
         scanner.registerPackageCalculator(new NumberOfClassesCalculator());

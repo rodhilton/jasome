@@ -9,12 +9,15 @@ import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
+import com.google.common.collect.ImmutableSet;
 import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
 import org.jasome.parsing.Method;
 import org.jasome.parsing.Package;
+import org.jasome.parsing.Project;
 import org.jasome.parsing.Type;
 
+import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
@@ -81,13 +84,48 @@ import java.util.stream.Collectors;
  * @author Rod Hilton
  * @since 0.1
  */
-public class TotalLinesOfCodeCalculator implements Calculator<Type> {
+public class TotalLinesOfCodeCalculator {
 
-    public Set<Metric> calculate(Type type) {
-        Stack<Node> nodeStack = new Stack<Node>();
-        nodeStack.add(type.getSource());
+    public static class ProjectCalculator implements Calculator<Project> {
 
-        return performCalculation(nodeStack);
+        @Override
+        public Set<Metric> calculate(Project aProject) {
+            BigDecimal total = aProject.getPackages().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+        }
+    }
+
+    public static class PackageCalculator implements Calculator<Package> {
+
+        @Override
+        public Set<Metric> calculate(Package aPackage) {
+            BigDecimal total = aPackage.getTypes().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+        }
+    }
+
+    public static class TypeCalculator implements Calculator<Type> {
+
+        @Override
+        public Set<Metric> calculate(Type type) {
+            Stack<Node> nodeStack = new Stack<Node>();
+            nodeStack.add(type.getSource());
+
+            return performCalculation(nodeStack);
+        }
+    }
+
+    public static class MethodCalculator implements Calculator<Method> {
+
+        @Override
+        public Set<Metric> calculate(Method method) {
+            Stack<Node> nodeStack = new Stack<Node>();
+            nodeStack.add(method.getSource());
+
+            return performCalculation(nodeStack);
+        }
     }
     
     private static Set<Metric> performCalculation(Stack<Node> nodeStack) {

@@ -16,6 +16,8 @@ import org.jasome.parsing.Type
 
 class TestUtil {
 
+    //TODO: this no longer has the changes made in the regular scanner because it changed, need to
+    //get the scanning and test scanning along the same path. method constructors aren't included right now
     public static Type typeFromSnippet(String sourceCode) {
         CompilationUnit cu = JavaParser.parse(sourceCode);
 

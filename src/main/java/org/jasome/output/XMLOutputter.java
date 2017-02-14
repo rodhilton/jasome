@@ -29,11 +29,11 @@ public class XMLOutputter implements Outputter<Document> {
             Element projectElement = doc.createElement("Project");
             doc.appendChild(projectElement);
             
-            Element packagesElement = doc.createElement("Packages");
-            projectElement.appendChild(packagesElement);
-
             addAttributes(project, projectElement);
             addMetricsForNode(doc, projectElement, project);
+
+            Element packagesElement = doc.createElement("Packages");
+            projectElement.appendChild(packagesElement);
 
             for (Package packageNode : sortChildren(project.getPackages())) {
                 Element packageElement = doc.createElement("Package");

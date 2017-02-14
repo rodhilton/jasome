@@ -15,11 +15,11 @@ public class Method extends Code {
     }
 
     public Type getParentType() {
-        return (Type)getParent();
+        return (Type) getParent();
     }
 
     @Override
     public String toString() {
-        return "Method("+this.getName()+")";
+        return "Method(" + this.getName() + ")";
     }
 }

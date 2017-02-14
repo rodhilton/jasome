@@ -3,7 +3,9 @@ package org.jasome.parsing;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
@@ -16,14 +18,20 @@ import java.io.IOException;
 import java.util.*;
 
 public class Scanner {
+    private Set<Calculator<Project>> projectCalculators;
     private Set<Calculator<Package>> packageCalculators;
     private Set<Calculator<Type>> typeCalculators;
     private Set<Calculator<Method>> methodCalculators;
 
     public Scanner() {
+        projectCalculators = new HashSet<>();
         packageCalculators = new HashSet<>();
         typeCalculators = new HashSet<>();
         methodCalculators = new HashSet<>();
+    }
+
+    public void registerProjectCalculator(Calculator<Project> calculator) {
+        projectCalculators.add(calculator);
     }
 
     public void registerPackageCalculator(Calculator<Package> calculator) {
@@ -59,12 +67,37 @@ public class Scanner {
 
                 type.addAttribute("sourceFile", classAndSourceFile.getValue().getPath());
 
+                List<ConstructorDeclaration> constructors = classDefinition.getNodesByType(ConstructorDeclaration.class);
+                System.out.println(constructors);
+
+                for (ConstructorDeclaration constructorDeclaration : constructors) {
+                    MethodDeclaration constructorMethodDeclaration = new MethodDeclaration(
+                            constructorDeclaration.getModifiers(),
+                            constructorDeclaration.getAnnotations(),
+                            constructorDeclaration.getTypeParameters(),
+                            new ClassOrInterfaceType(classDefinition.getName().getIdentifier()),
+                            constructorDeclaration.getName(),
+                            false,
+                            constructorDeclaration.getParameters(),
+                            constructorDeclaration.getThrownExceptions(),
+                            constructorDeclaration.getBody()
+                    );
+                    Method constructor = new Method(constructorMethodDeclaration);
+                    type.addMethod(constructor);
+
+                    constructor.addAttribute("lineStart", ""+constructorDeclaration.getBegin().get().line);
+                    constructor.addAttribute("lineEnd", ""+constructorDeclaration.getEnd().get().line);
+                    constructor.addAttribute("constructor", "true");
+                }
+
                 for (MethodDeclaration methodDeclaration : classDefinition.getMethods()) {
                     Method method = new Method(methodDeclaration);
                     type.addMethod(method);
 
-                    attributes.put(method, Pair.of("lineStart", ""+methodDeclaration.getBegin().get().line));
-                    attributes.put(method, Pair.of("lineEnd", ""+methodDeclaration.getEnd().get().line));
+                    method.addAttribute("lineStart", ""+methodDeclaration.getBegin().get().line);
+                    method.addAttribute("lineEnd", ""+methodDeclaration.getEnd().get().line);
+                    method.addAttribute("constructor", "false");
+
                 }
 
             }
@@ -94,7 +127,11 @@ public class Scanner {
                 Set<Metric> packageMetrics = packageMetricCalculator.calculate(aPackage);
                 aPackage.addMetrics(packageMetrics);
             }
+        }
 
+        for (Calculator<Project> projectMetricCalculator : projectCalculators) {
+            Set<Metric> projectMetrics = projectMetricCalculator.calculate(project);
+            project.addMetrics(projectMetrics);
         }
 
 
