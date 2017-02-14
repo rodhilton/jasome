@@ -33,33 +33,65 @@ for metrics, but by and large on a normal project Jasome will be accurate.
 
 ## Metrics
 
-Jasome is currently tracking the following metrics:
+Jasome is either currently tracking or planning to track the following metrics:
    
- * **Raw Total Lines of Code (RTLOC)** - The actual number of lines of code in a
+ * [x] **Raw Total Lines of Code (RTLOC)** - The actual number of lines of code in a
    class, using the line numbers of the file itself.  Comments, whitespace, and
    everything else is counted. _(class)_
- * **Total Lines of Code (TLOC)** - The total number of lines of code, ignoring
+ * [x] **Total Lines of Code (TLOC)** - The total number of lines of code, ignoring
    comments, whitespace, and formatting differences _(project, package, class, method)_
- * **Number of Attributes (NF)** - The number of fields/attributes _(class)_
- * **Number of Static Attributes (NSF)** - The number of static attributes _(class)_
- * **Number of Public Attributes (NPF)** - The number of public attributes _(class)_
- * **Number of Methods (NM)** - The number of methods _(class)_
- * **Number of Static Methods (NSM)** - The number of static methods _(class)_
- * **Number of Public Methods (NPM)** - The number of public methods _(class)_
- * **Number of Classes (NOC)** - The number of classes within a package _(package)_
- * **Number of Parameters (NOP)** - The number of parameters a method takes _(method)_ 
- * **Depth of Inheritance Tree (DIT)** - The maximum depth of the inheritance
+ * [x] **Number of Attributes (NF)** - The number of fields/attributes _(class)_
+ * [x] **Number of Static Attributes (NSF)** - The number of static attributes _(class)_
+ * [x] **Number of Public Attributes (NPF)** - The number of public attributes _(class)_
+ * [x] **Number of Methods (NM)** - The number of methods _(class)_
+ * [x] **Number of Static Methods (NSM)** - The number of static methods _(class)_
+ * [x] **Number of Public Methods (NPM)** - The number of public methods _(class)_
+ * [x] **Number of Classes (NOC)** - The number of classes within a package _(package)_
+ * [x] **Number of Parameters (NOP)** - The number of parameters a method takes _(method)_ 
+ * [x] **Depth of Inheritance Tree (DIT)** - The maximum depth of the inheritance
    hierarchy for a class.  _(class)_
- * **Number of Overridden Methods (NORM)** - The number of methods a class overrides
+ * [x] **Number of Overridden Methods (NORM)** - The number of methods a class overrides
    or implements from a parent class _(class)_
- * **Number of Inherited Methods (NMI)** - The number of methods a class inherits
+ * [x] **Number of Inherited Methods (NMI)** - The number of methods a class inherits
    from parent classes _(class)_
- * **Number of Methods Added to Inheritance (NMA)** - The number of methods a
+ * [x] **Number of Methods Added to Inheritance (NMA)** - The number of methods a
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
- * **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
- * **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths through code _(method)_
- * **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic complexities of all methods on a class _(class)_
+ * [x] **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
+ * [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
+       through code _(method)_
+ * [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
+       complexities of all methods on a class _(class)_
+ * [ ] **Lack of Cohesion Methods (LCOM)** - A measure for the Cohesiveness of a class.
+       Calculated with the Henderson-Sellers method, based on the number of disjoint sets
+       formed by comparing methods with the attributes they use _(class)_
+ * [ ] **Number of Interfaces (NOI)** - The number of abstract classes (and interfaces) in a package _(package)_
+ * [ ] **Afferent Coupling (Ca)** - Number of classes outside a package that depend on it _(package)_
+ * [ ] **Efferent Coupling (Ca)** - Number of classes inside a package that depend on classes outside of it _(package)_
+ * [ ] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, Ce / (Ca + Ce) _(package)_
+ * [ ] **Abstractness (A)** - The number of abstract classes (and interfaces) divided by the total number of types in a package, NOI / NOC _(package)_
+ * [ ] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  | A + I - 1 |, _(package)_
+ * [ ] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
+ * [ ] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
+ * [ ] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
+ * [ ] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
+ * [ ] **Nested Block Depth (NBD)** - The maximum depth of the deepest level of nesting within a method _(method)_
+ * [ ] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between _(package)_
+ * [ ] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. NOL / NOC _(package)_
+ * [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
+ * [ ] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
+ * [ ] **McClure’s Complexity Metric (MCLC)** - NCOMP + NVAR _(method)_
+ * [ ] **Fan-out (Fout)** - The number of methods immediately subordinate to a method _(method)_
+ * [ ] **Fan-in (Fin)** - The number of methods that invoke a method _(method)_
+ * [ ] **Structural Complexity (Si)** - Fout^2 _(method)_
+ * [ ] **Data Complexity (Di)** - (NOP+1)/(Fout+1) _(method)_
+ * [ ] **System Complexity (Ci)** - Si + Di _(method)_
+ * [ ] **Number of Collaborations (CRC)** - The number of collaborations between a class and all others _(class)_
+ * [ ] **Method Inheritance Factor (MIF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ * [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ * [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ 
+ 
   
 More metrics coming soon, I plan to gather every metric outlined in the following sources:
 
