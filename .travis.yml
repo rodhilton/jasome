@@ -18,6 +18,7 @@ deploy:
   file: 
     - "$TRAVIS_BUILD_DIR/build/distributions/jasome-*.zip"
     - "$TRAVIS_BUILD_DIR/build/distributions/jasome-*.tar"
+  file_glob: true
   skip_cleanup: true
   on:
     repo: rodhilton/jasome
