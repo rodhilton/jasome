@@ -322,29 +322,4 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         then:
         expect result, containsMetric("TLOC", 7)
     }
-
-    def "calculate counts includes constructors"() {
-
-        given:
-        def type = typeFromSnippet('''package org.whatever.stuff;
-
-            import lineone;
-            import line2.stuff.junk;
-
-            class Example {                     
-                public Example() {
-                
-                }
-                
-                public Example(String name) {
-                
-                }                
-        ''')
-
-        when:
-        def result = new TotalLinesOfCodeCalculator.TypeCalculator().calculate(type)
-
-        then:
-        expect result, containsMetric("TLOC", 11)
-    }
 }
