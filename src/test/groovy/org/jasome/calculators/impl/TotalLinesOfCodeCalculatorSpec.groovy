@@ -320,6 +320,6 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
         def result = new TotalLinesOfCodeCalculator.MethodCalculator().calculate(method)
 
         then:
-        expect result, containsMetric("TLOC", 7)
+        expect result, containsMetric("TLOC", 8)
     }
 }
