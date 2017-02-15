@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.calculators.Metric;
 import org.jasome.parsing.*;
 import org.jasome.parsing.Package;
+import org.jscience.mathematics.number.LargeInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -11,6 +12,7 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +20,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
+
+    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0######");
 
     @Override
     public Document output(Project project) {
@@ -94,6 +98,7 @@ public class XMLOutputter implements Outputter<Document> {
 
     private void addMetricsForNode(Document doc, Node parentElement, Code node) {
         Element metricsContainer = doc.createElement("Metrics");
+
         Set<Metric> metrics = node.getMetrics();
         List<Metric> sortedMetrics = metrics.stream().sorted((m1, m2) -> m1.getName().compareTo(m2.getName())).collect(Collectors.toList());
         for (Metric metric : sortedMetrics) {
@@ -101,7 +106,12 @@ public class XMLOutputter implements Outputter<Document> {
 
             metricsElement.setAttribute("name", metric.getName());
             metricsElement.setAttribute("description", metric.getDescription());
-            metricsElement.setAttribute("value", metric.getValue().toString());
+
+            if(metric.getValue() instanceof LargeInteger) {
+                metricsElement.setAttribute("value", metric.getValue().toString());
+            } else {
+                metricsElement.setAttribute("value", METRIC_VALUE_FORMAT.format(metric.getValue().doubleValue()));
+            }
 
             metricsContainer.appendChild(metricsElement);
         }

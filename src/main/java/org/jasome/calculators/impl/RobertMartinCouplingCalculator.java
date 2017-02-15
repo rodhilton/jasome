@@ -7,6 +7,9 @@ import org.jasome.calculators.Metric;
 
 import org.jasome.parsing.Package;
 import org.jasome.parsing.Type;
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.Rational;
+import org.jscience.mathematics.number.Real;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -32,8 +35,8 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .filter(type -> type.getSource().isPublic())
                 .collect(Collectors.toMap(Type::getName, t->t));
 
-        BigDecimal afferentCoupling = BigDecimal.ZERO; //The number of classes outside a package that depend on classes inside the package.
-        BigDecimal efferentCoupling = BigDecimal.ZERO; //The number of classes inside a package that depend on classes outside the package.
+        LargeInteger afferentCoupling = LargeInteger.ZERO; //The number of classes outside a package that depend on classes inside the package.
+        LargeInteger efferentCoupling = LargeInteger.ZERO; //The number of classes inside a package that depend on classes outside the package.
 
         for(Type typeInsidePackage: aPackage.getTypes()) {
             List<ClassOrInterfaceType> referencedTypes = typeInsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
@@ -56,7 +59,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                     ).count();
 
             if(numberOfTypesReferencedThatAreInsideAnotherPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideAnotherPackage > 0) {
-                efferentCoupling = efferentCoupling.add(BigDecimal.ONE);
+                efferentCoupling = efferentCoupling.plus(LargeInteger.ONE);
             }
         }
 
@@ -80,7 +83,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                     ).count();
 
             if(numberOfTypesReferencedThatAreInsideThisPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage > 0) {
-                afferentCoupling = afferentCoupling.add(BigDecimal.ONE);
+                afferentCoupling = afferentCoupling.plus(LargeInteger.ONE);
             }
         }
 
@@ -88,14 +91,14 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .with("Ca", "Afferent Coupling", afferentCoupling)
                 .with("Ce", "Efferent Coupling", efferentCoupling);
 
-        BigDecimal instabilityDenominator = afferentCoupling.add(efferentCoupling);
-        boolean instabilityCalculationSafe = instabilityDenominator.compareTo(BigDecimal.ZERO) > 0;
+        LargeInteger instabilityDenominator = afferentCoupling.plus(efferentCoupling);
+        boolean instabilityCalculationSafe = instabilityDenominator.isGreaterThan(LargeInteger.ZERO);
 
         if(instabilityCalculationSafe) {
-            metrics = metrics.with("I", "Instability", efferentCoupling.divide(instabilityDenominator, 6, RoundingMode.HALF_UP));
+            metrics = metrics.with("I", "Instability", Rational.valueOf(efferentCoupling, instabilityDenominator));
         }
 
-        BigDecimal numberOfAbstractClassesAndInterfacesInPackage = new BigDecimal(
+        LargeInteger numberOfAbstractClassesAndInterfacesInPackage = LargeInteger.valueOf(
                 aPackage.getTypes()
                         .stream()
                         .filter(type -> type.getSource().isInterface() || type.getSource().isAbstract())
@@ -104,19 +107,19 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         metrics = metrics.with("NOI", "Number of Interfaces and Abstract Classes", numberOfAbstractClassesAndInterfacesInPackage);
 
-        BigDecimal numberOfClassesInPackage = new BigDecimal(aPackage.getTypes().size());
+        LargeInteger numberOfClassesInPackage = LargeInteger.valueOf(aPackage.getTypes().size());
 
-        boolean abstractnessCalculationSafe = numberOfClassesInPackage.compareTo(BigDecimal.ZERO) > 0;
+        boolean abstractnessCalculationSafe = numberOfClassesInPackage.isGreaterThan(LargeInteger.ZERO);
 
         if(abstractnessCalculationSafe) {
-            metrics = metrics.with("A", "Abstractness", numberOfAbstractClassesAndInterfacesInPackage.divide(numberOfClassesInPackage, 6, RoundingMode.HALF_UP));
+            metrics = metrics.with("A", "Abstractness", Rational.valueOf(numberOfAbstractClassesAndInterfacesInPackage, numberOfClassesInPackage));
         }
 
         if(instabilityCalculationSafe && abstractnessCalculationSafe) {
             //TODO duplication
-            BigDecimal instability = efferentCoupling.divide(instabilityDenominator, 6, RoundingMode.HALF_UP);
-            BigDecimal abstractness = numberOfAbstractClassesAndInterfacesInPackage.divide(numberOfClassesInPackage, 6, RoundingMode.HALF_UP);
-            BigDecimal distance = abstractness.add(instability).subtract(BigDecimal.ONE);
+            Rational instability = Rational.valueOf(efferentCoupling, instabilityDenominator);
+            Rational abstractness = Rational.valueOf(numberOfAbstractClassesAndInterfacesInPackage, numberOfClassesInPackage);
+            Rational distance = abstractness.plus(instability).minus(Rational.ONE);
             metrics = metrics.with("DMS", "Normalized Distance from Main Sequence", distance.abs());
         }
 

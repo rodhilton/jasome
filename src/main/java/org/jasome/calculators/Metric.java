@@ -1,8 +1,10 @@
 package org.jasome.calculators;
 
 import com.google.common.base.Objects;
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.Number;
+import org.jscience.mathematics.number.Rational;
 
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,9 +16,9 @@ public class Metric {
 
     private String name;
     private String description;
-    private BigDecimal value;
+    private Number value;
 
-    public Metric(String name, String description, BigDecimal value) {
+    public Metric(String name, String description, Number value) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -34,7 +36,7 @@ public class Metric {
         return description;
     }
 
-    public BigDecimal getValue() {
+    public Number getValue() {
         return value;
     }
 
@@ -65,13 +67,13 @@ public class Metric {
             metrics = new HashMap<String, Metric>();
         }
 
-        public Builder with(String name, String description, BigDecimal value) {
+        public Builder with(String name, String description, Number value) {
             metrics.put(name, new Metric(name, description, value));
             return this;
         }
 
         public Builder with(String name, String description, long value) {
-            return with(name, description, new BigDecimal(value));
+            return with(name, description, LargeInteger.valueOf(value));
         }
 
         public Set<Metric> build() {

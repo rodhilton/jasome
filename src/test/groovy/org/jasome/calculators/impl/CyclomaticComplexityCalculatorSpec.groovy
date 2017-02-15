@@ -17,14 +17,14 @@ class CyclomaticComplexityCalculatorSpec extends Specification {
                     if(x > 3) {
                         System.out.println("between 3 and 10");
                     }
-                    
+
                     if(x > 5) {
                         System.out.println("between 5 and 10");
                     } else {
                         System.out.println("less than 5");
                     }
                 }
-                
+
                 if(x > 100) {
                     if(x < 50) {
                       System.out.println("between 50 and 100");
@@ -49,7 +49,7 @@ class CyclomaticComplexityCalculatorSpec extends Specification {
                     for(int i=0;i<x;i++) {
                         System.out.println("Hello!");
                     }
-                } 
+                }
             }
         '''
 
@@ -110,10 +110,10 @@ class CyclomaticComplexityCalculatorSpec extends Specification {
                 if(x > 3 && x < 10) {
                     System.out.println("between 3 and 10");
                 }
-                
+
                 if(x > 100 || x < 0 && x != 0) {
                     System.out.println("it's either huge or small, and it's not zero");
-                }              
+                }
             }
         '''
 
@@ -129,7 +129,7 @@ class CyclomaticComplexityCalculatorSpec extends Specification {
         given:
         def type = methodFromSnippet '''
             public void method(int x) {
-                int y = (x < 10 && x > 3 || x == 0) ? 10 : 50;             
+                int y = (x < 10 && x > 3 || x == 0) ? 10 : 50;
             }
         '''
 
@@ -150,11 +150,11 @@ class CyclomaticComplexityCalculatorSpec extends Specification {
                     System.out.println("wee");
                     y--;
                 }
-                
+
                 do {
                     System.out.println("woo");
                     y++;
-                } while(y < x);             
+                } while(y < x);
             }
         '''
 

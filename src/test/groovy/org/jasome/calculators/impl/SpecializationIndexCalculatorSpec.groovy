@@ -172,9 +172,9 @@ class SpecializationIndexCalculatorSpec extends Specification {
             public void methodFour(int i) {
 
             }
-            
+
             public void methodSix(int i) {
-            
+
             }
         }
 
@@ -219,10 +219,10 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         abstract class A {
             public abstract void methodOne(int i) {
-            
+
             }
             public String methodTwo(int i) {
-            
+
             }
         }
 
@@ -257,13 +257,13 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         abstract class A {
             public abstract void methodOne(int i) {
-            
+
             }
         }
-        
+
         class B extends A {
             public void methodOne(int i) {
-            
+
             }
         }
 
@@ -294,28 +294,28 @@ class SpecializationIndexCalculatorSpec extends Specification {
 
         abstract class A {
             public abstract void methodOne(int i) {
-            
+
             }
         }
-        
+
         class B extends A {
             public void methodTwo(int i) {
-                
+
             }
         }
 
         class C extends B {
             public void methodOne(int i) {
-            
+
             }
-            
+
             public void methodThree(int i) {
-            
+
             }
         }
         '''
 
-        //TODO do we need to worrry about cycles
+        //TODO do we need to worry about cycles
         org.jasome.parsing.Package firstPackage = (project.getPackages() as List<Package>).find{p -> p.name=="org.whatever.stuff"}
 
         Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
@@ -324,7 +324,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         def result = new SpecializationIndexCalculator().calculate(typeC);
 
         then:
-        expect result, containsMetric("SIX", new BigDecimal(1.5))
+        expect result, containsMetric("SIX", 1.5)
         expect result, containsMetric("NMA", 1)
         expect result, containsMetric("NMI", 1)
     }
