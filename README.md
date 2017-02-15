@@ -57,7 +57,7 @@ Jasome is either currently tracking or planning to track the following metrics:
  * [x] **Number of Methods Added to Inheritance (NMA)** - The number of methods a
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
- * [x] **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / (NOM) _(class)_
+ * [x] **Specialization Index (SIX)** - How specialized a class is, defined as ![(DIT * NORM) / (NOM)](https://latex.codecogs.com/gif.latex?%5Cinline%20%5Cfrac%7BDIT%20*%20NORM%7D%7BNOM%7D) _(class)_
  * [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
        through code _(method)_
  * [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
@@ -68,9 +68,9 @@ Jasome is either currently tracking or planning to track the following metrics:
  * [x] **Number of Interfaces (NOI)** - The number of abstract classes (and interfaces) in a package _(package)_
  * [x] **Afferent Coupling (Ca)** - Number of classes outside a package that depend on it _(package)_
  * [x] **Efferent Coupling (Ca)** - Number of classes inside a package that depend on classes outside of it _(package)_
- * [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, ![Ce/(Ce+Ca)](https://latex.codecogs.com/gif.latex?%5Cfrac%7BCe%7D%7BCa&plus;Ce%7D) _(package)_
+ * [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, ![Ce/(Ce+Ca)](https://latex.codecogs.com/gif.latex?%5Cinline%20%5Cfrac%7BCe%7D%7BCa&plus;Ce%7D) _(package)_
  * [x] **Abstractness (A)** - The number of abstract classes (and interfaces) divided by the total number of types in a package, NOI / NOC _(package)_
- * [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  | A + I - 1 |, _(package)_
+ * [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  ![| A + I - 1 |](https://latex.codecogs.com/gif.latex?%5Cinline%20%7C%20A%20&plus;%20I%20-%201%20%7C), _(package)_
  * [ ] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
  * [ ] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
  * [ ] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
