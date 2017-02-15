@@ -57,7 +57,7 @@ Jasome is either currently tracking or planning to track the following metrics:
  * [x] **Number of Methods Added to Inheritance (NMA)** - The number of methods a
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
- * [x] **Specialization Index (SIX)** - How specialized a class is, defined as ![(DIT * NORM) / (NOM)](https://latex.codecogs.com/gif.latex?%5Cinline%20%5Cfrac%7BDIT%20*%20NORM%7D%7BNOM%7D) _(class)_
+ * [x] **Specialization Index (SIX)** - How specialized a class is, defined as ![math](https://latex.codecogs.com/gif.latex?%5Cinline%20%5Cfrac%7BDIT%20*%20NORM%7D%7BNOM%7D) _(class)_
  * [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
        through code _(method)_
  * [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
