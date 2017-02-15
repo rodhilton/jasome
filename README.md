@@ -68,7 +68,7 @@ Jasome is either currently tracking or planning to track the following metrics:
  * [x] **Number of Interfaces (NOI)** - The number of abstract classes (and interfaces) in a package _(package)_
  * [x] **Afferent Coupling (Ca)** - Number of classes outside a package that depend on it _(package)_
  * [x] **Efferent Coupling (Ca)** - Number of classes inside a package that depend on classes outside of it _(package)_
- * [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, ![\frac{Ce}{Ca + Ce}](http://quicklatex.com/cache3/cc/ql_5a66adad870837980ef12595db74c0cc_l3.png) _(package)_
+ * [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, ![Ce/(Ce+Ca)](https://latex.codecogs.com/gif.latex?\inline&space;\frac{Ce}{Ca&space;&plus;&space;Ce}) _(package)_
  * [x] **Abstractness (A)** - The number of abstract classes (and interfaces) divided by the total number of types in a package, NOI / NOC _(package)_
  * [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  | A + I - 1 |, _(package)_
  * [ ] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
