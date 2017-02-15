@@ -1,6 +1,7 @@
 package org.jasome.calculators;
 
 import com.google.common.base.Objects;
+import org.apfloat.Apfloat;
 import org.jscience.mathematics.number.Real;
 
 import java.math.BigDecimal;
@@ -15,9 +16,9 @@ public class Metric {
 
     private String name;
     private String description;
-    private Real value;
+    private Apfloat value;
 
-    public Metric(String name, String description, Real value) {
+    public Metric(String name, String description, Apfloat value) {
         this.name = name;
         this.description = description;
         this.value = value;
@@ -35,7 +36,7 @@ public class Metric {
         return description;
     }
 
-    public Real getValue() {
+    public Apfloat getValue() {
         return value;
     }
 
@@ -66,13 +67,13 @@ public class Metric {
             metrics = new HashMap<String, Metric>();
         }
 
-        public Builder with(String name, String description, Real value) {
+        public Builder with(String name, String description, Apfloat value) {
             metrics.put(name, new Metric(name, description, value));
             return this;
         }
 
         public Builder with(String name, String description, long value) {
-            return with(name, description, Real.valueOf(value));
+            return with(name, description, new Apfloat(value));
         }
 
         public Set<Metric> build() {

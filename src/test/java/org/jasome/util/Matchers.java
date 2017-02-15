@@ -1,5 +1,6 @@
 package org.jasome.util;
 
+import org.apfloat.Apfloat;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -12,7 +13,7 @@ import java.util.Set;
 
 public class Matchers {
 
-    public static Matcher<Set<Metric>> containsMetric(String name, Real value) {
+    public static Matcher<Set<Metric>> containsMetric(String name, Apfloat value) {
         return new BaseMatcher<Set<Metric>>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -21,8 +22,7 @@ public class Matchers {
                 Optional<Metric> namedMetric = metrics.stream().filter((m) -> m.getName().equalsIgnoreCase(name)).findFirst();
                 return namedMetric.isPresent() &&
                         (
-                                value.equals(namedMetric.get().getValue()) ||
-                            value.approximates(namedMetric.get().getValue())
+                                value.compareTo(namedMetric.get().getValue()) == 0
                         );
 
 
@@ -36,7 +36,7 @@ public class Matchers {
     }
 
     public static Matcher<Set<Metric>> containsMetric(String name, long value) {
-        return containsMetric(name, Real.valueOf(value));
+        return containsMetric(name, new Apfloat(value));
     }
 //
 //    public static Matcher<Set<Metric>> containsMetric(String name, double value) {

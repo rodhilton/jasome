@@ -2,6 +2,7 @@ package org.jasome.calculators.impl;
 
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import org.apfloat.Apfloat;
 import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
 
@@ -33,8 +34,8 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .filter(type -> type.getSource().isPublic())
                 .collect(Collectors.toMap(Type::getName, t->t));
 
-        Real afferentCoupling = Real.ZERO; //The number of classes outside a package that depend on classes inside the package.
-        Real efferentCoupling = Real.ZERO; //The number of classes inside a package that depend on classes outside the package.
+        Apfloat afferentCoupling = Apfloat.ZERO; //The number of classes outside a package that depend on classes inside the package.
+        Apfloat efferentCoupling = Apfloat.ZERO; //The number of classes inside a package that depend on classes outside the package.
 
         for(Type typeInsidePackage: aPackage.getTypes()) {
             List<ClassOrInterfaceType> referencedTypes = typeInsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
@@ -57,7 +58,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                     ).count();
 
             if(numberOfTypesReferencedThatAreInsideAnotherPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideAnotherPackage > 0) {
-                efferentCoupling = efferentCoupling.plus(Real.ONE);
+                efferentCoupling = efferentCoupling.add(Apfloat.ONE);
             }
         }
 
@@ -81,7 +82,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                     ).count();
 
             if(numberOfTypesReferencedThatAreInsideThisPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage > 0) {
-                afferentCoupling = afferentCoupling.plus(Real.ONE);
+                afferentCoupling = afferentCoupling.add(Apfloat.ONE);
             }
         }
 
@@ -89,14 +90,14 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .with("Ca", "Afferent Coupling", afferentCoupling)
                 .with("Ce", "Efferent Coupling", efferentCoupling);
 
-        Real instabilityDenominator = afferentCoupling.plus(efferentCoupling);
-        boolean instabilityCalculationSafe = instabilityDenominator.compareTo(Real.ZERO) > 0;
+        Apfloat instabilityDenominator = afferentCoupling.add(efferentCoupling);
+        boolean instabilityCalculationSafe = instabilityDenominator.compareTo(Apfloat.ZERO) > 0;
 
         if(instabilityCalculationSafe) {
             metrics = metrics.with("I", "Instability", efferentCoupling.divide(instabilityDenominator));
         }
 
-        Real numberOfAbstractClassesAndInterfacesInPackage = Real.valueOf(
+        Apfloat numberOfAbstractClassesAndInterfacesInPackage = new Apfloat(
                 aPackage.getTypes()
                         .stream()
                         .filter(type -> type.getSource().isInterface() || type.getSource().isAbstract())
@@ -105,9 +106,9 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         metrics = metrics.with("NOI", "Number of Interfaces and Abstract Classes", numberOfAbstractClassesAndInterfacesInPackage);
 
-        Real numberOfClassesInPackage = Real.valueOf(aPackage.getTypes().size());
+        Apfloat numberOfClassesInPackage = new Apfloat(aPackage.getTypes().size());
 
-        boolean abstractnessCalculationSafe = numberOfClassesInPackage.compareTo(Real.ZERO) > 0;
+        boolean abstractnessCalculationSafe = numberOfClassesInPackage.compareTo(Apfloat.ZERO) > 0;
 
         if(abstractnessCalculationSafe) {
             metrics = metrics.with("A", "Abstractness", numberOfAbstractClassesAndInterfacesInPackage.divide(numberOfClassesInPackage));
@@ -115,10 +116,10 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         if(instabilityCalculationSafe && abstractnessCalculationSafe) {
             //TODO duplication
-            Real instability = efferentCoupling.divide(instabilityDenominator);
-            Real abstractness = numberOfAbstractClassesAndInterfacesInPackage.divide(numberOfClassesInPackage);
-            Real distance = abstractness.plus(instability).minus(Real.ONE);
-            metrics = metrics.with("DMS", "Normalized Distance from Main Sequence", distance.abs());
+            Apfloat instability = efferentCoupling.divide(instabilityDenominator);
+            Apfloat abstractness = numberOfAbstractClassesAndInterfacesInPackage.divide(numberOfClassesInPackage);
+            Apfloat distance = abstractness.add(instability).subtract(Apfloat.ONE);
+            metrics = metrics.with("DMS", "Normalized Distance from Main Sequence", distance.compareTo(Apfloat.ZERO) < 0 ? distance.negate() : distance);
         }
 
         return metrics.build();
