@@ -12,6 +12,10 @@ properly run, and so on.  However, when all you need is the quality metrics
 for Java source code, this compilation requirement is unnecessary since most
 metrics can be derived from the source code alone.
 
+- latexmath:[$R_x = 10.0 \times \sin(R_\phi)$]
+
+- asciimath:[(a,b\]={x in RR : a < x <= b}]
+
 Jasome scans a given directory for .java files and performs Best Guess Metrics
 Analysis to derive various quality metrics, and then outputs those metrics on a
 a per-file basis as XML.  Each XML output will contain the name/path of the file
