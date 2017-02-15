@@ -22,6 +22,8 @@ public class ScannerFactory {
         scanner.registerPackageCalculator(new NumberOfClassesCalculator());
 
         scanner.registerTypeCalculator(new SpecializationIndexCalculator());
+
+        scanner.registerPackageCalculator(new RobertMartinCouplingCalculator());
         return scanner;
     }
 }
