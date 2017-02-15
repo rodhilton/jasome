@@ -1,5 +1,8 @@
 package org.jasome.calculators.impl
 
+import org.jscience.mathematics.number.LargeInteger
+import org.jscience.mathematics.number.Rational
+import org.jscience.mathematics.number.Real
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
@@ -107,10 +110,10 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         expect secondResult, containsMetric("Ce", 2)
         expect secondResult, containsMetric("Ca", 2)
 
-        expect firstResult, containsMetric("I", new BigDecimal(0.500000))
-        expect firstResult, containsMetric("A", new BigDecimal(0.250000))
-        expect firstResult, containsMetric("DMS", new BigDecimal(0.250000))
-        expect firstResult, containsMetric("NOI", BigDecimal.ONE)
+        expect firstResult, containsMetric("I", 0.5)
+        expect firstResult, containsMetric("A", 0.25)
+        expect firstResult, containsMetric("DMS", 0.25)
+        expect firstResult, containsMetric("NOI", LargeInteger.ONE)
     }
 
 
@@ -159,16 +162,16 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", BigDecimal.ZERO)
-        expect firstResult, containsMetric("Ca", BigDecimal.ZERO)
+        expect firstResult, containsMetric("Ce", Rational.ZERO)
+        expect firstResult, containsMetric("Ca", Rational.ZERO)
 
-        expect secondResult, containsMetric("Ce", BigDecimal.ZERO)
-        expect secondResult, containsMetric("Ca", BigDecimal.ZERO)
+        expect secondResult, containsMetric("Ce", Rational.ZERO)
+        expect secondResult, containsMetric("Ca", Rational.ZERO)
 
         expect firstResult, doesNotContainMetric("I")
-        expect secondResult, containsMetric("Ca", new BigDecimal("0.000000"))
+        expect secondResult, containsMetric("Ca", Rational.ZERO)
         expect firstResult, doesNotContainMetric("DMS")
-        expect firstResult, containsMetric("NOI", BigDecimal.ZERO)
+        expect firstResult, containsMetric("NOI", Rational.ZERO)
     }
 
     def "doesn't count non-public classes"() {
@@ -211,16 +214,16 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", BigDecimal.ZERO)
-        expect firstResult, containsMetric("Ca", BigDecimal.ZERO)
+        expect firstResult, containsMetric("Ce", Rational.ZERO)
+        expect firstResult, containsMetric("Ca", Rational.ZERO)
 
-        expect secondResult, containsMetric("Ce", BigDecimal.ZERO)
-        expect secondResult, containsMetric("Ca", BigDecimal.ZERO)
+        expect secondResult, containsMetric("Ce", Rational.ZERO)
+        expect secondResult, containsMetric("Ca", Rational.ZERO)
 
         expect firstResult, doesNotContainMetric("I")
-        expect secondResult, containsMetric("Ca", new BigDecimal("0.000000"))
+        expect secondResult, containsMetric("Ca", Rational.ZERO)
         expect firstResult, doesNotContainMetric("DMS")
-        expect firstResult, containsMetric("NOI", BigDecimal.ZERO)
+        expect firstResult, containsMetric("NOI", Rational.ZERO)
     }
 
     def "able to see public static classes"() {
@@ -263,10 +266,10 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", BigDecimal.ZERO)
-        expect firstResult, containsMetric("Ca", BigDecimal.ONE)
+        expect firstResult, containsMetric("Ce", Rational.ZERO)
+        expect firstResult, containsMetric("Ca", Rational.ONE)
 
-        expect secondResult, containsMetric("Ce", BigDecimal.ONE)
-        expect secondResult, containsMetric("Ca", BigDecimal.ZERO)
+        expect secondResult, containsMetric("Ce", Rational.ONE)
+        expect secondResult, containsMetric("Ca", Rational.ZERO)
     }
 }

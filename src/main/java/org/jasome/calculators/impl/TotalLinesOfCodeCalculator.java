@@ -16,14 +16,14 @@ import org.jasome.parsing.Method;
 import org.jasome.parsing.Package;
 import org.jasome.parsing.Project;
 import org.jasome.parsing.Type;
+import org.jscience.mathematics.number.LargeInteger;
 
-import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 //TODO: auto formatting fucked up this code, reformat
+
 /**
  * Counts the number of lines of code in a file.  Attempts to normalize for
  * different formatting styles and whitespace differences so equivalent code
@@ -90,7 +90,7 @@ public class TotalLinesOfCodeCalculator {
 
         @Override
         public Set<Metric> calculate(Project aProject) {
-            BigDecimal total = aProject.getPackages().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(BigDecimal.ZERO, BigDecimal::add);
+            LargeInteger total = aProject.getPackages().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
             return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
         }
@@ -100,7 +100,7 @@ public class TotalLinesOfCodeCalculator {
 
         @Override
         public Set<Metric> calculate(Package aPackage) {
-            BigDecimal total = aPackage.getTypes().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(BigDecimal.ZERO, BigDecimal::add);
+            LargeInteger total = aPackage.getTypes().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
             return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
         }
@@ -113,7 +113,8 @@ public class TotalLinesOfCodeCalculator {
             Stack<Node> nodeStack = new Stack<Node>();
             nodeStack.add(type.getSource());
 
-            return performCalculation(nodeStack);
+            LargeInteger total = performCalculation(nodeStack);
+            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
         }
     }
 
@@ -124,12 +125,13 @@ public class TotalLinesOfCodeCalculator {
             Stack<Node> nodeStack = new Stack<Node>();
             nodeStack.add(method.getSource());
 
-            return performCalculation(nodeStack);
+            LargeInteger total = performCalculation(nodeStack);
+            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
         }
     }
-    
-    private static Set<Metric> performCalculation(Stack<Node> nodeStack) {
-        int count = 0;
+
+    private static LargeInteger performCalculation(Stack<Node> nodeStack) {
+        long count = 0;
 
         while (!nodeStack.empty()) {
             Node node = nodeStack.pop();
@@ -257,7 +259,7 @@ public class TotalLinesOfCodeCalculator {
             }
         }
 
-        return Metric.builder().with("TLOC", "Total Lines of Code", count).build();
+        return LargeInteger.valueOf(count);
     }
 
 }

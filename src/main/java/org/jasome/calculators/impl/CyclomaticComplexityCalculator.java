@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableSet;
 import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
 import org.jasome.parsing.Method;
+import org.jscience.mathematics.number.LargeInteger;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -34,7 +35,7 @@ public class CyclomaticComplexityCalculator implements Calculator<Method> {
         List<BinaryExpr> orExprs = method.getSource().getNodesByType(BinaryExpr.class).stream().
                 filter(f -> f.getOperator() == OR).collect(Collectors.toList());
 
-        long total = ifStmts.size() +
+        LargeInteger total = LargeInteger.valueOf(ifStmts.size() +
                 forStmts.size() +
                 whileStmts.size() +
                 doStmts.size() +
@@ -42,8 +43,8 @@ public class CyclomaticComplexityCalculator implements Calculator<Method> {
                 ternaryExprs.size() +
                 andExprs.size() +
                 orExprs.size() +
-                1 ; //There's always at least 1 path through the method
+                1) ; //There's always at least 1 path through the method
 
-        return ImmutableSet.of(new Metric("VG", "McCabe Cyclomatic Complexity", new BigDecimal(total)));
+        return ImmutableSet.of(new Metric("VG", "McCabe Cyclomatic Complexity", total));
     }
 }

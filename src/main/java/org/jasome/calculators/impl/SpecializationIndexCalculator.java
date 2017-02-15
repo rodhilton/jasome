@@ -11,14 +11,13 @@ import org.jasome.calculators.Metric;
 import org.jasome.parsing.Method;
 import org.jasome.parsing.Package;
 import org.jasome.parsing.Type;
+import org.jscience.mathematics.number.LargeInteger;
+import org.jscience.mathematics.number.Rational;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- *
  * http://support.objecteering.com/objecteering6.1/help/us/metrics/metrics_in_detail/specialization_index.htm
  */
 public class SpecializationIndexCalculator implements Calculator<Type> {
@@ -34,26 +33,27 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
             }
         }
 
-        BigDecimal depth = new BigDecimal(calculateInheritanceDepth(type, allTypesByName));
+        LargeInteger depth = LargeInteger.valueOf(calculateInheritanceDepth(type, allTypesByName));
 
         Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type, allTypesByName);
 
-        BigDecimal overriddenMethods = new BigDecimal(overloadedAndInheritedOperations.getLeft());
-        BigDecimal inheritedMethods = new BigDecimal(overloadedAndInheritedOperations.getRight());
+        LargeInteger overriddenMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getLeft());
+        LargeInteger inheritedMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getRight());
 
-        BigDecimal numberOfMethods = new BigDecimal(type.getMethods().size());
+        LargeInteger numberOfMethods = LargeInteger.valueOf(type.getMethods().size());
 
         //more good and related ones here http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
 
-        Metric.Builder metricBuilder =  Metric.builder()
+        Metric.Builder metricBuilder = Metric.builder()
                 .with("DIT", "Depth of Inheritance Tree", depth)
                 .with("NORM", "Number of Overridden Methods", overriddenMethods)
                 .with("NM", "Number of Methods", numberOfMethods)
                 .with("NMI", "Number of Inherited Methods", inheritedMethods)
-                .with("NMA", "Number of Methods Added to Inheritance", numberOfMethods.subtract(overriddenMethods));
+                .with("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods));
 
-        if(numberOfMethods.compareTo(BigDecimal.ZERO) > 0) {
-            BigDecimal specializationIndex = overriddenMethods.multiply(depth).divide(numberOfMethods, 6, RoundingMode.HALF_UP);
+        if (numberOfMethods.isGreaterThan(LargeInteger.ZERO)) {
+            LargeInteger numerator = overriddenMethods.times(depth);
+            Rational specializationIndex = Rational.valueOf(numerator, numberOfMethods);
             metricBuilder.with("SIX", "Specialization Index", specializationIndex);
         }
 
@@ -68,10 +68,10 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
 
         typesToCheck.addAll(getParentTypes(type, allTypesByName, true));
 
-        while(!typesToCheck.empty()) {
+        while (!typesToCheck.empty()) {
             Type typeToCheck = typesToCheck.pop();
 
-            for(Method method: typeToCheck.getMethods()) {
+            for (Method method : typeToCheck.getMethods()) {
                 Triple<com.github.javaparser.ast.type.Type, String, List<com.github.javaparser.ast.type.Type>> methodSignature = getMethodSignatureData(method);
                 parentMethods.add(methodSignature);
             }
@@ -80,12 +80,12 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         }
 
         int numberOverridden = 0;
-        
-        for(Method m: type.getMethods()) {
+
+        for (Method m : type.getMethods()) {
 
             Triple<com.github.javaparser.ast.type.Type, String, List<com.github.javaparser.ast.type.Type>> methodSignature = getMethodSignatureData(m);
 
-            if(parentMethods.contains(methodSignature)) {
+            if (parentMethods.contains(methodSignature)) {
                 numberOverridden++;
             }
         }
@@ -96,7 +96,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     private Triple<com.github.javaparser.ast.type.Type, String, List<com.github.javaparser.ast.type.Type>> getMethodSignatureData(Method method) {
         com.github.javaparser.ast.type.Type returnType = method.getSource().getType();
         String name = method.getSource().getName().getIdentifier();
-        List<com.github.javaparser.ast.type.Type> parameterTypes = method.getSource().getParameters().stream().map(parameter->parameter.getType()).collect(Collectors.toList());
+        List<com.github.javaparser.ast.type.Type> parameterTypes = method.getSource().getParameters().stream().map(parameter -> parameter.getType()).collect(Collectors.toList());
 
         return Triple.of(returnType, name, parameterTypes);
     }
@@ -105,7 +105,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         Set<ClassOrInterfaceType> parentClasses = new HashSet<>();
 
         parentClasses.addAll(type.getSource().getExtendedTypes());
-        if(includeInterfaceTypes) {
+        if (includeInterfaceTypes) {
             parentClasses.addAll(type.getSource().getImplementedTypes());
         }
 
