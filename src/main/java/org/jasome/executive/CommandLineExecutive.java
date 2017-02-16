@@ -1,11 +1,13 @@
 package org.jasome.executive;
 
-import com.google.common.collect.Sets;
 import org.apache.commons.cli.*;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.filefilter.*;
-import org.jasome.output.XMLOutputter;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.jasome.input.FileScanner;
 import org.jasome.input.Project;
+import org.jasome.output.XMLOutputter;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.*;
@@ -13,7 +15,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.regex.Pattern;
 
 public class CommandLineExecutive {
@@ -57,7 +58,7 @@ public class CommandLineExecutive {
             String fileParam = line.getArgs()[0];
             File scanDir = new File(fileParam);
             FileScanner scanner = new FileScanner(scanDir);
-            
+
             IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(new RegexFileFilter(Pattern.compile("(Test|Spec)\\.java$")));
             IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(pathname -> {
                 return !pathname.getPath().contains("/src/test/java");
@@ -81,7 +82,7 @@ public class CommandLineExecutive {
                 DOMSource source = new DOMSource(outputDocument);
 
                 StreamResult result;
-                if(line.hasOption("output")) {
+                if (line.hasOption("output")) {
                     String outputLocation = line.getOptionValue("output");
                     result = new StreamResult(new File(outputLocation));
                 } else {

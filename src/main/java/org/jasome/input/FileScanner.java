@@ -1,4 +1,4 @@
-package org.jasome.executive;
+package org.jasome.input;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
@@ -20,7 +20,7 @@ public class FileScanner extends Scanner {
     private File scanDir;
     private IOFileFilter filter = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);;
 
-    FileScanner(File scanDir) {
+    public FileScanner(File scanDir) {
         this.scanDir = scanDir;
     }
     
@@ -42,7 +42,11 @@ public class FileScanner extends Scanner {
                     }
                 }).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 
-        return doScan(sourceCodeWithAttributes);
+        Project project = doScan(sourceCodeWithAttributes);
+
+        project.addAttribute("sourceDir", scanDir.getAbsolutePath());
+
+        return project;
     }
 
     public void setFilter(IOFileFilter filter) {

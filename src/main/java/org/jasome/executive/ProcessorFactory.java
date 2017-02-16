@@ -25,6 +25,8 @@ class ProcessorFactory {
         processor.registerTypeCalculator(new SpecializationIndexCalculator());
 
         processor.registerPackageCalculator(new RobertMartinCouplingCalculator());
+
+        processor.registerMethodCalculator(new NestedBlockDepthCalculator());
         return processor;
     }
 }

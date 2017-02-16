@@ -75,7 +75,7 @@ Jasome is either currently tracking or planning to track the following metrics:
  * [ ] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
  * [ ] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
  * [ ] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
- * [ ] **Nested Block Depth (NBD)** - The maximum depth of the deepest level of nesting within a method _(method)_
+ * [x] **Nested Block Depth (NBD)** - The maximum depth of the deepest level of nesting within a method _(method)_
  * [ ] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between _(package)_
  * [ ] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. NOL / NOC _(package)_
  * [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
