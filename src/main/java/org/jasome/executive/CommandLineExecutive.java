@@ -5,9 +5,7 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.jasome.output.XMLOutputter;
-import org.jasome.parsing.Project;
-import org.jasome.parsing.Scanner;
-import org.jasome.parsing.ScannerFactory;
+import org.jasome.input.Project;
 import org.w3c.dom.Document;
 
 import javax.xml.transform.*;
@@ -57,19 +55,21 @@ public class CommandLineExecutive {
             System.exit(0);
         } else {
             String fileParam = line.getArgs()[0];
-            Scanner scanner = ScannerFactory.getScanner();
-
-            IOFileFilter readableJavaFiles = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
-
+            File scanDir = new File(fileParam);
+            FileScanner scanner = new FileScanner(scanDir);
+            
             IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(new RegexFileFilter(Pattern.compile("(Test|Spec)\\.java$")));
             IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(pathname -> {
                 return !pathname.getPath().contains("/src/test/java");
             });
 
-            IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(readableJavaFiles, doesNotHaveTestSuffix, isNotInTestSubDirectory) : readableJavaFiles;
+            IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(doesNotHaveTestSuffix, isNotInTestSubDirectory) : FileFilterUtils.trueFileFilter();
 
+            scanner.setFilter(fileFilter);
 
-            Project scannerOutput = scanner.scan(gatherFilesFrom(new File(fileParam), fileFilter));
+            Project scannerOutput = scanner.scan();
+
+            ProcessorFactory.getProcessor().process(scannerOutput);
 
             try {
                 Document outputDocument = new XMLOutputter().output(scannerOutput);
@@ -97,28 +97,5 @@ public class CommandLineExecutive {
 
 
         }
-    }
-
-    private static Collection<File> gatherFilesFrom(File file, IOFileFilter filter) {
-
-        Collection<File> filesToScan;
-        if (file.isDirectory()) {
-            Collection<File> javaFiles = FileUtils.listFiles(file, filter, TrueFileFilter.INSTANCE);
-
-            if (javaFiles.size() == 0) {
-                System.err.println("No .java files found in " + file.toString());
-                System.exit(-1);
-            }
-
-            filesToScan = javaFiles;
-        } else {
-            if (!filter.accept(file)) {
-                System.err.println("Not a .java source file: " + file.toString());
-                System.exit(-1);
-            }
-
-            filesToScan = Sets.newHashSet(file);
-        }
-        return filesToScan;
     }
 }

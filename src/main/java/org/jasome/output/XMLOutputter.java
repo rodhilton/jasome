@@ -1,9 +1,8 @@
 package org.jasome.output;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.jasome.calculators.Metric;
-import org.jasome.parsing.*;
-import org.jasome.parsing.Package;
+import org.jasome.metrics.Metric;
+import org.jasome.input.*;
+import org.jasome.input.Package;
 import org.jscience.mathematics.number.LargeInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -13,15 +12,12 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.text.DecimalFormat;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
 
-    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0######");
+    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0########");
 
     @Override
     public Document output(Project project) {
@@ -32,7 +28,7 @@ public class XMLOutputter implements Outputter<Document> {
             Document doc = docBuilder.newDocument();
             Element projectElement = doc.createElement("Project");
             doc.appendChild(projectElement);
-            
+
             addAttributes(project, projectElement);
             addMetricsForNode(doc, projectElement, project);
 
@@ -91,7 +87,7 @@ public class XMLOutputter implements Outputter<Document> {
     }
 
     private void addAttributes(Code classNode, Element classElement) {
-        for (Pair<String, String> attribute : classNode.getAttributes()) {
+        for (Map.Entry<String, String> attribute : classNode.getAttributes().entrySet()) {
             classElement.setAttribute(attribute.getKey(), attribute.getValue());
         }
     }
@@ -107,7 +103,7 @@ public class XMLOutputter implements Outputter<Document> {
             metricsElement.setAttribute("name", metric.getName());
             metricsElement.setAttribute("description", metric.getDescription());
 
-            if(metric.getValue() instanceof LargeInteger) {
+            if (metric.getValue() instanceof LargeInteger) {
                 metricsElement.setAttribute("value", metric.getValue().toString());
             } else {
                 metricsElement.setAttribute("value", METRIC_VALUE_FORMAT.format(metric.getValue().doubleValue()));

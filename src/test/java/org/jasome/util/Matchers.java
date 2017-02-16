@@ -3,7 +3,7 @@ package org.jasome.util;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
-import org.jasome.calculators.Metric;
+import org.jasome.metrics.Metric;
 import org.jscience.mathematics.number.LargeInteger;
 import org.jscience.mathematics.number.Number;
 import org.jscience.mathematics.number.Real;
