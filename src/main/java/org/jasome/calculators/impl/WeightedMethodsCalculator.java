@@ -13,6 +13,6 @@ public class WeightedMethodsCalculator implements Calculator<Type> {
     public Set<Metric> calculate(Type method) {
         LargeInteger total = method.getMethods().stream().map(m -> LargeInteger.valueOf(m.getMetric("VG").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
-        return ImmutableSet.of(new Metric("WMC", "Weighted methods per Class", total));
+        return ImmutableSet.of(Metric.of("WMC", "Weighted methods per Class", total));
     }
 }

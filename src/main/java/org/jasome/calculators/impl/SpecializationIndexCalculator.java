@@ -3,6 +3,7 @@ package org.jasome.calculators.impl;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
@@ -44,17 +45,17 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
 
         //more good and related ones here http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
 
-        Metric.Builder metricBuilder = Metric.builder()
-                .with("DIT", "Depth of Inheritance Tree", depth)
-                .with("NORM", "Number of Overridden Methods", overriddenMethods)
-                .with("NM", "Number of Methods", numberOfMethods)
-                .with("NMI", "Number of Inherited Methods", inheritedMethods)
-                .with("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods));
+        ImmutableSet.Builder<Metric> metricBuilder = ImmutableSet.<Metric>builder()
+                .add(Metric.of("DIT", "Depth of Inheritance Tree", depth))
+                .add(Metric.of("NORM", "Number of Overridden Methods", overriddenMethods))
+                .add(Metric.of("NM", "Number of Methods", numberOfMethods))
+                .add(Metric.of("NMI", "Number of Inherited Methods", inheritedMethods))
+                .add(Metric.of("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods)));
 
         if (numberOfMethods.isGreaterThan(LargeInteger.ZERO)) {
             LargeInteger numerator = overriddenMethods.times(depth);
             Rational specializationIndex = Rational.valueOf(numerator, numberOfMethods);
-            metricBuilder.with("SIX", "Specialization Index", specializationIndex);
+            metricBuilder = metricBuilder.add(Metric.of("SIX", "Specialization Index", specializationIndex));
         }
 
         return metricBuilder.build();

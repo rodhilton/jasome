@@ -92,7 +92,7 @@ public class TotalLinesOfCodeCalculator {
         public Set<Metric> calculate(Project aProject) {
             LargeInteger total = aProject.getPackages().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
-            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+            return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
 
@@ -102,7 +102,7 @@ public class TotalLinesOfCodeCalculator {
         public Set<Metric> calculate(Package aPackage) {
             LargeInteger total = aPackage.getTypes().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
-            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+            return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
 
@@ -114,7 +114,7 @@ public class TotalLinesOfCodeCalculator {
             nodeStack.add(type.getSource());
 
             LargeInteger total = performCalculation(nodeStack);
-            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+            return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
 
@@ -126,7 +126,7 @@ public class TotalLinesOfCodeCalculator {
             nodeStack.add(method.getSource());
 
             LargeInteger total = performCalculation(nodeStack);
-            return ImmutableSet.of(new Metric("TLOC", "Total Lines of Code", total));
+            return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
 

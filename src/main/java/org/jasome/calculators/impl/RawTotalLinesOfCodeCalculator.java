@@ -2,6 +2,7 @@ package org.jasome.calculators.impl;
 
 import com.github.javaparser.Position;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.google.common.collect.ImmutableSet;
 import org.jasome.calculators.Calculator;
 import org.jasome.calculators.Metric;
 import org.jasome.parsing.Type;
@@ -28,9 +29,9 @@ public class RawTotalLinesOfCodeCalculator implements Calculator<Type> {
         Optional<Position> end = decl.getEnd();
         Optional<Position> begin = decl.getBegin();
 
-        if (!begin.isPresent()) return Metric.NONE;
-        if (!end.isPresent()) return Metric.NONE;
-
-        return Metric.builder().with("RTLOC", "Raw Total Lines of Code", end.get().line - begin.get().line + 1).build();
+        if (!begin.isPresent()) return ImmutableSet.of();
+        if (!end.isPresent()) return ImmutableSet.of();
+        
+        return ImmutableSet.of(Metric.of("RTLOC", "Raw Total Lines of Code", end.get().line - begin.get().line + 1));
     }
 }

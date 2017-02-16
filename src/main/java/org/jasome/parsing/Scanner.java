@@ -47,9 +47,6 @@ public class Scanner {
     }
 
     public Project scan(Collection<File> inputFiles) throws IOException {
-        Multimap<Code, Pair<String, String>> attributes = HashMultimap.create();
-        Multimap<Code, Metric> metrics = HashMultimap.create();
-
         Project project = new Project();
 
         Map<String, List<Pair<ClassOrInterfaceDeclaration, File>>> packages = gatherPackages(inputFiles);
@@ -67,10 +64,8 @@ public class Scanner {
 
                 type.addAttribute("sourceFile", classAndSourceFile.getValue().getPath());
 
-                List<ConstructorDeclaration> constructors = classDefinition.getNodesByType(ConstructorDeclaration.class);
-                System.out.println(constructors);
-
-                for (ConstructorDeclaration constructorDeclaration : constructors) {
+                //We need to convert the constructor declarations to method declarations because we treat them the same, but javaparser don't have them sharing a useful common type
+                for (ConstructorDeclaration constructorDeclaration : classDefinition.getNodesByType(ConstructorDeclaration.class)) {
                     MethodDeclaration constructorMethodDeclaration = new MethodDeclaration(
                             constructorDeclaration.getModifiers(),
                             constructorDeclaration.getAnnotations(),
@@ -103,8 +98,7 @@ public class Scanner {
             }
         }
 
-
-        //TODO gather project metrics, go "recursively" so that class-level metrics can reference method metrics and so on
+        
         for (Package aPackage : project.getPackages()) {
 
             for (Type type : aPackage.getTypes()) {
@@ -137,17 +131,17 @@ public class Scanner {
 
         for (Package aPackage : project.getPackages()) {
             System.out.println(aPackage.getName());
-            System.out.println("+" + metrics.get(aPackage));
+            System.out.println("+" + aPackage.getMetrics());
 
             for (Type type : aPackage.getTypes()) {
 
                 System.out.println("  " + type.getName());
-                System.out.println("  +" + metrics.get(type));
+                System.out.println("  +" + type.getMetrics());
 
                 for (Method method : type.getMethods()) {
 
                     System.out.println("    " + method.getName());
-                    System.out.println("    +" + metrics.get(method));
+                    System.out.println("    +" + aPackage.getMetrics());
 
                 }
             }

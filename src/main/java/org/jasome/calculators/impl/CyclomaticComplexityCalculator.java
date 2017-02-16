@@ -1,7 +1,5 @@
 package org.jasome.calculators.impl;
 
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.stmt.*;
@@ -11,7 +9,6 @@ import org.jasome.calculators.Metric;
 import org.jasome.parsing.Method;
 import org.jscience.mathematics.number.LargeInteger;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -43,8 +40,8 @@ public class CyclomaticComplexityCalculator implements Calculator<Method> {
                 ternaryExprs.size() +
                 andExprs.size() +
                 orExprs.size() +
-                1) ; //There's always at least 1 path through the method
+                1); //There's always at least 1 path through the method
 
-        return ImmutableSet.of(new Metric("VG", "McCabe Cyclomatic Complexity", total));
+        return ImmutableSet.of(Metric.of("VG", "McCabe Cyclomatic Complexity", total));
     }
 }
