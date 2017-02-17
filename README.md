@@ -42,7 +42,7 @@ Download the latest distribution and unzip, change into directory, then run:
 JaSoMe will gather metrics and output them to the console.  You can save the XML
 to a file using the `--output <file>` option.
 
-## Metrics
+# Metrics
 
 Jasome is either currently tracking or planning to track the following metrics:
    
