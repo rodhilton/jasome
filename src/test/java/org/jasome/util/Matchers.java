@@ -19,9 +19,13 @@ public class Matchers {
             @SuppressWarnings("unchecked")
             public boolean matches(final Object item) {
                 final Set<Metric> metrics = (Set<Metric>) item;
-                Optional<Metric> namedMetric = metrics.stream().filter((m) -> m.getName().equalsIgnoreCase(name)).findFirst();
+                if(metrics == null || metrics.size() == 0) return false;
+                Optional<Metric> namedMetric = metrics
+                        .stream()
+                        .filter((m) -> m.getName().equalsIgnoreCase(name))
+                        .findFirst();
                 return namedMetric.isPresent() &&
-                        Math.abs(value.floatValue() - namedMetric.get().getValue().floatValue()) < 0.0000001;
+                        Math.abs(value.doubleValue() - namedMetric.get().getValue().doubleValue()) < 0.000000000001;
 
 
             }

@@ -5,8 +5,6 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jasome.input.Project;
-import org.jasome.input.Scanner;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,15 +16,16 @@ import java.util.stream.Collectors;
 
 public class FileScanner extends Scanner {
     private File scanDir;
-    private IOFileFilter filter = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);;
+    private IOFileFilter filter = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
+    ;
 
     public FileScanner(File scanDir) {
         this.scanDir = scanDir;
     }
-    
+
     public Project scan() {
-        
-        Collection<File> inputFiles  = gatherFilesFrom(scanDir, filter);
+
+        Collection<File> inputFiles = gatherFilesFrom(scanDir, filter);
 
         Collection<Pair<String, Map<String, String>>> sourceCodeWithAttributes = inputFiles
                 .stream()

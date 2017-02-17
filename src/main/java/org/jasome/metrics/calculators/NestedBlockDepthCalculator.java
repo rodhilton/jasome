@@ -25,7 +25,7 @@ public class NestedBlockDepthCalculator implements Calculator<Method> {
         allNestedBlocks.addAll(blocks);
         allNestedBlocks.addAll(switchEntries);
 
-        OptionalInt maxDepth = allNestedBlocks.stream().mapToInt(block -> {
+        OptionalInt maxDepth = allNestedBlocks.parallelStream().mapToInt(block -> {
             //figure out this block's depth and return it
             Node theNode = block;
             int i = 1;

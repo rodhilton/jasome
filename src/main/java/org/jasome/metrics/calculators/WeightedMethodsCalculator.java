@@ -11,7 +11,7 @@ import java.util.Set;
 public class WeightedMethodsCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type method) {
-        LargeInteger total = method.getMethods().stream().map(m -> LargeInteger.valueOf(m.getMetric("VG").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
+        LargeInteger total = method.getMethods().parallelStream().map(m -> LargeInteger.valueOf(m.getMetric("VG").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
 
         return ImmutableSet.of(Metric.of("WMC", "Weighted methods per Class", total));
     }

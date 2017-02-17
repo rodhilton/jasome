@@ -20,7 +20,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
     @Override
     public Set<Metric> calculate(Package aPackage) {
         Map<String, Type> allClassesOutsideOfPackage = aPackage.getParentProject().getPackages()
-                .stream()
+                .parallelStream()
                 .filter(p -> p != aPackage)
                 .map(Package::getTypes)
                 .flatMap(Set::stream)
@@ -28,7 +28,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .collect(Collectors.toMap(Type::getName, t -> t));
 
         Map<String, Type> allClassesInsideOfPackage = aPackage.getTypes()
-                .stream()
+                .parallelStream()
                 .filter(type -> type.getSource().isPublic())
                 .collect(Collectors.toMap(Type::getName, t -> t));
 
@@ -39,7 +39,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
             List<ClassOrInterfaceType> referencedTypes = typeInsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
 
             long numberOfTypesReferencedThatAreInsideAnotherPackage = referencedTypes
-                    .stream()
+                    .parallelStream()
                     .map(typ -> typ.getName().getIdentifier())
                     .filter(typeName ->
                             allClassesOutsideOfPackage.containsKey(typeName) && !allClassesInsideOfPackage.containsKey(typeName)
@@ -49,7 +49,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
             List<SimpleName> referencedNames = typeInsidePackage.getSource().getNodesByType(SimpleName.class);
 
             long numberOfSimpleNamesReferencedThatCorrespondToTypesInsideAnotherPackage = referencedNames
-                    .stream()
+                    .parallelStream()
                     .map(SimpleName::getIdentifier)
                     .filter(typeName ->
                             allClassesOutsideOfPackage.containsKey(typeName) && !allClassesInsideOfPackage.containsKey(typeName)
@@ -64,7 +64,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
             List<ClassOrInterfaceType> referencedTypes = typeOutsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
 
             long numberOfTypesReferencedThatAreInsideThisPackage = referencedTypes
-                    .stream()
+                    .parallelStream()
                     .map(typ -> typ.getName().getIdentifier())
                     .filter(typeName ->
                             allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
@@ -73,7 +73,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
             List<SimpleName> referencedNames = typeOutsidePackage.getSource().getNodesByType(SimpleName.class);
 
             long numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage = referencedNames
-                    .stream()
+                    .parallelStream()
                     .map(SimpleName::getIdentifier)
                     .filter(typeName ->
                             allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
@@ -98,7 +98,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         LargeInteger numberOfAbstractClassesAndInterfacesInPackage = LargeInteger.valueOf(
                 aPackage.getTypes()
-                        .stream()
+                        .parallelStream()
                         .filter(type -> type.getSource().isInterface() || type.getSource().isAbstract())
                         .count()
         );

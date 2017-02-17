@@ -1,8 +1,8 @@
 package org.jasome.output;
 
-import org.jasome.metrics.Metric;
 import org.jasome.input.*;
 import org.jasome.input.Package;
+import org.jasome.metrics.Metric;
 import org.jscience.mathematics.number.LargeInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -11,8 +11,11 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
@@ -103,7 +106,7 @@ public class XMLOutputter implements Outputter<Document> {
             metricsElement.setAttribute("name", metric.getName());
             metricsElement.setAttribute("description", metric.getDescription());
 
-            if (metric.getValue() instanceof LargeInteger) {
+            if (isInteger(metric)) {
                 metricsElement.setAttribute("value", metric.getValue().toString());
             } else {
                 metricsElement.setAttribute("value", METRIC_VALUE_FORMAT.format(metric.getValue().doubleValue()));
@@ -112,5 +115,17 @@ public class XMLOutputter implements Outputter<Document> {
             metricsContainer.appendChild(metricsElement);
         }
         parentElement.appendChild(metricsContainer);
+    }
+
+    private boolean isInteger(Metric metric) {
+        Number value = metric.getValue();
+        return value instanceof LargeInteger
+                || value instanceof BigInteger
+                || value instanceof Byte
+                || value instanceof Short
+                || value instanceof Long
+                || value instanceof Integer
+                || value instanceof AtomicLong
+                || value instanceof AtomicInteger;
     }
 }
