@@ -31,6 +31,17 @@ but continue processing the remaining files.  In other words, there are definite
 ways someone can manipulate their code to intentionally change the measurements
 for metrics, but by and large on a normal project Jasome will be accurate.
 
+# Getting Started
+
+Download the latest distribution and unzip, change into directory, then run:
+
+  ```
+  bin/jasome <directory to analyze>
+  ```
+  
+JaSoMe will gather metrics and output them to the console.  You can save the XML
+to a file using the `--output <file>` option.
+
 ## Metrics
 
 Jasome is either currently tracking or planning to track the following metrics:
@@ -101,14 +112,3 @@ More metrics coming soon, I plan to gather every metric outlined in the followin
  * http://www.objectmentor.com/resources/articles/oodmetrc.pdf
  
 And a lot more
-  
-# Running
-
-Download the latest distribution and unzip, change into directory, then run:
-
-  ```
-  bin/jasome <directory to analyze>
-  ```
-  
-JaSoMe will gather metrics and output them to the console.  You can save the XML
-to a file using the `--output <file>` option.
