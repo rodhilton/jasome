@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.Statement;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -41,7 +42,7 @@ public class CalculationUtils {
                                 .anyMatch(nameAccessExpr -> {
 
 
-                                    List<BlockStmt> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode.getUnchecked(nameAccessExpr);
+                                    List<Statement> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(nameAccessExpr);
 
                                     List<VariableDeclarator> variablesDefinedInMethod = method.getNodesByType(VariableDeclarator.class);
 
@@ -54,7 +55,7 @@ public class CalculationUtils {
                                                 //have at least one block between it and the method declaration that ISN'T between the name access and the method
 
                                                 if (variableDeclaration.getName().equals(nameAccessExpr.getName())) {
-                                                    List<BlockStmt> allBlocksFromMethodDeclarationToVariableDeclaration = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode.getUnchecked(variableDeclaration);
+                                                    List<Statement> allBlocksFromMethodDeclarationToVariableDeclaration = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(variableDeclaration);
                                                     return allBlocksFromMethodDeclarationToNameAccessExpr.containsAll(allBlocksFromMethodDeclarationToVariableDeclaration);
                                                 } else {
                                                     return false;
@@ -83,27 +84,23 @@ public class CalculationUtils {
             });
 
 
-    public static LoadingCache<Node, List<BlockStmt>> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode = CacheBuilder.newBuilder()
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .build(new CacheLoader<Node, List<BlockStmt>>() {
-                @Override
-                public List<BlockStmt> load(Node theNode) throws Exception {
-                    List<BlockStmt> blocksOnPathToMethodDeclaration = new ArrayList<>();
+    private static List<Statement> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(Node theNode) {
+        List<Statement> blocksOnPathToMethodDeclaration = new ArrayList<>();
 
-                    while (!(theNode instanceof MethodDeclaration)) {
+        while (!(theNode instanceof MethodDeclaration)) {
 
-                        if (theNode instanceof BlockStmt) {
-                            blocksOnPathToMethodDeclaration.add((BlockStmt) theNode);
-                        }
+            if (theNode instanceof BlockStmt) {
+                blocksOnPathToMethodDeclaration.add((BlockStmt) theNode);
+            }
 
-                        if (theNode.getParentNode().isPresent()) {
-                            theNode = theNode.getParentNode().get();
-                        } else {
-                            break;
-                        }
-                    }
+            if (theNode.getParentNode().isPresent()) {
+                theNode = theNode.getParentNode().get();
+            } else {
+                break;
+            }
+        }
 
-                    return blocksOnPathToMethodDeclaration;
-                }
-            });
+        return blocksOnPathToMethodDeclaration;
+    }
+
 }
