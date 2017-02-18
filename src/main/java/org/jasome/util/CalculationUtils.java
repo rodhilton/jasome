@@ -42,7 +42,7 @@ public class CalculationUtils {
                                 .anyMatch(nameAccessExpr -> {
 
 
-                                    List<Statement> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(nameAccessExpr);
+                                    List<BlockStmt> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(nameAccessExpr);
 
                                     List<VariableDeclarator> variablesDefinedInMethod = method.getNodesByType(VariableDeclarator.class);
 
@@ -55,7 +55,7 @@ public class CalculationUtils {
                                                 //have at least one block between it and the method declaration that ISN'T between the name access and the method
 
                                                 if (variableDeclaration.getName().equals(nameAccessExpr.getName())) {
-                                                    List<Statement> allBlocksFromMethodDeclarationToVariableDeclaration = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(variableDeclaration);
+                                                    List<BlockStmt> allBlocksFromMethodDeclarationToVariableDeclaration = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(variableDeclaration);
                                                     return allBlocksFromMethodDeclarationToNameAccessExpr.containsAll(allBlocksFromMethodDeclarationToVariableDeclaration);
                                                 } else {
                                                     return false;
@@ -84,8 +84,8 @@ public class CalculationUtils {
             });
 
 
-    private static List<Statement> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(Node theNode) {
-        List<Statement> blocksOnPathToMethodDeclaration = new ArrayList<>();
+    private static List<BlockStmt> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(Node theNode) {
+        List<BlockStmt> blocksOnPathToMethodDeclaration = new ArrayList<>();
 
         while (!(theNode instanceof MethodDeclaration)) {
 

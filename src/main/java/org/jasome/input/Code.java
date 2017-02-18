@@ -53,16 +53,16 @@ public abstract class Code {
 
     //* * * Package-level, only the scanner can add metrics and attributes, not calculators
 
-    void addMetric(Metric metric) {
+    synchronized void addMetric(Metric metric) {
         metrics.put(metric.getName(), metric);
     }
 
-    void addAttribute(String key, String value) {
+    synchronized void addAttribute(String key, String value) {
         this.attributes.put(key, value);
     }
 
     void addAttribute(Map.Entry<String, String> attribute) {
-        this.attributes.put(attribute.getKey(), attribute.getValue());
+        addAttribute(attribute.getKey(), attribute.getValue());
     }
 
     void addMetrics(Set<Metric> metrics) {
