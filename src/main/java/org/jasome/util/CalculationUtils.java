@@ -6,84 +6,104 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.stmt.BlockStmt;
-import com.github.javaparser.ast.stmt.ForStmt;
-import com.github.javaparser.ast.stmt.Statement;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class CalculationUtils {
-    public static boolean isFieldAccessedWithinMethod(MethodDeclaration method, VariableDeclarator variable) {
-        if(!method.getBody().isPresent()) return false;
+    public static LoadingCache<Pair<MethodDeclaration, VariableDeclarator>, Boolean> isFieldAccessedWithinMethod = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build(new CacheLoader<Pair<MethodDeclaration, VariableDeclarator>, Boolean>() {
+                @Override
+                public Boolean load(Pair<MethodDeclaration, VariableDeclarator> key) throws Exception {
+                    MethodDeclaration method = key.getLeft();
+                    VariableDeclarator variable = key.getRight();
 
-        List<FieldAccessExpr> fieldAccesses = method.getBody().get().getNodesByType(FieldAccessExpr.class);
+                    if (!method.getBody().isPresent()) return false;
 
-        //If we have a field match we can just count it, it's directly prefixed with 'this.' so there's no room for shadowing
+                    List<FieldAccessExpr> fieldAccesses = method.getBody().get().getNodesByType(FieldAccessExpr.class);
 
-        boolean anyDirectAccess = fieldAccesses.stream().anyMatch(fieldAccessExpr -> fieldAccessExpr.getName().equals(variable.getName()));
+                    //If we have a field match we can just count it, it's directly prefixed with 'this.' so there's no room for shadowing
 
-        if(anyDirectAccess) return true;
-        else {
-            List<NameExpr> nameAccesses = method.getBody().get().getNodesByType(NameExpr.class);
-            
-            boolean anyIndirectAccess = nameAccesses
-                    .stream()
-                    .anyMatch(nameAccessExpr -> {
+                    boolean anyDirectAccess = fieldAccesses.parallelStream().anyMatch(fieldAccessExpr -> fieldAccessExpr.getName().equals(variable.getName()));
 
+                    if (anyDirectAccess) return true;
+                    else {
+                        List<NameExpr> nameAccesses = method.getBody().get().getNodesByType(NameExpr.class);
 
-                        List<Statement> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(nameAccessExpr);
-
-                        //so the blocks on the path are, in order, each block stmt between the method declaration and the use of the variable
-
-                        //so now we're going to get all of the variable definitions from the topmost block.  for each of them, we're going to get all THEIR parent
-                        // block definitions, and ensure that each of them is in this list.  if any are off the list, it's a divergent path and we don't have to worry about it
-
-                        List<VariableDeclarator> variablesDefinedInMethod = method.getNodesByType(VariableDeclarator.class);
-
-                        boolean isVariableRedefinedInScope = variablesDefinedInMethod.stream().anyMatch(variableDeclaration-> {
-                            //if any of these variables have all their parents in the allBlocks list above, then that variable shadows nameExpr (as long as the name matches)
-
-                            if( variableDeclaration.getName().equals(nameAccessExpr.getName()) ) {
-                                List<Statement> variableBlockStmts = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(variableDeclaration);
-                                return allBlocksFromMethodDeclarationToNameAccessExpr.containsAll(variableBlockStmts);
-                            } else {
-                                return false;
-                            }
-                        });
-
-                        boolean isVariableRedefinedByMethodSignature = method.getParameters().stream().anyMatch(parameter -> parameter.getName().equals(nameAccessExpr.getName()));
+                        boolean anyIndirectAccess = nameAccesses
+                                .parallelStream()
+                                .anyMatch(nameAccessExpr -> {
 
 
-                        if(isVariableRedefinedInScope || isVariableRedefinedByMethodSignature) {
-                             return false;
-                        } else {
-                            return nameAccessExpr.getName().equals(variable.getName());
+                                    List<BlockStmt> allBlocksFromMethodDeclarationToNameAccessExpr = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode.getUnchecked(nameAccessExpr);
+
+                                    List<VariableDeclarator> variablesDefinedInMethod = method.getNodesByType(VariableDeclarator.class);
+
+                                    boolean isVariableRedefinedInScope = variablesDefinedInMethod
+                                            .parallelStream()
+                                            .anyMatch(variableDeclaration -> {
+                                                //if any of these variables have all their parents in the allBlocks list above, then that variable shadows nameExpr (as long as the name matches)
+                                                //It essentially means that this variable declaration is BETWEEN the variable access and the method declaration, which means this variable
+                                                //shadows the field when doing the name access.  If this variable declaration were LOWER on the nesting chain or divergent entirely, it would
+                                                //have at least one block between it and the method declaration that ISN'T between the name access and the method
+
+                                                if (variableDeclaration.getName().equals(nameAccessExpr.getName())) {
+                                                    List<BlockStmt> allBlocksFromMethodDeclarationToVariableDeclaration = getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode.getUnchecked(variableDeclaration);
+                                                    return allBlocksFromMethodDeclarationToNameAccessExpr.containsAll(allBlocksFromMethodDeclarationToVariableDeclaration);
+                                                } else {
+                                                    return false;
+                                                }
+                                            });
+
+                                    boolean isVariableRedefinedByMethodSignature = method.getParameters()
+                                            .parallelStream()
+                                            .anyMatch(parameter -> parameter.getName().equals(nameAccessExpr.getName()));
+
+
+                                    if (isVariableRedefinedInScope || isVariableRedefinedByMethodSignature) {
+                                        return false;
+                                    } else {
+                                        return nameAccessExpr.getName().equals(variable.getName());
+                                    }
+                                });
+
+                        if (anyIndirectAccess) return true;
+                    }
+
+
+                    return false;
+                }
+
+            });
+
+
+    public static LoadingCache<Node, List<BlockStmt>> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build(new CacheLoader<Node, List<BlockStmt>>() {
+                @Override
+                public List<BlockStmt> load(Node theNode) throws Exception {
+                    List<BlockStmt> blocksOnPathToMethodDeclaration = new ArrayList<>();
+
+                    while (!(theNode instanceof MethodDeclaration)) {
+
+                        if (theNode instanceof BlockStmt) {
+                            blocksOnPathToMethodDeclaration.add((BlockStmt) theNode);
                         }
-                    });
 
-            if(anyIndirectAccess) return true;
-        }
+                        if (theNode.getParentNode().isPresent()) {
+                            theNode = theNode.getParentNode().get();
+                        } else {
+                            break;
+                        }
+                    }
 
-
-        return false;
-    }
-
-    private static List<Statement> getAllVariableDefinitionScopesBetweenMethodDefinitionAndNode(Node theNode) {
-        List<Statement> blocksOnPathToMethodDeclaration = new ArrayList<>();
-
-        while(!(theNode instanceof MethodDeclaration)) {
-
-            if(theNode instanceof BlockStmt) {
-                blocksOnPathToMethodDeclaration.add((BlockStmt)theNode);
-            }
-
-            if (theNode.getParentNode().isPresent()) {
-                theNode = theNode.getParentNode().get();
-            } else {
-                break;
-            }
-        }
-
-        return blocksOnPathToMethodDeclaration;
-    }
+                    return blocksOnPathToMethodDeclaration;
+                }
+            });
 }

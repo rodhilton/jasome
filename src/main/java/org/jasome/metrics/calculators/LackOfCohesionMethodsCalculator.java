@@ -4,6 +4,7 @@ import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.google.common.collect.ImmutableSet;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jasome.input.Method;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
@@ -32,7 +33,7 @@ public class LackOfCohesionMethodsCalculator implements Calculator<Type> {
         for (VariableDeclarator variable : variables) {
             int numberOfMethodsAccessingVariable = 0;
             for (MethodDeclaration method : methods) {
-                if (CalculationUtils.isFieldAccessedWithinMethod(method, variable)) {
+                if (CalculationUtils.isFieldAccessedWithinMethod.getUnchecked(Pair.of(method, variable))) {
                     numberOfMethodsAccessingVariable++;
                 }
             }
