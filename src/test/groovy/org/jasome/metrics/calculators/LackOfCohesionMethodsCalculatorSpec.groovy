@@ -413,7 +413,32 @@ class LackOfCohesionMethodsCalculatorSpec extends Specification {
         expect result, containsMetric("LCOM*", 0)
     }
 
-    //TODO: shadowing in method signature via parameter
+    def "detects variable shadowing via method parameters"() {
+
+        given:
+        def type = typeFromSnippet '''
+            public class Class {
+              private double x;
+              private double y;          
+            
+              public void printX(int x) {
+                System.out.println(x);
+              }
+              
+              public void printY(int y) {
+                System.out.println(y);
+              }            
+            
+            }
+        '''
+
+        when:
+        def result = new LackOfCohesionMethodsCalculator().calculate(type)
+
+        then:
+        expect result, containsMetric("LCOM*", 2)
+    }
+    
     //TODO: don't factor in interface or abstract methods? should they not even count in the total?
     //TODO: one method, one variable - this is high cohesion right? so why is it 0/0 which is NaN or 1?
 }

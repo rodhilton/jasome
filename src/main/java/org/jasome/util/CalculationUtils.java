@@ -51,8 +51,10 @@ public class CalculationUtils {
                             }
                         });
 
+                        boolean isVariableRedefinedByMethodSignature = method.getParameters().stream().anyMatch(parameter -> parameter.getName().equals(nameAccessExpr.getName()));
 
-                        if(isVariableRedefinedInScope) {
+
+                        if(isVariableRedefinedInScope || isVariableRedefinedByMethodSignature) {
                              return false;
                         } else {
                             return nameAccessExpr.getName().equals(variable.getName());
