@@ -27,6 +27,7 @@ class ProcessorFactory {
         processor.registerPackageCalculator(new RobertMartinCouplingCalculator());
 
         processor.registerMethodCalculator(new NestedBlockDepthCalculator());
+        processor.registerTypeCalculator(new LackOfCohesionMethodsCalculator());
         return processor;
     }
 }

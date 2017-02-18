@@ -354,6 +354,38 @@ class LackOfCohesionMethodsCalculatorSpec extends Specification {
         expect result, containsMetric("LCOM*", 1)
     }
 
+    def "detects when usages have been shadowed in else statement"() {
+
+        given:
+        def type = typeFromSnippet '''
+            public class Class {
+              private double x;          
+            
+              public void printAll() {
+                if( 5 < 10.0) {
+                    if(9 < 10) {
+                       System.out.println(x);
+                    } else {
+                        int x=0;
+                        System.out.println(x);
+                    }                    
+                }
+              }
+              
+              public void doNothing() {
+              
+              }                         
+            
+            }
+        '''
+
+        when:
+        def result = new LackOfCohesionMethodsCalculator().calculate(type)
+
+        then:
+        expect result, containsMetric("LCOM*", 1)
+    }
+
     def "calculate LCOM counts assignments as usages"() {
 
         given:
