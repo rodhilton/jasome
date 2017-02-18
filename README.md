@@ -73,7 +73,7 @@ Jasome is either currently tracking or planning to track the following metrics:
      through code _(method)_
  - [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
        complexities of all methods on a class _(class)_
- - [ ] **Lack of Cohesion Methods (LCOM)** - A measure for the Cohesiveness of a class.
+ - [x] **Lack of Cohesion Methods (LCOM)** - A measure for the Cohesiveness of a class.
        Calculated with the Henderson-Sellers method, based on the number of disjoint sets
        formed by comparing methods with the attributes they use _(class)_
  - [x] **Number of Interfaces (NOI)** - The number of abstract classes (and interfaces) in a package _(package)_
