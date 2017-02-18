@@ -39,53 +39,54 @@ public class Processor {
 
     public void process(Project project) {
 
-        for (Package aPackage : project.getPackages()) {
+        project.getPackages().parallelStream().forEach(aPackage -> {
 
-            for (Type type : aPackage.getTypes()) {
+            aPackage.getTypes().parallelStream().forEach(type -> {
 
-                for (Method method : type.getMethods()) {
+                type.getMethods().parallelStream().forEach(method -> {
 
-                    for (Calculator<Method> methodMetricCalculator : methodCalculators) {
+                    methodCalculators.parallelStream().forEach(methodMetricCalculator -> {
                         Set<Metric> methodMetrics = methodMetricCalculator.calculate(method);
                         method.addMetrics(methodMetrics);
-                    }
-                }
+                    });
+                });
 
-                for (Calculator<Type> typeMetricCalculator : typeCalculators) {
+                typeCalculators.parallelStream().forEach(typeMetricCalculator -> {
                     Set<Metric> classMetrics = typeMetricCalculator.calculate(type);
                     type.addMetrics(classMetrics);
-                }
-            }
+                });
+            });
 
-            for (Calculator<Package> packageMetricCalculator : packageCalculators) {
+            packageCalculators.parallelStream().forEach(packageMetricCalculator -> {
                 Set<Metric> packageMetrics = packageMetricCalculator.calculate(aPackage);
                 aPackage.addMetrics(packageMetrics);
-            }
-        }
+            });
 
-        for (Calculator<Project> projectMetricCalculator : projectCalculators) {
+        });
+
+        projectCalculators.parallelStream().forEach(projectMetricCalculator -> {
             Set<Metric> projectMetrics = projectMetricCalculator.calculate(project);
             project.addMetrics(projectMetrics);
-        }
+        });
 
 
-        for (Package aPackage : project.getPackages()) {
-            System.out.println(aPackage.getName());
-            System.out.println("+" + aPackage.getMetrics());
-
-            for (Type type : aPackage.getTypes()) {
-
-                System.out.println("  " + type.getName());
-                System.out.println("  +" + type.getMetrics());
-
-                for (Method method : type.getMethods()) {
-
-                    System.out.println("    " + method.getName());
-                    System.out.println("    +" + aPackage.getMetrics());
-
-                }
-            }
-
-        }
+//        for (Package aPackage : project.getPackages()) {
+//            System.out.println(aPackage.getName());
+//            System.out.println("+" + aPackage.getMetrics());
+//
+//            for (Type type : aPackage.getTypes()) {
+//
+//                System.out.println("  " + type.getName());
+//                System.out.println("  +" + type.getMetrics());
+//
+//                for (Method method : type.getMethods()) {
+//
+//                    System.out.println("    " + method.getName());
+//                    System.out.println("    +" + aPackage.getMetrics());
+//
+//                }
+//            }
+//
+//        }
     }
 }
