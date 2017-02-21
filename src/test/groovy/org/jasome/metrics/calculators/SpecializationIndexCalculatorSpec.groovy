@@ -98,7 +98,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         expect resultTwo, containsMetric("DIT", 2)
     }
 
-    def "calculate depth uses the maximum possible path when there are classes with the same name and it's not clear which is used"() {
+    def "calculate depth uses the closest class when classes have same name"() {
 
         given:
         def project = projectFromSnippet '''

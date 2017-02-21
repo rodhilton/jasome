@@ -5,6 +5,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.google.common.graph.Graph;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
 import org.jasome.metrics.Calculator;
@@ -12,6 +13,7 @@ import org.jasome.metrics.Metric;
 import org.jasome.input.Method;
 import org.jasome.input.Package;
 import org.jasome.input.Type;
+import org.jasome.util.CalculationUtils;
 import org.jscience.mathematics.number.LargeInteger;
 import org.jscience.mathematics.number.Rational;
 
@@ -27,16 +29,10 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
 
-        Multimap<String, Type> allTypesByName = HashMultimap.create();
-        for (Package aPackage : type.getParentPackage().getParentProject().getPackages()) {
-            for (Type aType : aPackage.getTypes()) {
-                allTypesByName.put(aType.getName(), aType);
-            }
-        }
 
-        LargeInteger depth = LargeInteger.valueOf(calculateInheritanceDepth(type, allTypesByName));
+        LargeInteger depth = LargeInteger.valueOf(calculateInheritanceDepth(type));
 
-        Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type, allTypesByName);
+        Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type);
 
         LargeInteger overriddenMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getLeft());
         LargeInteger inheritedMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getRight());
@@ -61,13 +57,13 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         return metricBuilder.build();
     }
 
-    private Pair<Integer, Integer> calculateOverloadedAndInheritedOperations(Type type, Multimap<String, Type> allTypesByName) {
+    private Pair<Integer, Integer> calculateOverloadedAndInheritedOperations(Type type) {
 
         Set<Triple<com.github.javaparser.ast.type.Type, String, List<com.github.javaparser.ast.type.Type>>> parentMethods = new HashSet<>();
 
         Stack<Type> typesToCheck = new Stack<>();
 
-        typesToCheck.addAll(getParentTypes(type, allTypesByName, true));
+        typesToCheck.addAll(getParentTypes(type));
 
         while (!typesToCheck.empty()) {
             Type typeToCheck = typesToCheck.pop();
@@ -77,7 +73,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
                 parentMethods.add(methodSignature);
             }
 
-            typesToCheck.addAll(getParentTypes(typeToCheck, allTypesByName, true));
+            typesToCheck.addAll(getParentTypes(typeToCheck));
         }
 
         int numberOverridden = 0;
@@ -102,33 +98,21 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         return Triple.of(returnType, name, parameterTypes);
     }
 
-    private Set<Type> getParentTypes(Type type, Multimap<String, Type> allTypesByName, boolean includeInterfaceTypes) {
-        Set<ClassOrInterfaceType> parentClasses = new HashSet<>();
-
-        parentClasses.addAll(type.getSource().getExtendedTypes());
-        if (includeInterfaceTypes) {
-            parentClasses.addAll(type.getSource().getImplementedTypes());
-        }
-
-        Set<Type> parentTypes = new HashSet<Type>();
-
-        for (ClassOrInterfaceType parentClass : parentClasses) {
-            Collection<Type> nextLevelTypes = allTypesByName.get(parentClass.getName().toString());
-            parentTypes.addAll(nextLevelTypes);
-        }
-        return parentTypes;
+    private Set<Type> getParentTypes(Type type) {
+        Graph<Type> typeGraph = CalculationUtils.getInheritanceGraph(type.getParentPackage().getParentProject());
+        return typeGraph.predecessors(type);
     }
 
-    private int calculateInheritanceDepth(Type type, Multimap<String, Type> allTypesByName) {
+    private int calculateInheritanceDepth(Type type) {
         ClassOrInterfaceDeclaration decl = type.getSource();
 
-        Collection<Type> nextLevelTypes = getParentTypes(type, allTypesByName, true);
+        Collection<Type> nextLevelTypes = getParentTypes(type);
 
 
         List<Integer> maximums = new ArrayList<>();
 
         for (Type t : nextLevelTypes) {
-            maximums.add(1 + calculateInheritanceDepth(t, allTypesByName));
+            maximums.add(1 + calculateInheritanceDepth(t));
         }
 
 

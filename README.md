@@ -83,10 +83,10 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Abstractness (A)** - The number of abstract classes (and interfaces) divided by the total number of types in a package, NOI / NOC _(package)_
  - [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  ![| A + I - 1 |](https://latex.codecogs.com/gif.latex?%5Cinline%20%7C%20A%20&plus;%20I%20-%201%20%7C), _(package)_
  - [x] **Nested Block Depth (NBD)** - The maximum depth of the deepest level of nesting within a method _(method)_
- - [ ] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
- - [ ] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
- - [ ] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
- - [ ] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
+ - [x] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
+ - [x] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
+ - [x] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
+ - [x] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
  - [ ] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between _(package)_
  - [ ] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. NOL / NOC _(package)_
  - [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
