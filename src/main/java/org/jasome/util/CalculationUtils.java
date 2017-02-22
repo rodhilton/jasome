@@ -14,6 +14,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.graph.Graph;
 import com.google.common.graph.GraphBuilder;
+import com.google.common.graph.ImmutableGraph;
 import com.google.common.graph.MutableGraph;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -166,19 +167,15 @@ public class CalculationUtils {
             List<ClassOrInterfaceType> extendedTypes = type.getSource().getExtendedTypes();
             List<ClassOrInterfaceType> implementedTypes = type.getSource().getImplementedTypes();
 
-            for (ClassOrInterfaceType extendedType : extendedTypes) {
-                if (allClassesByName.containsKey(extendedType.getName().getIdentifier())) {
-                    Optional<Type> closestType = getClosestTypeWithName(extendedType.getName().getIdentifier(), type, allClassesByName);
+            graph.addNode(type);
 
-                    closestType.ifPresent(c ->
-                        graph.putEdge(c, type)
-                    );
-                }
-            }
+            List<ClassOrInterfaceType> parentTypes = new ArrayList<>();
+            parentTypes.addAll(extendedTypes);
+            parentTypes.addAll(implementedTypes);
 
-            for (ClassOrInterfaceType implementedType : implementedTypes) {
-                if (allClassesByName.containsKey(implementedType.getName().getIdentifier())) {
-                    Optional<Type> closestType = getClosestTypeWithName(implementedType.getName().getIdentifier(), type, allClassesByName);
+            for (ClassOrInterfaceType parentType : parentTypes) {
+                if (allClassesByName.containsKey(parentType.getName().getIdentifier())) {
+                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName().getIdentifier(), type, allClassesByName);
 
                     closestType.ifPresent(c ->
                         graph.putEdge(c, type)
@@ -186,7 +183,7 @@ public class CalculationUtils {
                 }
             }
         }
-        return graph;
+        return ImmutableGraph.copyOf(graph);
     }
 
     private static Optional<Type> getClosestTypeWithName(String identifier, Type source, Multimap<String, Type> allClassesByName) {

@@ -194,8 +194,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
 
         then:
 
-        //TODO: this should really be 2 ideally... it should choose the closer I2.  But i2 extends I1, which registers as a separate relationship in the graph
-        //and thus gives us 1.  But leaving it for now, ultra accuracy in this case goes against the "best guess" principle of design for jasome
+        expect resultY, containsMetric("NOA", 2)
         expect resultY, containsMetric("NOPa", 1)
     }
 
