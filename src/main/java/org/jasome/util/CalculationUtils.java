@@ -245,7 +245,6 @@ public class CalculationUtils {
             if(nameType.isPresent()) {
                 if(nameType.get() instanceof ClassOrInterfaceType) {
                     Optional<Type> closestType = getClosestType((ClassOrInterfaceType) nameType.get(), containingMethod.getParentType());
-                    System.out.println(closestType);
                     return closestType;
                 } else {
                     return Optional.empty();
