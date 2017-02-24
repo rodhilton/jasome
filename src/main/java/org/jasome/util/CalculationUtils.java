@@ -1,10 +1,10 @@
 package org.jasome.util;
 
 import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
-import com.github.javaparser.ast.expr.FieldAccessExpr;
-import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.cache.CacheBuilder;
@@ -12,12 +12,10 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.common.graph.Graph;
-import com.google.common.graph.GraphBuilder;
-import com.google.common.graph.ImmutableGraph;
-import com.google.common.graph.MutableGraph;
+import com.google.common.graph.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jasome.input.Method;
 import org.jasome.input.Package;
 import org.jasome.input.Project;
 import org.jasome.input.Type;
@@ -184,6 +182,62 @@ public class CalculationUtils {
             }
         }
         return ImmutableGraph.copyOf(graph);
+    }
+
+    public static Network<Method, Expression> getCallNetwork(Project parentProject) {
+        MutableNetwork<Method, Expression> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
+
+//        Set<Method> allClassesByName = new HashSet<>();
+
+        Set<Method> allMethods = parentProject.getPackages()
+                .parallelStream()
+                .map(Package::getTypes)
+                .flatMap(Set::stream).map(Type::getMethods).flatMap(Set::stream).collect(Collectors.toSet());
+
+        for(Method method: allMethods) {
+            network.addNode(method);
+
+            List<MethodCallExpr> calls = method.getSource().getNodesByType(MethodCallExpr.class);
+            List<MethodReferenceExpr> references = method.getSource().getNodesByType(MethodReferenceExpr.class);
+
+            for(MethodCallExpr methodCall: calls) {
+
+                Optional<Method> methodCalled;
+
+                methodCalled = getMethodCalledByMethod(method, methodCall);
+
+                network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), methodCall);
+            }
+        }
+
+
+        return ImmutableNetwork.copyOf(network);
+    }
+
+    private static Optional<Method> getMethodCalledByMethod(Method method, MethodCallExpr methodCall) {
+        Optional<Expression> methodCallScope = methodCall.getScope();
+
+        Optional<Type> scopeType  = determineTypeOf(methodCallScope.orElse(null), method);
+
+        if(scopeType.isPresent()) {
+            List<Method> inClassMethods = scopeType.get().getMethods().stream().collect(Collectors.toList());
+            Optional<Method> matching = inClassMethods.stream().filter(m->
+                    m.getSource().getName().equals(methodCall.getName()) && m.getSource().getParameters().size() == methodCall.getArguments().size()
+            ).findFirst();
+
+            return matching;
+        }
+
+        return Optional.empty();
+    }
+
+    private static Optional<Type> determineTypeOf(Expression scope, Method containingMethod) {
+        if(scope == null || scope instanceof ThisExpr) return Optional.of(containingMethod.getParentType());
+
+
+
+        return Optional.empty();
+
     }
 
     private static Optional<Type> getClosestTypeWithName(String identifier, Type source, Multimap<String, Type> allClassesByName) {

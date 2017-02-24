@@ -1,5 +1,8 @@
 package org.jasome.metrics.calculators
 
+import com.google.common.graph.Graph
+import com.google.common.graph.GraphBuilder
+import com.google.common.graph.NetworkBuilder
 import org.jasome.input.Type
 import spock.lang.Specification
 
@@ -197,6 +200,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
         expect resultY, containsMetric("NOA", 2)
         expect resultY, containsMetric("NOPa", 1)
     }
+
 
 
     //TODO: inner classes, make sure getIdentifier is the way to go
