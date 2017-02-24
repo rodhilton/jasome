@@ -159,8 +159,14 @@ public class CalculationUtils {
                 .map(Package::getTypes)
                 .flatMap(Set::stream)
                 .forEach(type -> allClassesByName.put(type.getName(), type));
+
+        Set<Type> allClasses = parentProject.getPackages()
+                .parallelStream()
+                .map(Package::getTypes)
+                .flatMap(Set::stream)
+                .collect(Collectors.toSet());
         
-        for (Type type : allClassesByName.values()) {
+        for (Type type :allClasses) {
             List<ClassOrInterfaceType> extendedTypes = type.getSource().getExtendedTypes();
             List<ClassOrInterfaceType> implementedTypes = type.getSource().getImplementedTypes();
 
@@ -171,13 +177,11 @@ public class CalculationUtils {
             parentTypes.addAll(implementedTypes);
 
             for (ClassOrInterfaceType parentType : parentTypes) {
-                if (allClassesByName.containsKey(parentType.getName().getIdentifier())) {
-                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName().getIdentifier(), type);
+                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName(), type);
 
                     closestType.ifPresent(c ->
                         graph.putEdge(c, type)
                     );
-                }
             }
         }
         return ImmutableGraph.copyOf(graph);
@@ -314,14 +318,15 @@ public class CalculationUtils {
         return Lists.reverse(parents);
     }
 
-    private static Optional<Type> getClosestTypeWithName(String identifier, Type source) {
-        Multimap<String, Type> allClassesByName = HashMultimap.create();
+    //TODO: this desperately needs to be cached
+    private static Optional<Type> getClosestTypeWithName(SimpleName identifier, Type source) {
+        Multimap<SimpleName, Type> allClassesByName = HashMultimap.create();
 
         source.getParentPackage().getParentProject().getPackages()
                 .parallelStream()
                 .map(Package::getTypes)
                 .flatMap(Set::stream)
-                .forEach(type -> allClassesByName.put(type.getName(), type));
+                .forEach(type -> allClassesByName.put(type.getSource().getName(), type));
 
 
         Collection<Type> matchingTypes = allClassesByName.get(identifier);

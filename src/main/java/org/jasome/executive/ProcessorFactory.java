@@ -30,6 +30,7 @@ class ProcessorFactory {
         processor.registerTypeCalculator(new LackOfCohesionMethodsCalculator());
 
         processor.registerTypeCalculator(new ClassInheritanceCalculator());
+        processor.registerMethodCalculator(new FanCalculator());
         return processor;
     }
 }
