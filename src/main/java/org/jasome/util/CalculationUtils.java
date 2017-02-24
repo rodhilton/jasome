@@ -1,7 +1,6 @@
 package org.jasome.util;
 
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -11,10 +10,7 @@ import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import com.google.common.collect.*;
 import com.google.common.graph.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -187,8 +183,8 @@ public class CalculationUtils {
         return ImmutableGraph.copyOf(graph);
     }
 
-    public static ValueGraph<Method, Integer> getCallNetwork(Project parentProject) {
-        MutableValueGraph<Method, Integer> network = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
+    public static Network<Method, Distinct<Expression>> getCallNetwork(Project parentProject) {
+        MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
 
 //        Set<Method> allClassesByName = new HashSet<>();
 
@@ -207,22 +203,21 @@ public class CalculationUtils {
 
                 Optional<Method> methodCalled;
 
-                methodCalled = getMethodCalledByMethod(method, methodCall);
+                methodCalled = getMethodCalledByMethodExpression(method, methodCall);
 
-                Method callee = methodCalled.orElse(Method.UNKNOWN);
-                network.putEdgeValue(method, callee, 1+network.edgeValueOrDefault(method, callee, 0));
+                network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), Distinct.of(methodCall));
 
             }
         }
 
 
-        return ImmutableValueGraph.copyOf(network);
+        return ImmutableNetwork.copyOf(network);
     }
 
-    private static Optional<Method> getMethodCalledByMethod(Method method, MethodCallExpr methodCall) {
+    private static Optional<Method> getMethodCalledByMethodExpression(Method containingMethod, MethodCallExpr methodCall) {
         Optional<Expression> methodCallScope = methodCall.getScope();
 
-        Optional<Type> scopeType  = determineTypeOf(methodCallScope.orElse(null), method);
+        Optional<Type> scopeType  = determineTypeOf(methodCallScope.orElse(null), containingMethod);
 
         if(scopeType.isPresent()) {
             List<Method> inClassMethods = scopeType.get().getMethods().stream().collect(Collectors.toList());

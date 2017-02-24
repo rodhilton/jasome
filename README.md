@@ -92,9 +92,9 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
  - [ ] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
  - [ ] **McClure’s Complexity Metric (MCLC)** - NCOMP + NVAR _(method)_
- - [ ] **Fan-out (Fout)** - The number of methods immediately subordinate to a method _(method)_
- - [ ] **Fan-in (Fin)** - The number of methods that invoke a method _(method)_
- - [ ] **Structural Complexity (Si)** - Fout^2 _(method)_
+ - [x] **Fan-out (Fout)** - The number of methods immediately subordinate to a method _(method)_
+ - [x] **Fan-in (Fin)** - The number of methods that invoke a method _(method)_
+ - [x] **Structural Complexity (Si)** - Fout^2 _(method)_
  - [ ] **Data Complexity (Di)** - (NOP+1)/(Fout+1) _(method)_
  - [ ] **System Complexity (Ci)** - Si + Di _(method)_
  - [ ] **Number of Collaborations (CRC)** - The number of collaborations between a class and all others _(class)_
@@ -110,5 +110,6 @@ More metrics coming soon, I plan to gather every metric outlined in the followin
  * http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
  * http://www.alibris.com/Object-Oriented-Metrics-Measures-of-Complexity-Brian-Henderson-Sellers/book/29695100
  * http://www.objectmentor.com/resources/articles/oodmetrc.pdf
+ * http://www.win.tue.nl/~aserebre/2IS55/2009-2010/10.pdf
  
 And a lot more

@@ -5,9 +5,7 @@ import org.jasome.input.Type
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
-import static org.jasome.util.Matchers.containsMetric
 import static org.jasome.util.TestUtil.projectFromSnippet
-import static spock.util.matcher.HamcrestSupport.expect
 import static spock.util.matcher.HamcrestSupport.expect
 
 class FanCalculatorSpec extends Specification {
@@ -47,7 +45,7 @@ class FanCalculatorSpec extends Specification {
 
         Type classA = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassA" }
 
-        Method printDouble = (classA.getMethods() as List<Method>).find {method -> method.name == "public void printDouble(ClassB b)"}
+        Method printDouble = (classA.getMethods() as List<Method>).find { method -> method.name == "public void printDouble(ClassB b)" }
 
         when:
         def result = new FanCalculator().calculate(printDouble);
@@ -55,6 +53,7 @@ class FanCalculatorSpec extends Specification {
         then:
 
         expect result, containsMetric("FOut", 3)
+        expect result, containsMetric("Si", 9)
     }
 
     def "properly counts fan-in within a class"() {
@@ -91,8 +90,8 @@ class FanCalculatorSpec extends Specification {
         org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
 
         Type classB = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassB" }
-        
-        Method getDoubleNumber = (classB.getMethods() as List<Method>).find {method -> method.name == "public int getDoubleNumber()"}
+
+        Method getDoubleNumber = (classB.getMethods() as List<Method>).find { method -> method.name == "public int getDoubleNumber()" }
 
         when:
         def result = new FanCalculator().calculate(getDoubleNumber);
@@ -101,6 +100,7 @@ class FanCalculatorSpec extends Specification {
 
         expect result, containsMetric("Fin", 0)
         expect result, containsMetric("Fout", 2)
+        expect result, containsMetric("Si", 4)
     }
 
     def "properly counts fan-in outside of class"() {
@@ -138,16 +138,18 @@ class FanCalculatorSpec extends Specification {
 
         Type classB = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassB" }
 
-        Method getNumber = (classB.getMethods() as List<Method>).find {method -> method.name == "public int getNumber()"}
+        Method getNumber = (classB.getMethods() as List<Method>).find { method -> method.name == "public int getNumber()" }
 
         when:
         def result = new FanCalculator().calculate(getNumber);
 
         then:
 
-        //TODO: make this pass
         expect result, containsMetric("Fin", 4)
     }
 
+    //TODO: tests for chained method calls
+
+    //TODO: tests for class resolution on complex cross calls, lots of logic in the utils that aren't really tested here
     //TODO: check for toString() being called when using string concatenation?  is this doable?
 }
