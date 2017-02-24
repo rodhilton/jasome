@@ -4,6 +4,7 @@ import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Network;
+import com.google.common.graph.ValueGraph;
 import org.jasome.input.Method;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
@@ -15,7 +16,7 @@ public class FanCalculator implements Calculator<Method> {
     @Override
     public Set<Metric> calculate(Method method) {
 
-        Network<Method, Expression> methodCalls = CalculationUtils.getCallNetwork(method.getParentType().getParentPackage().getParentProject());
+        ValueGraph<Method, Integer> methodCalls = CalculationUtils.getCallNetwork(method.getParentType().getParentPackage().getParentProject());
 
         Set<Method> methodsCalled = methodCalls.successors(method);
 
@@ -23,9 +24,11 @@ public class FanCalculator implements Calculator<Method> {
 
         for(Method methodCalled: methodsCalled) {
 
-            Set<Expression> calls = methodCalls.edgesConnecting(method, methodCalled);
+            fanOut += methodCalls.edgeValue(method, methodCalled);
 
-            fanOut += calls.size();
+//            Set<Expression> calls = methodCalls.(method, methodCalled);
+//
+//            fanOut += calls.size();
         }
 
         Set<Method> methodsCalling = methodCalls.predecessors(method);
@@ -34,9 +37,11 @@ public class FanCalculator implements Calculator<Method> {
 
         for(Method methodCalling: methodsCalling) {
 
-            Set<Expression> calls = methodCalls.edgesConnecting(method, methodCalling);
+            fanIn += methodCalls.edgeValue(methodCalling, method);
 
-            fanIn += calls.size();
+//            Set<Expression> calls = methodCalls.edgesConnecting(methodCalling, method);
+//
+//            fanIn += calls.size();
         }
 
 

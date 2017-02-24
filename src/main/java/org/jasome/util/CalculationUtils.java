@@ -3,6 +3,7 @@ package org.jasome.util;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
@@ -11,6 +12,8 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.graph.*;
 import org.apache.commons.lang3.StringUtils;
@@ -173,7 +176,7 @@ public class CalculationUtils {
 
             for (ClassOrInterfaceType parentType : parentTypes) {
                 if (allClassesByName.containsKey(parentType.getName().getIdentifier())) {
-                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName().getIdentifier(), type, allClassesByName);
+                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName().getIdentifier(), type);
 
                     closestType.ifPresent(c ->
                         graph.putEdge(c, type)
@@ -184,8 +187,8 @@ public class CalculationUtils {
         return ImmutableGraph.copyOf(graph);
     }
 
-    public static Network<Method, Expression> getCallNetwork(Project parentProject) {
-        MutableNetwork<Method, Expression> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
+    public static ValueGraph<Method, Integer> getCallNetwork(Project parentProject) {
+        MutableValueGraph<Method, Integer> network = ValueGraphBuilder.directed().allowsSelfLoops(true).build();
 
 //        Set<Method> allClassesByName = new HashSet<>();
 
@@ -206,12 +209,14 @@ public class CalculationUtils {
 
                 methodCalled = getMethodCalledByMethod(method, methodCall);
 
-                network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), methodCall);
+                Method callee = methodCalled.orElse(Method.UNKNOWN);
+                network.putEdgeValue(method, callee, 1+network.edgeValueOrDefault(method, callee, 0));
+
             }
         }
 
 
-        return ImmutableNetwork.copyOf(network);
+        return ImmutableValueGraph.copyOf(network);
     }
 
     private static Optional<Method> getMethodCalledByMethod(Method method, MethodCallExpr methodCall) {
@@ -234,13 +239,96 @@ public class CalculationUtils {
     private static Optional<Type> determineTypeOf(Expression scope, Method containingMethod) {
         if(scope == null || scope instanceof ThisExpr) return Optional.of(containingMethod.getParentType());
 
+        if(scope instanceof NameExpr) {
+            SimpleName variableName = ((NameExpr)scope).getName();
+            Optional<com.github.javaparser.ast.type.Type> nameType = findTypeOfVariableDeclaration(variableName, scope);
 
+            if(nameType.isPresent()) {
+                if(nameType.get() instanceof ClassOrInterfaceType) {
+                    Optional<Type> closestType = getClosestType((ClassOrInterfaceType) nameType.get(), containingMethod.getParentType());
+                    System.out.println(closestType);
+                    return closestType;
+                } else {
+                    return Optional.empty();
+                }
+            } else {
+                return Optional.empty();
+            }
+
+        }
 
         return Optional.empty();
 
     }
 
-    private static Optional<Type> getClosestTypeWithName(String identifier, Type source, Multimap<String, Type> allClassesByName) {
+    private static Optional<com.github.javaparser.ast.type.Type> findTypeOfVariableDeclaration(SimpleName variableName, Node scope) {
+        List<Node> scopeParents = getAllParentsUpToClassDefinition(scope);
+
+        Node topMostNode = scopeParents.get(0);
+
+
+        com.github.javaparser.ast.type.Type typeCandidate = null;
+        int longestChainLength = 0;
+
+        List<VariableDeclarator> variableDeclarations = topMostNode.getNodesByType(VariableDeclarator.class);
+        for(VariableDeclarator variableDeclarator: variableDeclarations) {
+            List<Node> variableParents = getAllParentsUpToClassDefinition(variableDeclarator);
+            if(scopeParents.containsAll(variableParents)) {
+                //This variable is defined in the scope we care about
+                if(variableParents.size() > longestChainLength) {
+                    typeCandidate = variableDeclarator.getType();
+                    longestChainLength = variableParents.size();
+                }
+            }
+        }
+
+        List<VariableDeclarationExpr> variableDeclarationExprs = topMostNode.getNodesByType(VariableDeclarationExpr.class);
+        for(VariableDeclarationExpr variableDeclarationExpr: variableDeclarationExprs) {
+            List<Node> variableParents = getAllParentsUpToClassDefinition(variableDeclarationExpr);
+            if(scopeParents.containsAll(variableParents)) {
+                //This variable is defined in the scope we care about
+                if(variableParents.size() > longestChainLength) {
+                    typeCandidate = variableDeclarationExpr.getCommonType();
+                    longestChainLength = variableParents.size();
+                }
+            }
+        }
+
+        List<Parameter> parameters = topMostNode.getNodesByType(Parameter.class);
+        for(Parameter parameter: parameters) {
+            List<Node> parameterParents = getAllParentsUpToClassDefinition(parameter);
+            if(scopeParents.containsAll(parameterParents)) {
+                //This variable is defined in the scope we care about
+                if(parameterParents.size() > longestChainLength) {
+                    typeCandidate = parameter.getType();
+                    longestChainLength = parameterParents.size();
+                }
+            }
+        }
+
+        return Optional.ofNullable(typeCandidate);
+    }
+
+    private static List<Node> getAllParentsUpToClassDefinition(Node scope) {
+        List<Node> parents = new ArrayList<>();
+        while(scope.getParentNode().isPresent()) {
+            Node parent = scope.getParentNode().get();
+            parents.add(parent);
+            scope = parent;
+        }
+        return Lists.reverse(parents);
+    }
+
+    private static Optional<Type> getClosestTypeWithName(String identifier, Type source) {
+        Multimap<String, Type> allClassesByName = HashMultimap.create();
+
+        source.getParentPackage().getParentProject().getPackages()
+                .parallelStream()
+                .map(Package::getTypes)
+                .flatMap(Set::stream)
+                .forEach(type -> allClassesByName.put(type.getName(), type));
+
+
         Collection<Type> matchingTypes = allClassesByName.get(identifier);
         List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
             @Override
@@ -258,5 +346,34 @@ public class CalculationUtils {
             return Optional.empty();
         }
         
+    }
+
+    private static Optional<Type> getClosestType(ClassOrInterfaceType target, Type source) {
+        Multimap<SimpleName, Type> allClassesByName = HashMultimap.create();
+
+        source.getParentPackage().getParentProject().getPackages()
+                .parallelStream()
+                .map(Package::getTypes)
+                .flatMap(Set::stream)
+                .forEach(type -> allClassesByName.put(type.getSource().getName(), type));
+
+
+        Collection<Type> matchingTypes = allClassesByName.get(target.getName());
+        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
+            @Override
+            public int compare(Type t1, Type t2) {
+                int firstCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t1.getParentPackage().getName()).length();
+                int secondCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t2.getParentPackage().getName()).length();
+
+                return ((Integer) firstCharsInCommon).compareTo(secondCharsInCommon);
+            }
+        }).collect(Collectors.toList());
+
+        if(matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage.size() > 0) {
+            return Optional.of(matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage.get(0));
+        } else {
+            return Optional.empty();
+        }
+
     }
 }

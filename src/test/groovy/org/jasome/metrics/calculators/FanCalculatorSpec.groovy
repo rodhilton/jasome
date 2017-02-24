@@ -146,8 +146,7 @@ class FanCalculatorSpec extends Specification {
         then:
 
         //TODO: make this pass
-        //expect result, containsMetric("Fin", 4)
-        true
+        expect result, containsMetric("Fin", 4)
     }
 
     //TODO: check for toString() being called when using string concatenation?  is this doable?
