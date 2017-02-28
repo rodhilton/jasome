@@ -1,19 +1,25 @@
 package org.jasome.input;
 
 import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
 public abstract class Scanner<T> {
-    
+
     protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode) {
-        Project project = new Project();
+        return doScan(sourceCode, "root");
+    }
+
+    protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectName) {
+        Project project = new Project(projectName);
 
         Map<String, List<Pair<ClassOrInterfaceDeclaration, Map<String, String>>>> packages = gatherPackages(sourceCode);
 
@@ -80,18 +86,22 @@ public abstract class Scanner<T> {
             String sourceCode = sourceFile.getLeft();
             Map<String, String> attributes = sourceFile.getRight();
             
-            CompilationUnit cu = JavaParser.parse(sourceCode);
+            try {
+                CompilationUnit cu = JavaParser.parse(sourceCode);
 
-            String packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString()).orElse("default");
+                String packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString()).orElse("default");
 
-            List<ClassOrInterfaceDeclaration> classes = cu.getNodesByType(ClassOrInterfaceDeclaration.class);
+                List<ClassOrInterfaceDeclaration> classes = cu.getNodesByType(ClassOrInterfaceDeclaration.class);
 
-            if (!packages.containsKey(packageName)) {
-                packages.put(packageName, new ArrayList<>());
-            }
+                if (!packages.containsKey(packageName)) {
+                    packages.put(packageName, new ArrayList<>());
+                }
 
-            for (ClassOrInterfaceDeclaration clazz : classes) {
-                packages.get(packageName).add(Pair.of(clazz, attributes));
+                for (ClassOrInterfaceDeclaration clazz : classes) {
+                    packages.get(packageName).add(Pair.of(clazz, attributes));
+                }
+            } catch(ParseProblemException e) {
+                System.err.println("Unable to parse code, ignoring.  Started with: "+ StringUtils.abbreviate(sourceCode, 80));
             }
         }
 

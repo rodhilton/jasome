@@ -1,5 +1,10 @@
 package org.jasome.util;
 
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.ast.visitor.EqualsVisitor;
+
+import java.util.Optional;
+
 /**
  * A lot of the JavaParser node types have their own equals and hashCode methods which use the EqualsVisitor to determine if they are equal,
  * but often they only include certain aspects of the element in the equality consideration.  For example, if you have two distinct method calls
@@ -12,25 +17,30 @@ package org.jasome.util;
  *
  * @param <T>
  */
-public class Distinct<T> {
-    private T wrapped;
+public class DistinctNode<T extends Node> {
+    private Node wrapped;
 
-    private Distinct(T wrapped) {
+    private DistinctNode(T wrapped) {
         this.wrapped = wrapped;
     }
 
-    public static <T> Distinct<T> of(T toWrap) {
-        return new Distinct<>(toWrap);
+    public static <T extends Node> DistinctNode<T> of(T toWrap) {
+        return new DistinctNode<>(toWrap);
     }
 
     @Override
     public boolean equals(Object o) {
-        if(!(o instanceof Distinct)) return false;
+        if(!(o instanceof DistinctNode)) return false;
         else {
-            Distinct other = (Distinct)o;
-            return other.wrapped == this.wrapped;
+            DistinctNode other = (DistinctNode)o;
+            return areEqual(Optional.of(other.wrapped), Optional.of(this.wrapped));
         }
-        
+    }
+
+    private boolean areEqual(Optional<Node> one, Optional<Node> two) {
+        if(!one.isPresent() && !two.isPresent()) return true;
+        else if(!one.isPresent() || !two.isPresent()) return false;
+        else return EqualsVisitor.equals(one.get(), two.get()) && areEqual(one.get().getParentNode(), two.get().getParentNode());
     }
 
     @Override
@@ -38,7 +48,9 @@ public class Distinct<T> {
         return System.identityHashCode(wrapped);
     }
 
-    public T get() {
+    public Node get() {
         return wrapped;
     }
+
+
 }

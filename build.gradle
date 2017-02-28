@@ -34,5 +34,6 @@ dependencies {
         exclude module: 'groovy-all' //Already bringing groovy in
     }
     testCompile group: 'org.mockito', name: 'mockito-all', version: '1.10.19'
+    testCompile group: 'com.github.javafaker', name: 'javafaker', version: '0.12'
 }
 

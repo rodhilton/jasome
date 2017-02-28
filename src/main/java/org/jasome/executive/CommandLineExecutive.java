@@ -68,9 +68,13 @@ public class CommandLineExecutive {
 
             scanner.setFilter(fileFilter);
 
+            long startTime = System.currentTimeMillis();
+
             Project scannerOutput = scanner.scan();
 
             ProcessorFactory.getProcessor().process(scannerOutput);
+
+            long endTime = System.currentTimeMillis();
 
             try {
                 Document outputDocument = new XMLOutputter().output(scannerOutput);
@@ -85,6 +89,7 @@ public class CommandLineExecutive {
                 if (line.hasOption("output")) {
                     String outputLocation = line.getOptionValue("output");
                     result = new StreamResult(new File(outputLocation));
+                    System.out.println("Operation completed in "+((endTime - startTime)/1000)+" seconds, output written to "+outputLocation);
                 } else {
                     result = new StreamResult(System.out);
                 }

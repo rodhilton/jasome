@@ -30,7 +30,8 @@ class ProcessorFactory {
         processor.registerTypeCalculator(new LackOfCohesionMethodsCalculator());
 
         processor.registerTypeCalculator(new ClassInheritanceCalculator());
-        processor.registerMethodCalculator(new FanCalculator());
+
+        processor.registerMethodCalculator(new FanCalculator());  //This one is really slow, adds about 2 minutes on a normal project
         return processor;
     }
 }

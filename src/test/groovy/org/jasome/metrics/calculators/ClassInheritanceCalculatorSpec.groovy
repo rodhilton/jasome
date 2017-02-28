@@ -1,8 +1,5 @@
 package org.jasome.metrics.calculators
 
-import com.google.common.graph.Graph
-import com.google.common.graph.GraphBuilder
-import com.google.common.graph.NetworkBuilder
 import org.jasome.input.Type
 import spock.lang.Specification
 
@@ -169,14 +166,14 @@ class ClassInheritanceCalculatorSpec extends Specification {
         class ClassY implements I2 {
 
         }
-        ''','''
+        ''', '''
         package org.whatever.stuff.far.away;
         
            
         interface I2 {
         
         }
-        ''','''
+        ''', '''
         package org.whatever.stuff.close;
         
         interface I1 {
@@ -188,7 +185,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>).find { type -> type.name == "org.whatever.stuff" }
 
         Type classY = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassY" }
 
@@ -201,8 +198,106 @@ class ClassInheritanceCalculatorSpec extends Specification {
         expect resultY, containsMetric("NOPa", 1)
     }
 
+    def "completely ignores classes it doesn't know about"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassY implements Serializable {
+
+        }
+        '''
+
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>).find { type -> type.name == "org.whatever.stuff" }
+
+        Type classY = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassY" }
+
+        when:
+        def resultY = new ClassInheritanceCalculator().calculate(classY);
+
+        then:
+
+        expect resultY, containsMetric("NOA", 0)
+        expect resultY, containsMetric("NOPa", 0)
+    }
 
 
-    //TODO: inner classes, make sure getIdentifier is the way to go
+    def "properly handles inner classes"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        import org.whatever.stuff.far.away.*; //ignore the import
+
+        class Outer {
+
+            public static class Inner {
+                public void sayHello() {
+                    System.out.println("hi!");
+                }
+            }     
+        }        
+        ''', '''
+        package org.whatever.stuff2;
+        
+           
+        class ClassX extends Outer.Inner {
+        
+        }
+        '''
+
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>).find { type -> type.name == "org.whatever.stuff2" }
+
+        Type classY = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassX" }
+
+        when:
+        def resultY = new ClassInheritanceCalculator().calculate(classY);
+
+        then:
+
+        expect resultY, containsMetric("NOA", 1)
+        expect resultY, containsMetric("NOPa", 1)
+    }
+
+    def "properly handles inner classes even when statically imported"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        import org.whatever.stuff.far.away.*; //ignore the import
+
+        class Outer {
+
+            public static class Inner {
+                public void sayHello() {
+                    System.out.println("hi!");
+                }
+            }     
+        }        
+        ''', '''
+        package org.whatever.stuff2;
+        
+        import static org.whatever.stuff.Outer.*;
+           
+        class ClassX extends Inner {
+        
+        }
+        '''
+
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>).find { type -> type.name == "org.whatever.stuff2" }
+
+        Type classY = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassX" }
+
+        when:
+        def resultY = new ClassInheritanceCalculator().calculate(classY);
+
+        then:
+
+        expect resultY, containsMetric("NOA", 1)
+        expect resultY, containsMetric("NOPa", 1)
+    }
 
 }
