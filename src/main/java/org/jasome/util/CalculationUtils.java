@@ -349,7 +349,7 @@ public class CalculationUtils {
 //        System.out.println("getAllParentsUpToClassDefinition");
 
         if(GETALLPARENTSCACHE.containsKey(scope)) {
-            System.out.println("!!!!cache hit in getAllParentsUpToClassDefinition");
+            //System.out.println("!!!!cache hit in getAllParentsUpToClassDefinition");
             return GETALLPARENTSCACHE.get(scope);
         }
         else {
@@ -362,7 +362,7 @@ public class CalculationUtils {
             }
             List<Node> reversedParents = Lists.reverse(parents);
             GETALLPARENTSCACHE.put(scope, reversedParents);
-            return parents;
+            return reversedParents;
         }
     }
 
