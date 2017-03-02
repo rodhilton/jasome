@@ -187,6 +187,44 @@ public class CalculationUtils {
         return ImmutableGraph.copyOf(graph);
     }
 
+    public static LoadingCache<Project, Network<Method, Distinct<Expression>>> callNetwork = CacheBuilder.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .build(new CacheLoader<Project, Network<Method, Distinct<Expression>>>() {
+                @Override
+                public Network<Method, Distinct<Expression>> load(Project parentProject) throws Exception {
+                    MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
+
+//        Set<Method> allClassesByName = new HashSet<>();
+
+                    Set<Method> allMethods = parentProject.getPackages()
+                            .parallelStream()
+                            .map(Package::getTypes)
+                            .flatMap(Set::stream).map(Type::getMethods).flatMap(Set::stream).collect(Collectors.toSet());
+
+                    for(Method method: allMethods) {
+                        network.addNode(method);
+
+                        List<MethodCallExpr> calls = method.getSource().getNodesByType(MethodCallExpr.class);
+
+                        //TODO: not using this yet
+                        List<MethodReferenceExpr> references = method.getSource().getNodesByType(MethodReferenceExpr.class);
+
+                        for(MethodCallExpr methodCall: calls) {
+
+                            Optional<Method> methodCalled;
+
+                            methodCalled = getMethodCalledByMethodExpression(method, methodCall);
+
+                            network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), Distinct.of(methodCall));
+
+                        }
+                    }
+
+
+                    return ImmutableNetwork.copyOf(network);
+                }
+            });
+
     public static Network<Method, Distinct<Expression>> getCallNetwork(Project parentProject) {
         MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
 
@@ -458,8 +496,10 @@ public class CalculationUtils {
         Map<SimpleName, Collection<Type>> allClassesByName = getAllClassesForProject(source.getParentPackage().getParentProject());
 
 
+        if(!allClassesByName.containsKey(target.getName())) return Optional.empty(); //The referenced class is not in this project, might be in a dependency, or something from Java itself (Serializable, Comparable, etc)
+
         Collection<Type> matchingTypes = allClassesByName.get(target.getName());
-        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.parallelStream().sorted(new Comparator<Type>() {
+        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
             @Override
             public int compare(Type t1, Type t2) {
                 int firstCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t1.getParentPackage().getName()).length();

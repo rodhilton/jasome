@@ -148,7 +148,7 @@ class FanCalculatorSpec extends Specification {
     }
 
     //TODO: tests for chained method calls
-
+    //TODO: tests for method references in lambdas rather than direct calls
     //TODO: tests for class resolution on complex cross calls, lots of logic in the utils that aren't really tested here
     //TODO: check for toString() being called when using string concatenation?  is this doable?
 }
