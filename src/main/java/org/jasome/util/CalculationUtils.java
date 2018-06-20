@@ -38,14 +38,14 @@ public class CalculationUtils {
 
                     //If we have a field match we can just count it, it's directly prefixed with 'this.' so there's no room for shadowing
 
-                    boolean anyDirectAccess = fieldAccesses.parallelStream().anyMatch(fieldAccessExpr -> fieldAccessExpr.getName().equals(variable.getName()));
+                    boolean anyDirectAccess = fieldAccesses.stream().anyMatch(fieldAccessExpr -> fieldAccessExpr.getName().equals(variable.getName()));
 
                     if (anyDirectAccess) return true;
                     else {
                         List<NameExpr> nameAccesses = method.getBody().get().getNodesByType(NameExpr.class);
 
                         boolean anyIndirectAccess = nameAccesses
-                                .parallelStream()
+                                .stream()
                                 .anyMatch(nameAccessExpr -> {
 
 
@@ -54,7 +54,7 @@ public class CalculationUtils {
                                     List<VariableDeclarator> variablesDefinedInMethod = method.getNodesByType(VariableDeclarator.class);
 
                                     boolean isVariableRedefinedInScope = variablesDefinedInMethod
-                                            .parallelStream()
+                                            .stream()
                                             .anyMatch(variableDeclaration -> {
                                                 //if any of these variables have all their parents in the allBlocks list above, then that variable shadows nameExpr (as long as the name matches)
                                                 //It essentially means that this variable declaration is BETWEEN the variable access and the method declaration, which means this variable
@@ -70,7 +70,7 @@ public class CalculationUtils {
                                             });
 
                                     boolean isVariableRedefinedByMethodSignature = method.getParameters()
-                                            .parallelStream()
+                                            .stream()
                                             .anyMatch(parameter -> parameter.getName().equals(nameAccessExpr.getName()));
 
 
@@ -110,42 +110,46 @@ public class CalculationUtils {
         return blocksOnPathToMethodDeclaration;
     }
 
-    private static LoadingCache<Project, Graph<Type>> inheritanceGraph = CacheBuilder.newBuilder()
+    public static LoadingCache<Project, Graph<Type>> inheritanceGraph = CacheBuilder.newBuilder()
             .expireAfterWrite(10, TimeUnit.MINUTES)
             .build(new CacheLoader<Project, Graph<Type>>() {
                 @Override
-                public Graph<Type> load(Project project) throws Exception {
+                public Graph<Type> load(Project parentProject) throws Exception {
                     MutableGraph<Type> graph = GraphBuilder.directed().build();
 
-                    Map<String, Type> allClassesByName = project.getPackages()
-                            .parallelStream()
+                    Multimap<String, Type> allClassesByName = HashMultimap.create();
+
+                    parentProject.getPackages()
+                            .stream()
                             .map(Package::getTypes)
                             .flatMap(Set::stream)
-                            .collect(Collectors.toMap(Type::getName, t -> t));
+                            .forEach(type -> allClassesByName.put(type.getName(), type));
 
-                    //TODO: make this a little smarter - basically when adding an edge based on a use, see if that 'use' is
-                    //of a class that has the same name in multiple packages.  if so, use the one in the current type's package.
-                    //otherwise just pick one deterministically, we're not parsing import statements.  Maybe pick the one
-                    //whose package name has the most characters in common with the types ("closer"). What to do if equal?
-                    //Can they be equal?  would that mean that both target types have the same package, which wouldn't be allowed?
+                    Set<Type> allClasses = parentProject.getPackages()
+                            .stream()
+                            .map(Package::getTypes)
+                            .flatMap(Set::stream)
+                            .collect(Collectors.toSet());
 
-                    for (Type type : allClassesByName.values()) {
+                    for (Type type :allClasses) {
                         List<ClassOrInterfaceType> extendedTypes = type.getSource().getExtendedTypes();
                         List<ClassOrInterfaceType> implementedTypes = type.getSource().getImplementedTypes();
 
-                        for (ClassOrInterfaceType extendedType : extendedTypes) {
-                            if (allClassesByName.containsKey(extendedType.getName().getIdentifier())) {
-                                graph.putEdge(allClassesByName.get(extendedType.getName().getIdentifier()), type);
-                            }
-                        }
+                        graph.addNode(type);
 
-                        for (ClassOrInterfaceType implementedType : implementedTypes) {
-                            if (allClassesByName.containsKey(implementedType.getName().getIdentifier())) {
-                                graph.putEdge(allClassesByName.get(implementedType.getName().getIdentifier()), type);
-                            }
+                        List<ClassOrInterfaceType> parentTypes = new ArrayList<>();
+                        parentTypes.addAll(extendedTypes);
+                        parentTypes.addAll(implementedTypes);
+
+                        for (ClassOrInterfaceType parentType : parentTypes) {
+                            Optional<Type> closestType = getClosestTypeWithName(parentType.getName(), type);
+
+                            closestType.ifPresent(c ->
+                                    graph.putEdge(c, type)
+                            );
                         }
                     }
-                    return graph;
+                    return ImmutableGraph.copyOf(graph);
                 }
             });
 
@@ -161,7 +165,7 @@ public class CalculationUtils {
                 .forEach(type -> allClassesByName.put(type.getName(), type));
 
         Set<Type> allClasses = parentProject.getPackages()
-                .parallelStream()
+                .stream()
                 .map(Package::getTypes)
                 .flatMap(Set::stream)
                 .collect(Collectors.toSet());
@@ -194,10 +198,12 @@ public class CalculationUtils {
                 public Network<Method, Distinct<Expression>> load(Project parentProject) throws Exception {
                     MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
 
+                    System.out.println("should only be here once...");
+
 //        Set<Method> allClassesByName = new HashSet<>();
 
                     Set<Method> allMethods = parentProject.getPackages()
-                            .parallelStream()
+                            .stream()
                             .map(Package::getTypes)
                             .flatMap(Set::stream).map(Type::getMethods).flatMap(Set::stream).collect(Collectors.toSet());
 
@@ -230,8 +236,17 @@ public class CalculationUtils {
 
 //        Set<Method> allClassesByName = new HashSet<>();
 
+        Map<String, List<String>> mapOfTypeNamesToPackagesContainingThem = new HashMap<>();
+
+        parentProject.getPackages()
+                .stream()
+                .map(Package::getTypes).flatMap(Set::stream).forEach(type -> {
+                   mapOfTypeNamesToPackagesContainingThem.putIfAbsent(type.getName(), new ArrayList<String>());
+                   mapOfTypeNamesToPackagesContainingThem.get(type.getName()).add(type.getParentPackage().getName());
+        });
+
         Set<Method> allMethods = parentProject.getPackages()
-                .parallelStream()
+                .stream()
                 .map(Package::getTypes)
                 .flatMap(Set::stream).map(Type::getMethods).flatMap(Set::stream).collect(Collectors.toSet());
 
@@ -264,7 +279,7 @@ public class CalculationUtils {
         Optional<Type> scopeType  = determineTypeOf_CACHED(methodCallScope.orElse(null), containingMethod);
 
         if(scopeType.isPresent()) {
-            Optional<Method> matching = scopeType.get().getMethods().parallelStream().filter(m->
+            Optional<Method> matching = scopeType.get().getMethods().stream().filter(m->
                     m.getSource().getName().equals(methodCall.getName()) && m.getSource().getParameters().size() == methodCall.getArguments().size()
             ).findFirst();
 
@@ -293,6 +308,7 @@ public class CalculationUtils {
 
         if(scope instanceof NameExpr) {
             SimpleName variableName = ((NameExpr)scope).getName();
+            //TODO: cache this, we might be looking up the same variable multiple times
             Optional<com.github.javaparser.ast.type.Type> nameType = findTypeOfVariableDeclaration(variableName, scope);
 
             if(nameType.isPresent()) {
@@ -328,9 +344,47 @@ public class CalculationUtils {
             com.github.javaparser.ast.type.Type typeCandidate = null;
             int longestChainLength = 0;
 
+            Map<SimpleName, List<Pair<com.github.javaparser.ast.type.Type, Node>>> declarationsAndScopes = new HashMap<>();
+
             List<VariableDeclarator> variableDeclarations = topMostNode.getNodesByType(VariableDeclarator.class);
             for (VariableDeclarator variableDeclarator : variableDeclarations) {
-                if (variableDeclarator.getName().equals(variableName)) {
+                declarationsAndScopes.putIfAbsent(variableDeclarator.getName(), new ArrayList<>());
+                declarationsAndScopes.get(variableDeclarator.getName()).add(Pair.of(variableDeclarator.getType(), variableDeclarator));
+            }
+
+            List<VariableDeclarationExpr> variableDeclarationExprs = topMostNode.getNodesByType(VariableDeclarationExpr.class);
+            for (VariableDeclarationExpr variableDeclarationExpr : variableDeclarationExprs) {
+                for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
+                    declarationsAndScopes.putIfAbsent(variableDeclarator.getName(), new ArrayList<>());
+                    declarationsAndScopes.get(variableDeclarator.getName()).add(Pair.of(variableDeclarator.getType(), variableDeclarator));
+                }
+            }
+
+            List<Parameter> parameters = topMostNode.getNodesByType(Parameter.class);
+            for (Parameter parameter : parameters) {
+                declarationsAndScopes.putIfAbsent(parameter.getName(), new ArrayList<>());
+                declarationsAndScopes.get(parameter.getName()).add(Pair.of(parameter.getType(), parameter));
+            }
+
+
+            if(declarationsAndScopes.containsKey(variableName)) {
+
+                for(Pair<com.github.javaparser.ast.type.Type, Node> variableParents: declarationsAndScopes.get(variableName) ) {
+                    List<Node> parents = getAllParentsUpToClassDefinition(variableParents.getRight());
+                    if (scopeParentsSet.containsAll(parents)) {
+                        //This variable is defined in the scope we care about
+                        if (parents.size() > longestChainLength) {
+                            typeCandidate = variableParents.getLeft();
+                            longestChainLength = parents.size();
+                        }
+                    }
+
+                }
+
+            }
+
+
+            /*if (variableDeclarator.getName().equals(variableName)) {
                     List<Node> variableParents = getAllParentsUpToClassDefinition(variableDeclarator);
                     if (scopeParentsSet.containsAll(variableParents)) {
                         //This variable is defined in the scope we care about
@@ -339,38 +393,9 @@ public class CalculationUtils {
                             longestChainLength = variableParents.size();
                         }
                     }
-                }
-            }
+                }*/
 
-            List<VariableDeclarationExpr> variableDeclarationExprs = topMostNode.getNodesByType(VariableDeclarationExpr.class);
-            for (VariableDeclarationExpr variableDeclarationExpr : variableDeclarationExprs) {
-                for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
-                    if (variableDeclarator.getName().equals(variableName)) {
-                        List<Node> variableParents = getAllParentsUpToClassDefinition(variableDeclarator);
-                        if (scopeParentsSet.containsAll(variableParents)) {
-                            //This variable is defined in the scope we care about
-                            if (variableParents.size() > longestChainLength) {
-                                typeCandidate = variableDeclarator.getType();
-                                longestChainLength = variableParents.size();
-                            }
-                        }
-                    }
-                }
-            }
-
-            List<Parameter> parameters = topMostNode.getNodesByType(Parameter.class);
-            for (Parameter parameter : parameters) {
-                if (parameter.getName().equals(variableName)) {
-                    List<Node> parameterParents = getAllParentsUpToClassDefinition(parameter);
-                    if (scopeParentsSet.containsAll(parameterParents)) {
-                        //This variable is defined in the scope we care about
-                        if (parameterParents.size() > longestChainLength) {
-                            typeCandidate = parameter.getType();
-                            longestChainLength = parameterParents.size();
-                        }
-                    }
-                }
-            }
+            //Set<Node> variableParents = new HashSet<>(getAllParentsUpToClassDefinition(variableDeclarator));
 
             Optional<com.github.javaparser.ast.type.Type> answer = Optional.ofNullable(typeCandidate);
             variableTypes.put(Pair.of(Distinct.of(variableName), Distinct.of(scope)), answer);
@@ -425,7 +450,7 @@ public class CalculationUtils {
         if(!allClassesByName.containsKey(identifier)) return Optional.empty(); //The referenced class is not in this project, might be in a dependency, or something from Java itself (Serializable, Comparable, etc)
 
         Collection<Type> matchingTypes = allClassesByName.get(identifier);
-        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.parallelStream().sorted(new Comparator<Type>() {
+        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
             @Override
             public int compare(Type t1, Type t2) {
                 int firstCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t1.getParentPackage().getName()).length();
@@ -502,6 +527,7 @@ public class CalculationUtils {
         List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
             @Override
             public int compare(Type t1, Type t2) {
+                System.out.println("test");
                 int firstCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t1.getParentPackage().getName()).length();
                 int secondCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t2.getParentPackage().getName()).length();
 

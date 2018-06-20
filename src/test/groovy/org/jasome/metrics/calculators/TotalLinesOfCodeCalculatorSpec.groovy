@@ -106,7 +106,7 @@ class TotalLinesOfCodeCalculatorSpec extends Specification {
             import line2.stuff.junk;
 
             class Example {                      //1
-                synchronized int x=5;            //2
+                int x=5;                         //2
 
                 synchronized void method() {     //3
                     System.out.println("test");  //4

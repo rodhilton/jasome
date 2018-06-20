@@ -147,6 +147,54 @@ class FanCalculatorSpec extends Specification {
         expect result, containsMetric("Fin", 4)
     }
 
+    def "properly figures out correct types"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassA {
+        
+            public void print() {
+                System.out.println("A");           
+            }
+
+        }
+        
+        class ClassB {
+            public void print() {
+                System.out.println("B");            
+            }
+        }
+        
+        class ClassC {
+            private ClassA thingy, thingy2;
+            
+            public ClassC(ClassA thingy) {
+                this.thingy = thingy;
+            }
+        
+            public void doPrint(ClassB thingy) {
+                ClassA otherThing = new ClassA();
+                thingy.print();
+                otherThing.print();
+            }
+        }
+        '''
+
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
+
+        Type classC = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassC" }
+
+        Method getNumber = (classC.getMethods() as List<Method>).find { method -> method.name == "public void doPrint(ClassB thingy)" }
+
+        when:
+        def result = new FanCalculator().calculate(getNumber);
+
+        then:
+        expect result, containsMetric("Fout", 2)
+    }
+
     //TODO: tests for chained method calls
     //TODO: tests for method references in lambdas rather than direct calls
     //TODO: tests for class resolution on complex cross calls, lots of logic in the utils that aren't really tested here

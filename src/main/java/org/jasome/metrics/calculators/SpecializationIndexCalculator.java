@@ -99,7 +99,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     }
 
     private Set<Type> getParentTypes(Type type) {
-        Graph<Type> typeGraph = CalculationUtils.getInheritanceGraph(type.getParentPackage().getParentProject());
+        Graph<Type> typeGraph = CalculationUtils.inheritanceGraph.getUnchecked(type.getParentPackage().getParentProject());
         return typeGraph.predecessors(type);
     }
 

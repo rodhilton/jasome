@@ -1,5 +1,10 @@
 package org.jasome.input;
 
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
@@ -26,7 +31,7 @@ public class FileScanner extends Scanner {
     public Project scan() {
 
         Collection<File> inputFiles = gatherFilesFrom(scanDir, filter);
-
+        
         Collection<Pair<String, Map<String, String>>> sourceCodeWithAttributes = inputFiles
                 .stream()
                 .<Optional<Pair<String, Map<String, String>>>>map(file -> {
@@ -41,7 +46,7 @@ public class FileScanner extends Scanner {
                     }
                 }).filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
 
-        Project project = doScan(sourceCodeWithAttributes);
+        Project project = doScan(sourceCodeWithAttributes, scanDir.getAbsolutePath());
 
         project.addAttribute("sourceDir", scanDir.getAbsolutePath());
 

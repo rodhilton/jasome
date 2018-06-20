@@ -19,13 +19,13 @@ import java.util.stream.Collectors;
 public class RobertMartinCouplingCalculator implements Calculator<Package> {
     @Override
     public Set<Metric> calculate(Package aPackage) {
-        Map<String, Type> allClassesOutsideOfPackage = aPackage.getParentProject().getPackages()
+        Map<String, List<Type>> allClassesOutsideOfPackage = aPackage.getParentProject().getPackages()
                 .parallelStream()
                 .filter(p -> p != aPackage)
                 .map(Package::getTypes)
                 .flatMap(Set::stream)
-                .filter(type -> type.getSource().isPublic()) //only public classes count, nothing else is visible outside of the package
-                .collect(Collectors.toMap(Type::getName, t -> t));
+                .filter(type -> type.getSource().isPublic()) //only public classes count, nothing else is visible outside of the package)
+                .collect(Collectors.groupingBy(Type::getName));
 
         Map<String, Type> allClassesInsideOfPackage = aPackage.getTypes()
                 .parallelStream()
@@ -60,27 +60,29 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
             }
         }
 
-        for (Type typeOutsidePackage : allClassesOutsideOfPackage.values()) {
-            List<ClassOrInterfaceType> referencedTypes = typeOutsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
+        for (List<Type> typesOutsidePackage : allClassesOutsideOfPackage.values()) {
+            for (Type typeOutsidePackage : typesOutsidePackage) {
+                List<ClassOrInterfaceType> referencedTypes = typeOutsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
 
-            long numberOfTypesReferencedThatAreInsideThisPackage = referencedTypes
-                    .parallelStream()
-                    .map(typ -> typ.getName().getIdentifier())
-                    .filter(typeName ->
-                            allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
-                    ).count();
+                long numberOfTypesReferencedThatAreInsideThisPackage = referencedTypes
+                        .parallelStream()
+                        .map(typ -> typ.getName().getIdentifier())
+                        .filter(typeName ->
+                                allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
+                        ).count();
 
-            List<SimpleName> referencedNames = typeOutsidePackage.getSource().getNodesByType(SimpleName.class);
+                List<SimpleName> referencedNames = typeOutsidePackage.getSource().getNodesByType(SimpleName.class);
 
-            long numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage = referencedNames
-                    .parallelStream()
-                    .map(SimpleName::getIdentifier)
-                    .filter(typeName ->
-                            allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
-                    ).count();
+                long numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage = referencedNames
+                        .parallelStream()
+                        .map(SimpleName::getIdentifier)
+                        .filter(typeName ->
+                                allClassesInsideOfPackage.containsKey(typeName) && !allClassesOutsideOfPackage.containsKey(typeName)
+                        ).count();
 
-            if (numberOfTypesReferencedThatAreInsideThisPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage > 0) {
-                afferentCoupling = afferentCoupling.plus(LargeInteger.ONE);
+                if (numberOfTypesReferencedThatAreInsideThisPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage > 0) {
+                    afferentCoupling = afferentCoupling.plus(LargeInteger.ONE);
+                }
             }
         }
 

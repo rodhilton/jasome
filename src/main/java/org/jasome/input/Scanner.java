@@ -2,24 +2,75 @@ package org.jasome.input;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import org.apache.commons.lang3.StringUtils;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
 
+import java.io.File;
 import java.util.*;
 
 public abstract class Scanner<T> {
 
-    protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode) {
-        return doScan(sourceCode, "root");
-    }
+    protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
+        Set<File> sourceDirs = new HashSet<>();
 
-    protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectName) {
-        Project project = new Project(projectName);
+        for (Pair<String, Map<String, String>> sourceFile : sourceCode) {
+            String sourceCodeContent = sourceFile.getLeft();
+            Map<String, String> attributes = sourceFile.getRight();
+
+            try {
+                CompilationUnit cu = JavaParser.parse(sourceCodeContent);
+
+                String sourceFileName = attributes.get("sourceFile");
+
+                Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
+
+                if(packageName.isPresent()) {
+                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator)+"/";
+                    String sourceDir = FilenameUtils.getPath(sourceFileName);
+                    String baseSourceDir = sourceDir.replace(packagePrefix, "");
+                    String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
+                    sourceDirs.add(new File(finalSourceBaseDir));
+                } else {
+                    sourceDirs.add(new File(FilenameUtils.getPath(sourceFileName)));
+                }
+
+            } catch(ParseProblemException e) {
+                String file = attributes.get("sourceFile");
+                System.err.format("Unable to parse code from file %s, ignoring", file);
+                System.err.print(e.getProblems());
+            }
+        }
+
+        Project project = new Project(FilenameUtils.getBaseName(projectPath));
+
+        TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
+
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(reflectionTypeSolver);
+
+        for(File sourceDir: sourceDirs) {
+            combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
+        }
+
+        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+
+        project.setSymbolSolver(symbolSolver);
+
+        ParserConfiguration parserConfiguration = new ParserConfiguration()
+                .setAttributeComments(false)
+                .setSymbolResolver(symbolSolver);
+        JavaParser.setStaticConfiguration(parserConfiguration);
+
 
         Map<String, List<Pair<ClassOrInterfaceDeclaration, Map<String, String>>>> packages = gatherPackages(sourceCode);
 
@@ -40,12 +91,12 @@ public abstract class Scanner<T> {
                 }
 
                 //We need to convert the constructor declarations to method declarations because we treat them the same, but javaparser don't have them sharing a useful common type
-                for (ConstructorDeclaration constructorDeclaration : classDefinition.getNodesByType(ConstructorDeclaration.class)) {
+                for (ConstructorDeclaration constructorDeclaration : classDefinition.findAll(ConstructorDeclaration.class)) {
                     MethodDeclaration constructorMethodDeclaration = new MethodDeclaration(
                             constructorDeclaration.getModifiers(),
                             constructorDeclaration.getAnnotations(),
                             constructorDeclaration.getTypeParameters(),
-                            new ClassOrInterfaceType(classDefinition.getName().getIdentifier()),
+                            JavaParser.parseClassOrInterfaceType(classDefinition.getName().getIdentifier()),
                             constructorDeclaration.getName(),
                             false,
                             constructorDeclaration.getParameters(),
@@ -72,7 +123,7 @@ public abstract class Scanner<T> {
 
             }
         }
-        
+
         return project;
 
     }
@@ -101,7 +152,9 @@ public abstract class Scanner<T> {
                     packages.get(packageName).add(Pair.of(clazz, attributes));
                 }
             } catch(ParseProblemException e) {
-                System.err.println("Unable to parse code, ignoring.  Started with: "+ StringUtils.abbreviate(sourceCode, 80));
+                String file = attributes.get("sourceFile");
+                System.err.format("Unable to parse code from file %s, ignoring", file);
+                System.err.print(e.getProblems());
             }
         }
 

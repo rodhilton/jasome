@@ -36,11 +36,9 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
-
-        Type typeA = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "A"}
-        Type typeC = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
-        Type typeD = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
+        Type typeA = project.locateType("A")
+        Type typeC = project.locateType("C")
+        Type typeD = project.locateType("D")
 
         when:
         def resultA = new SpecializationIndexCalculator().calculate(typeA);
@@ -84,10 +82,8 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
-
-        Type typeFour = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "ShouldBeFour"}
-        Type typeTwo = (aPackage.getTypes() as List<Type>).find{ type -> type.name == "ShouldBeTwo"}
+        Type typeFour = project.locateType("ShouldBeFour")
+        Type typeTwo = project.locateType("ShouldBeTwo")
 
         when:
         def resultFour = new SpecializationIndexCalculator().calculate(typeFour);
@@ -129,11 +125,8 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package firstPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff"}
-        org.jasome.input.Package secondPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff2"}
-
-        Type typeA = (secondPackage.getTypes() as List<Type>).find{ type -> type.name == "A"}
-
+        Type typeA = project.locateType("org.whatever.stuff2.A")
+        
         when:
         def result = new SpecializationIndexCalculator().calculate(typeA);
 
@@ -196,9 +189,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package firstPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff"}
-
-        Type typeD = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "D"}
+        Type typeD = project.locateType("org.whatever.stuff.D")
 
         when:
         def result = new SpecializationIndexCalculator().calculate(typeD);
@@ -236,9 +227,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package firstPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff"}
-
-        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+        Type typeC = project.locateType("org.whatever.stuff.C")
 
         when:
         def result = new SpecializationIndexCalculator().calculate(typeC);
@@ -273,9 +262,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
         '''
 
-        org.jasome.input.Package firstPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff"}
-
-        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+        Type typeC = project.locateType("org.whatever.stuff.C")
 
         when:
         def result = new SpecializationIndexCalculator().calculate(typeC);
@@ -315,9 +302,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         '''
 
         //TODO do we need to worry about cycles
-        org.jasome.input.Package firstPackage = (project.getPackages() as List<Package>).find{ p -> p.name=="org.whatever.stuff"}
-
-        Type typeC = (firstPackage.getTypes() as List<Type>).find{ type -> type.name == "C"}
+        Type typeC = project.locateType("org.whatever.stuff.C")
 
         when:
         def result = new SpecializationIndexCalculator().calculate(typeC);

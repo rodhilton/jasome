@@ -171,8 +171,8 @@ public class TotalLinesOfCodeCalculator {
                 count = count + 2; //for the opening and closing of the declaration
                 AnnotationDeclaration annotationDeclaration = (AnnotationDeclaration) node;
                 nodeStack.addAll(annotationDeclaration.getMembers());
-            } else if (node instanceof EmptyMemberDeclaration) {
-                //Ignore, it's empty
+//            } else if (node instanceof EmptyMemberDeclaration) {
+//                //Ignore, it's empty
             } else if (node instanceof AnnotationMemberDeclaration) {
                 count = count + 1;
             } else if (node instanceof LocalClassDeclarationStmt) {
@@ -231,10 +231,8 @@ public class TotalLinesOfCodeCalculator {
                 }
             } else if (node instanceof TryStmt) {
                 TryStmt tryStmt = (TryStmt) node;
-                if (tryStmt.getTryBlock().isPresent()) {
-                    count = count + 2;
-                    nodeStack.add(tryStmt.getTryBlock().get());
-                }
+                count = count + 2;
+                nodeStack.add(tryStmt.getTryBlock());
                 for (CatchClause catchClause : tryStmt.getCatchClauses()) {
                     count = count + 1; //Only 1 becuase the close brace of the try is the start of the catch clause
                     nodeStack.add(catchClause.getBody());

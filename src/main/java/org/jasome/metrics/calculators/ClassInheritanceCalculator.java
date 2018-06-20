@@ -16,9 +16,7 @@ import java.util.Stack;
 public class ClassInheritanceCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
-        Package parentPackage = type.getParentPackage();
-        Project parentProject = parentPackage.getParentProject();
-        Graph<Type> inheritanceGraph = CalculationUtils.getInheritanceGraph(parentProject);
+        Graph<Type> inheritanceGraph = CalculationUtils.inheritanceGraph.getUnchecked(type.getParentPackage().getParentProject());
 
         Set<Type> parents = inheritanceGraph.predecessors(type);
         Set<Type> children = inheritanceGraph.successors(type);

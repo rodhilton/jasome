@@ -18,7 +18,7 @@ class ScannerSpec extends Specification {
         ''', '''
         package org.whatever.stuff;
 
-        cl4t 1  3ass q w4t A {
+        clorkssA {
 
         }  r
         '''
