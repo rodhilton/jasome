@@ -27,12 +27,12 @@ import java.util.stream.Collectors;
 
 public class FanCalculator implements Calculator<Method> {
 
-    private Set<Project> cached = new HashSet<>();
+    //private Set<Project> cached = new HashSet<>();
 
     @Override
     public Set<Metric> calculate(Method method) {
 
-        Project rootProject = method.getParentType().getParentPackage().getParentProject();
+        //Project rootProject = method.getParentType().getParentPackage().getParentProject();
 //
 //        if(!cached.contains(rootProject)) {
 //            System.out.println("in cache check for "+rootProject);

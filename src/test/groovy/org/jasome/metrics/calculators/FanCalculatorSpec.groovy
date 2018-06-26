@@ -57,8 +57,51 @@ class FanCalculatorSpec extends Specification {
         expect result, containsMetric("Si", 4)
     }
 
-    @Ignore("Not yet implemented")
+    @Ignore("Not yet working")
     def "properly counts fan-out in lambda"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassA {
+
+            public void doStuff() {
+                ClassB b = new ClassB();
+                IntStream.range(0, 9).mapToObj((int i)->b.printNumber(i));
+            }
+        
+        }
+        
+        class ClassB {
+ 
+            public void printNumber(int i) {
+                System.out.println(this.i);
+            }
+        }
+        '''
+
+        Type classA = project.locateType("ClassA")
+
+        Method doStuff = (classA.getMethods() as List<Method>).find { method -> method.name == "public void doStuff()" }
+
+        Type classB = project.locateType("ClassB")
+
+        Method printNumber = (classB.getMethods() as List<Method>).find { method -> method.name == "public void printNumber(int i)" }
+
+        when:
+        def doStuffResult = new FanCalculator().calculate(doStuff)
+        def printNumberResult = new FanCalculator().calculate(printNumber)
+
+        then:
+        expect doStuffResult, containsMetric("FOut", 1)
+        expect doStuffResult, containsMetric("Si", 2)
+        expect printNumberResult, containsMetric("Fin", 1)
+    }
+
+
+    @Ignore("Not yet implemented")
+    def "properly counts fan-out in method expression"() {
 
         given:
         def project = projectFromSnippet '''
@@ -236,8 +279,64 @@ class FanCalculatorSpec extends Specification {
         expect result, containsMetric("Fout", 2)
     }
 
-    //TODO: tests for chained method calls
-    //TODO: tests for method references in lambdas rather than direct calls
-    //TODO: tests for class resolution on complex cross calls, lots of logic in the utils that aren't really tested here
-    //TODO: check for toString() being called when using string concatenation?  is this doable?
+    def "properly calculates chained method calls"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassA {
+        
+            public ClassB getB() {
+                return new ClassB();           
+            }
+
+        }
+        
+        class ClassB {
+            public ClassC getC() {
+                return new ClassC();            
+            }
+        }
+        
+        class ClassC {
+            public void print() {
+                System.out.println("Hello");
+            }
+        }
+        
+        class MainClass {
+            private ClassA classA;
+        
+            public MainClass(ClassA classA) {
+                this.classA = classA;
+            }
+                            
+            public void doPrint() {
+                classA.getB().getC().print();
+            }
+        }
+        '''
+
+
+        Type mainClass = project.locateType("MainClass")
+
+        Optional<Method> doPrint = mainClass.lookupMethodBySignature("doPrint()")
+
+        Optional<Method> classAgetB = project.locateType("ClassA").lookupMethodBySignature("getB()")
+        Optional<Method> classBgetC = project.locateType("ClassB").lookupMethodBySignature("getC()")
+        Optional<Method> classCPrint = project.locateType("ClassC").lookupMethodBySignature("print()")
+
+        when:
+        def doPrintResult = new FanCalculator().calculate(doPrint.get());
+        def classAgetBResult = new FanCalculator().calculate(classAgetB.get());
+        def classBgetCResult = new FanCalculator().calculate(classBgetC.get());
+        def classCPrintResult = new FanCalculator().calculate(classCPrint.get());
+
+        then:
+        expect doPrintResult, containsMetric("Fout", 3)
+        expect classAgetBResult, containsMetric("Fin", 1)
+        expect classBgetCResult, containsMetric("Fin", 1)
+        expect classCPrintResult, containsMetric("Fin", 1)
+    }
 }
