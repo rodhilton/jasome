@@ -52,8 +52,8 @@ class FanCalculatorSpec extends Specification {
 
         then:
 
-        expect result, containsMetric("FOut", 3)
-        expect result, containsMetric("Si", 9)
+        expect result, containsMetric("FOut", 2)
+        expect result, containsMetric("Si", 4)
     }
 
     def "properly counts fan-in within a class"() {

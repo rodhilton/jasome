@@ -3,14 +3,19 @@ package org.jasome.input;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class Type extends Code {
     private final ClassOrInterfaceDeclaration declaration;
+    private Map<String, Method> methodLookup;
 
     public Type(ClassOrInterfaceDeclaration declaration) {
         super(getClassNameFromDeclaration(declaration));
         this.declaration = declaration;
+        this.methodLookup = new HashMap<>();
     }
 
     public ClassOrInterfaceDeclaration getSource() {
@@ -36,6 +41,7 @@ public class Type extends Code {
     }
 
     public void addMethod(Method method) {
+        methodLookup.put(method.getSource().getSignature().asString(), method);
         addChild(method);
     }
 
@@ -46,5 +52,13 @@ public class Type extends Code {
     @Override
     public String toString() {
         return "Type("+this.getName()+")";
+    }
+
+    public Optional<Method> lookupMethodBySignature(String methodSignature) {
+        if(methodLookup.containsKey(methodSignature)) {
+            return Optional.of(methodLookup.get(methodSignature));
+        } else {
+            return Optional.empty();
+        }
     }
 }

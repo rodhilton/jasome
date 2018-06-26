@@ -1,5 +1,6 @@
 package org.jasome.util;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
@@ -7,6 +8,11 @@ import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.*;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.resolution.types.ResolvedType;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -142,53 +148,31 @@ public class CalculationUtils {
                         parentTypes.addAll(implementedTypes);
 
                         for (ClassOrInterfaceType parentType : parentTypes) {
-                            Optional<Type> closestType = getClosestTypeWithName(parentType.getName(), type);
+                            try {
+                                ResolvedReferenceType refType = parentType.resolve();
+                                Optional<Type> closestType = CalculationUtils.lookupType(parentProject, refType);
 
-                            closestType.ifPresent(c ->
-                                    graph.putEdge(c, type)
-                            );
+                                closestType.ifPresent(c ->
+                                        graph.putEdge(c, type)
+                                );
+                            } catch(UnsolvedSymbolException e) {
+                                //Ignore if a symbol can't be resolved
+                            }
+
                         }
                     }
                     return ImmutableGraph.copyOf(graph);
                 }
             });
 
-    public static Graph<Type> getInheritanceGraph(Project parentProject) {
-        MutableGraph<Type> graph = GraphBuilder.directed().build();
-
-        Multimap<String, Type> allClassesByName = HashMultimap.create();
-
-        parentProject.getPackages()
-                .stream()
-                .map(Package::getTypes)
-                .flatMap(Set::stream)
-                .forEach(type -> allClassesByName.put(type.getName(), type));
-
-        Set<Type> allClasses = parentProject.getPackages()
-                .stream()
-                .map(Package::getTypes)
-                .flatMap(Set::stream)
-                .collect(Collectors.toSet());
-        
-        for (Type type :allClasses) {
-            List<ClassOrInterfaceType> extendedTypes = type.getSource().getExtendedTypes();
-            List<ClassOrInterfaceType> implementedTypes = type.getSource().getImplementedTypes();
-
-            graph.addNode(type);
-
-            List<ClassOrInterfaceType> parentTypes = new ArrayList<>();
-            parentTypes.addAll(extendedTypes);
-            parentTypes.addAll(implementedTypes);
-
-            for (ClassOrInterfaceType parentType : parentTypes) {
-                    Optional<Type> closestType = getClosestTypeWithName(parentType.getName(), type);
-
-                    closestType.ifPresent(c ->
-                        graph.putEdge(c, type)
-                    );
-            }
+    private static Optional<Type> lookupType(Project parentProject, ResolvedReferenceType refType) {
+        try {
+            Optional<Package> optPackage = parentProject.lookupPackageByName(refType.getTypeDeclaration().getPackageName());
+            return optPackage.flatMap(pkg -> pkg.lookupTypeByName(refType.getTypeDeclaration().getClassName()));
+        } catch(Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
         }
-        return ImmutableGraph.copyOf(graph);
     }
 
     public static LoadingCache<Project, Network<Method, Distinct<Expression>>> callNetwork = CacheBuilder.newBuilder()
@@ -217,11 +201,12 @@ public class CalculationUtils {
 
                         for(MethodCallExpr methodCall: calls) {
 
-                            Optional<Method> methodCalled;
 
-                            methodCalled = getMethodCalledByMethodExpression(method, methodCall);
+                            Optional<Method> methodCalled = getMethodCalledByMethodExpression(method, methodCall);
 
-                            network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), Distinct.of(methodCall));
+                            if(methodCalled.isPresent()) {
+                                network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), Distinct.of(methodCall));
+                            }
 
                         }
                     }
@@ -274,161 +259,40 @@ public class CalculationUtils {
     }
 
     private static Optional<Method> getMethodCalledByMethodExpression(Method containingMethod, MethodCallExpr methodCall) {
-        Optional<Expression> methodCallScope = methodCall.getScope();
+        //if(methodCall.getScope().isPresent()) {
+            //Expression methodCallScope = methodCall.getScope().get();
 
-        Optional<Type> scopeType  = determineTypeOf_CACHED(methodCallScope.orElse(null), containingMethod);
+            //ResolvedType resolvedType = JavaParser.getStaticConfiguration().getSymbolResolver().get().calculateType(methodCall.getScope().get());
 
-        if(scopeType.isPresent()) {
-            Optional<Method> matching = scopeType.get().getMethods().stream().filter(m->
-                    m.getSource().getName().equals(methodCall.getName()) && m.getSource().getParameters().size() == methodCall.getArguments().size()
-            ).findFirst();
+            try {
+                ResolvedMethodDeclaration blah = methodCall.resolve();
+                ResolvedReferenceTypeDeclaration declaringType = blah.declaringType();
 
-            return matching;
-        }
+                Project project = containingMethod.getParentType().getParentPackage().getParentProject();
+                Optional<Package> pkg = project.lookupPackageByName(declaringType.getPackageName());
+                if (!pkg.isPresent()) return Optional.empty();
 
-        return Optional.empty();
-    }
+                Optional<Type> typ = pkg.get().lookupTypeByName(declaringType.getName());
 
-    private static final Map<Pair<Distinct<Expression>, Method>, Optional<Type>> expressionTypes = new HashMap<>();
+                if (!typ.isPresent()) return Optional.empty();
 
-    private static Optional<Type> determineTypeOf_CACHED(Expression scope, Method containingMethod) {
-        synchronized (expressionTypes) {
-            if (!expressionTypes.containsKey(Pair.of(Distinct.of(scope), containingMethod))) {
-                Optional<Type> type = determineTypeOf(scope, containingMethod);
-                expressionTypes.put(Pair.of(Distinct.of(scope), containingMethod), type);
-            }
+                Optional<Method> method = typ.get().lookupMethodBySignature(blah.getSignature());
 
-            return expressionTypes.get(Pair.of(Distinct.of(scope), containingMethod));
-        }
-    }
+                //System.out.println(method);
 
-    private static Optional<Type> determineTypeOf(Expression scope, Method containingMethod) {
-//        System.out.println("determineTypeOf");
-        if(scope == null || scope instanceof ThisExpr) return Optional.of(containingMethod.getParentType());
-
-        if(scope instanceof NameExpr) {
-            SimpleName variableName = ((NameExpr)scope).getName();
-            //TODO: cache this, we might be looking up the same variable multiple times
-            Optional<com.github.javaparser.ast.type.Type> nameType = findTypeOfVariableDeclaration(variableName, scope);
-
-            if(nameType.isPresent()) {
-                if(nameType.get() instanceof ClassOrInterfaceType) {
-                    Optional<Type> closestType = getClosestType((ClassOrInterfaceType) nameType.get(), containingMethod.getParentType());
-                    return closestType;
-                } else {
-                    return Optional.empty();
-                }
-            } else {
+                return method;
+            } catch(Exception e) {
+                //e.printStackTrace();
                 return Optional.empty();
             }
 
-        }
-
-        return Optional.empty();
-
+//        } else {
+//            System.out.println("stuff");
+//        }
+       // return Optional.empty();
     }
 
     private static Map<Pair<Distinct<SimpleName>, Distinct<Node>>, Optional<com.github.javaparser.ast.type.Type>> variableTypes = new HashMap<>();
-
-    private static Optional<com.github.javaparser.ast.type.Type> findTypeOfVariableDeclaration(SimpleName variableName, Node scope) {
-
-        if(!variableTypes.containsKey(Pair.of(Distinct.of(variableName), Distinct.of(scope)))) {
-
-//            System.out.println("findTypeOfVariableDeclaration");
-            List<Node> scopeParents = getAllParentsUpToClassDefinition(scope);
-
-            Node topMostNode = scopeParents.get(0);
-
-            Set<Node> scopeParentsSet = new HashSet<Node>(scopeParents);
-
-            com.github.javaparser.ast.type.Type typeCandidate = null;
-            int longestChainLength = 0;
-
-            Map<SimpleName, List<Pair<com.github.javaparser.ast.type.Type, Node>>> declarationsAndScopes = new HashMap<>();
-
-            List<VariableDeclarator> variableDeclarations = topMostNode.getNodesByType(VariableDeclarator.class);
-            for (VariableDeclarator variableDeclarator : variableDeclarations) {
-                declarationsAndScopes.putIfAbsent(variableDeclarator.getName(), new ArrayList<>());
-                declarationsAndScopes.get(variableDeclarator.getName()).add(Pair.of(variableDeclarator.getType(), variableDeclarator));
-            }
-
-            List<VariableDeclarationExpr> variableDeclarationExprs = topMostNode.getNodesByType(VariableDeclarationExpr.class);
-            for (VariableDeclarationExpr variableDeclarationExpr : variableDeclarationExprs) {
-                for (VariableDeclarator variableDeclarator : variableDeclarationExpr.getVariables()) {
-                    declarationsAndScopes.putIfAbsent(variableDeclarator.getName(), new ArrayList<>());
-                    declarationsAndScopes.get(variableDeclarator.getName()).add(Pair.of(variableDeclarator.getType(), variableDeclarator));
-                }
-            }
-
-            List<Parameter> parameters = topMostNode.getNodesByType(Parameter.class);
-            for (Parameter parameter : parameters) {
-                declarationsAndScopes.putIfAbsent(parameter.getName(), new ArrayList<>());
-                declarationsAndScopes.get(parameter.getName()).add(Pair.of(parameter.getType(), parameter));
-            }
-
-
-            if(declarationsAndScopes.containsKey(variableName)) {
-
-                for(Pair<com.github.javaparser.ast.type.Type, Node> variableParents: declarationsAndScopes.get(variableName) ) {
-                    List<Node> parents = getAllParentsUpToClassDefinition(variableParents.getRight());
-                    if (scopeParentsSet.containsAll(parents)) {
-                        //This variable is defined in the scope we care about
-                        if (parents.size() > longestChainLength) {
-                            typeCandidate = variableParents.getLeft();
-                            longestChainLength = parents.size();
-                        }
-                    }
-
-                }
-
-            }
-
-
-            /*if (variableDeclarator.getName().equals(variableName)) {
-                    List<Node> variableParents = getAllParentsUpToClassDefinition(variableDeclarator);
-                    if (scopeParentsSet.containsAll(variableParents)) {
-                        //This variable is defined in the scope we care about
-                        if (variableParents.size() > longestChainLength) {
-                            typeCandidate = variableDeclarator.getType();
-                            longestChainLength = variableParents.size();
-                        }
-                    }
-                }*/
-
-            //Set<Node> variableParents = new HashSet<>(getAllParentsUpToClassDefinition(variableDeclarator));
-
-            Optional<com.github.javaparser.ast.type.Type> answer = Optional.ofNullable(typeCandidate);
-            variableTypes.put(Pair.of(Distinct.of(variableName), Distinct.of(scope)), answer);
-        } else {
-//            System.out.println("!!!!cache hit in findTypeOfVariableDeclaration");
-        }
-
-        return variableTypes.get(Pair.of(Distinct.of(variableName), Distinct.of(scope)));
-    }
-
-    private static Map<Node, List<Node>> GETALLPARENTSCACHE=new HashMap<Node, List<Node>>();
-
-    private static List<Node> getAllParentsUpToClassDefinition(Node scope) {
-//        System.out.println("getAllParentsUpToClassDefinition");
-
-        if(GETALLPARENTSCACHE.containsKey(scope)) {
-            //System.out.println("!!!!cache hit in getAllParentsUpToClassDefinition");
-            return GETALLPARENTSCACHE.get(scope);
-        }
-        else {
-
-            List<Node> parents = new ArrayList<>();
-            while (scope.getParentNode().isPresent()) {
-                Node parent = scope.getParentNode().get();
-                parents.add(parent);
-                scope = parent;
-            }
-            List<Node> reversedParents = Lists.reverse(parents);
-            GETALLPARENTSCACHE.put(scope, reversedParents);
-            return reversedParents;
-        }
-    }
-
 
     private static final Map<Pair<Distinct<SimpleName>, Type>, Optional<Type>> closestTypeByNameCache = new HashMap<>();
 
@@ -503,43 +367,4 @@ public class CalculationUtils {
     }
 
 
-    private static final Map<Pair<ClassOrInterfaceType, Type>, Optional<Type>> closestTypeCache = new HashMap<>();
-
-    private static Optional<Type> getClosestType(ClassOrInterfaceType target, Type source) {
-        synchronized (closestTypeCache) {
-            if(!closestTypeCache.containsKey(Pair.of(target, source))) {
-                Optional<Type> theType = getClosestTypeUncached(target, source);
-                closestTypeCache.put(Pair.of(target, source), theType);
-            }
-
-            return closestTypeCache.get(Pair.of(target, source));
-        }
-
-    }
-
-    private static Optional<Type> getClosestTypeUncached(ClassOrInterfaceType target, Type source) {
-        Map<SimpleName, Collection<Type>> allClassesByName = getAllClassesForProject(source.getParentPackage().getParentProject());
-
-
-        if(!allClassesByName.containsKey(target.getName())) return Optional.empty(); //The referenced class is not in this project, might be in a dependency, or something from Java itself (Serializable, Comparable, etc)
-
-        Collection<Type> matchingTypes = allClassesByName.get(target.getName());
-        List<Type> matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage = matchingTypes.stream().sorted(new Comparator<Type>() {
-            @Override
-            public int compare(Type t1, Type t2) {
-                System.out.println("test");
-                int firstCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t1.getParentPackage().getName()).length();
-                int secondCharsInCommon = StringUtils.getCommonPrefix(source.getParentPackage().getName(), t2.getParentPackage().getName()).length();
-
-                return ((Integer) firstCharsInCommon).compareTo(secondCharsInCommon);
-            }
-        }).collect(Collectors.toList());
-
-        if(matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage.size() > 0) {
-            return Optional.of(matchingTypesSortedByNumberOfCharactersInCommonWithSourcePackage.get(0));
-        } else {
-            return Optional.empty();
-        }
-
-    }
 }

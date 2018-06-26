@@ -21,57 +21,11 @@ import java.util.*;
 public abstract class Scanner<T> {
 
     protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
-        Set<File> sourceDirs = new HashSet<>();
 
-        for (Pair<String, Map<String, String>> sourceFile : sourceCode) {
-            String sourceCodeContent = sourceFile.getLeft();
-            Map<String, String> attributes = sourceFile.getRight();
-
-            try {
-                CompilationUnit cu = JavaParser.parse(sourceCodeContent);
-
-                String sourceFileName = attributes.get("sourceFile");
-
-                Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
-
-                if(packageName.isPresent()) {
-                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator)+"/";
-                    String sourceDir = FilenameUtils.getPath(sourceFileName);
-                    String baseSourceDir = sourceDir.replace(packagePrefix, "");
-                    String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
-                    sourceDirs.add(new File(finalSourceBaseDir));
-                } else {
-                    sourceDirs.add(new File(FilenameUtils.getPath(sourceFileName)));
-                }
-
-            } catch(ParseProblemException e) {
-                String file = attributes.get("sourceFile");
-                System.err.format("Unable to parse code from file %s, ignoring", file);
-                System.err.print(e.getProblems());
-            }
-        }
+        JavaSymbolSolver symbolSolver = configureParserAndResolver(sourceCode, projectPath);
 
         Project project = new Project(FilenameUtils.getBaseName(projectPath));
-
-        TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
-
-        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
-        combinedTypeSolver.add(reflectionTypeSolver);
-
-        for(File sourceDir: sourceDirs) {
-            combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
-        }
-
-        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
-
         project.setSymbolSolver(symbolSolver);
-
-        ParserConfiguration parserConfiguration = new ParserConfiguration()
-                .setAttributeComments(false)
-                .setSymbolResolver(symbolSolver);
-        JavaParser.setStaticConfiguration(parserConfiguration);
-
-
         Map<String, List<Pair<ClassOrInterfaceDeclaration, Map<String, String>>>> packages = gatherPackages(sourceCode);
 
         for (Map.Entry<String, List<Pair<ClassOrInterfaceDeclaration, Map<String, String>>>> entry : packages.entrySet()) {
@@ -126,6 +80,57 @@ public abstract class Scanner<T> {
 
         return project;
 
+    }
+
+    private JavaSymbolSolver configureParserAndResolver(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
+        Set<File> sourceDirs = new HashSet<>();
+
+        for (Pair<String, Map<String, String>> sourceFile : sourceCode) {
+            String sourceCodeContent = sourceFile.getLeft();
+            Map<String, String> attributes = sourceFile.getRight();
+
+            try {
+                CompilationUnit cu = JavaParser.parse(sourceCodeContent);
+
+                String sourceFileName = attributes.get("sourceFile");
+
+                Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
+
+                if(packageName.isPresent()) {
+                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator)+"/";
+                    String sourceDir = FilenameUtils.getPath(sourceFileName);
+                    String baseSourceDir = sourceDir.replace(packagePrefix, "");
+                    String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
+                    sourceDirs.add(new File(finalSourceBaseDir));
+                } else {
+                    sourceDirs.add(new File(FilenameUtils.getPath(sourceFileName)));
+                }
+
+            } catch(ParseProblemException e) {
+                String file = attributes.get("sourceFile");
+                System.err.format("Unable to parse code from file %s, ignoring", file);
+                System.err.print(e.getProblems());
+            }
+        }
+
+
+        TypeSolver reflectionTypeSolver = new ReflectionTypeSolver();
+
+        CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
+        combinedTypeSolver.add(reflectionTypeSolver);
+
+        for(File sourceDir: sourceDirs) {
+            combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
+        }
+
+        JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
+
+
+        ParserConfiguration parserConfiguration = new ParserConfiguration()
+                .setAttributeComments(false)
+                .setSymbolResolver(symbolSolver);
+        JavaParser.setStaticConfiguration(parserConfiguration);
+        return symbolSolver;
     }
 
 

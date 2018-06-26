@@ -59,7 +59,6 @@ class TreeNodeSpec extends Specification {
         firstMethod.toString() contains "public String toString()"
         firstType.toString() contains "Thing1"
         firstPackage.toString() contains "org.whatever.stuff1"
-        project.toString() == "Project"
     }
 
     def "correctly names classes and methods"() {

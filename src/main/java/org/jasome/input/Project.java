@@ -3,14 +3,19 @@ package org.jasome.input;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class Project extends Code {
 
     private JavaSymbolSolver symbolSolver;
+    private Map<String, Package> packageLookup;
 
     public Project(String name) {
         super(name);
+        packageLookup = new HashMap<>();
     }
     
     @SuppressWarnings("unchecked")
@@ -19,6 +24,7 @@ public class Project extends Code {
     }
 
     public void addPackage(Package aPackage) {
+        packageLookup.put(aPackage.getName(), aPackage);
         addChild(aPackage);
     }
 
@@ -44,5 +50,13 @@ public class Project extends Code {
 
     public JavaSymbolSolver getSymbolSolver() {
         return symbolSolver;
+    }
+
+    public Optional<Package> lookupPackageByName(String packageName) {
+        if(packageLookup.containsKey(packageName)) {
+            return Optional.of(packageLookup.get(packageName));
+        } else {
+            return Optional.empty();
+        }
     }
 }

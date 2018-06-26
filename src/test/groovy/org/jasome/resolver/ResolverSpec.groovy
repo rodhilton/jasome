@@ -16,16 +16,16 @@ import static spock.util.matcher.HamcrestSupport.expect
 
 class ResolverSpec extends Specification {
 
-    def "calculate class length when only two lines (open and close)"() {
-
-        given:
-        def project = projectFromResources("org/jasome/resolver")
-
-        when:
-        Type t = project.locateType("Test")
-
-        then:
-        FieldDeclaration fieldDeclaration = Navigator.findNodeOfGivenClass(t.source, FieldDeclaration.class);
-        System.out.println("Field type: " + fieldDeclaration.getVariables().get(0).getType().resolve().asReferenceType().getQualifiedName());
-    }
+//    def "calculate class length when only two lines (open and close)"() {
+//
+//        given:
+//        def project = projectFromResources("org/jasome/resolver")
+//
+//        when:
+//        Type t = project.locateType("Test")
+//
+//        then:
+//        //FieldDeclaration fieldDeclaration = Navigator.findNodeOfGivenClass(t.source, FieldDeclaration.class);
+//    //    System.out.println("Field type: " + fieldDeclaration.getVariables().get(0).getType().resolve().asReferenceType().getQualifiedName());
+//    }
 }

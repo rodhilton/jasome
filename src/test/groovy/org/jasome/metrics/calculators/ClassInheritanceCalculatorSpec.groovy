@@ -161,7 +161,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
         def project = projectFromSnippet '''
         package org.whatever.stuff;
 
-        import org.whatever.stuff.far.away.*; //ignore the import
+        import org.whatever.stuff.far.away.*;
 
         class ClassY implements I2 {
 
@@ -194,7 +194,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
 
         then:
 
-        expect resultY, containsMetric("NOA", 2)
+        expect resultY, containsMetric("NOA", 1)
         expect resultY, containsMetric("NOPa", 1)
     }
 
@@ -229,8 +229,6 @@ class ClassInheritanceCalculatorSpec extends Specification {
         def project = projectFromSnippet '''
         package org.whatever.stuff;
 
-        import org.whatever.stuff.far.away.*; //ignore the import
-
         class Outer {
 
             public static class Inner {
@@ -242,6 +240,7 @@ class ClassInheritanceCalculatorSpec extends Specification {
         ''', '''
         package org.whatever.stuff2;
         
+        import org.whatever.stuff.Outer;
            
         class ClassX extends Outer.Inner {
         

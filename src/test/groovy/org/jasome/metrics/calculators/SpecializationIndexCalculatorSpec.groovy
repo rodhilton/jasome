@@ -94,7 +94,7 @@ class SpecializationIndexCalculatorSpec extends Specification {
         expect resultTwo, containsMetric("DIT", 2)
     }
 
-    def "calculate depth uses the closest class when classes have same name"() {
+    def "calculate depth uses the correct class when classes have same name"() {
 
         given:
         def project = projectFromSnippet '''
@@ -119,14 +119,50 @@ class SpecializationIndexCalculatorSpec extends Specification {
         }
 
         class A extends K {
-        //It "should" be obvious to use K since its the same package, but without resolving imports we can't know
-        //So we want to assume the longest possible inheritance tree for duplicated names
 
         }
         '''
 
         Type typeA = project.locateType("org.whatever.stuff2.A")
         
+        when:
+        def result = new SpecializationIndexCalculator().calculate(typeA);
+
+        then:
+        expect result, containsMetric("DIT", 2)
+    }
+
+    def "calculate depth uses the correct class even if it's not the closest class when classes have same name"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        interface I {
+
+        }
+
+        interface J extends I {
+
+        }
+
+        interface K extends J {
+
+        }
+        ''','''
+        package org.whatever.stuff2;
+
+        interface K { //short
+
+        }
+
+        class A extends org.whatever.stuff.K {
+
+        }
+        '''
+
+        Type typeA = project.locateType("org.whatever.stuff2.A")
+
         when:
         def result = new SpecializationIndexCalculator().calculate(typeA);
 

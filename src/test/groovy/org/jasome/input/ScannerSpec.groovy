@@ -2,34 +2,22 @@ package org.jasome.input
 
 import spock.lang.Specification
 
+import static org.jasome.util.TestUtil.projectFromResources
 import static org.jasome.util.TestUtil.projectFromSnippet
 
 class ScannerSpec extends Specification {
 
     def "gracefully handles unparseable files"() {
-
         given:
-        def project = projectFromSnippet '''
-        package org.whatever.stuff;
-
-        class ClassA {
-
-        }
-        ''', '''
-        package org.whatever.stuff;
-
-        clorkssA {
-
-        }  r
-        '''
-
-        Package aPackage = (project.getPackages() as List<Package>).find { p -> p.name == "org.whatever.stuff" }
+        def project = projectFromResources("org/jasome/unparseable")
 
         when:
-        Type classA = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassA" }
+        Type stuffType = project.locateType("Stuff")
+        Type fineType = project.locateType("Fine")
 
         then:
-        classA != null
+        stuffType == null
+        fineType != null
     }
 
 }
