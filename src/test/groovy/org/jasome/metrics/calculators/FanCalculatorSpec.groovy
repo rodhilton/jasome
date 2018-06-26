@@ -2,6 +2,7 @@ package org.jasome.metrics.calculators
 
 import org.jasome.input.Method
 import org.jasome.input.Type
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
@@ -54,6 +55,46 @@ class FanCalculatorSpec extends Specification {
 
         expect result, containsMetric("FOut", 2)
         expect result, containsMetric("Si", 4)
+    }
+
+    @Ignore("Not yet implemented")
+    def "properly counts fan-out in lambda"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassA {
+
+            public void doStuff() {
+                IntStream.range(0, 9).forEach(ClassB::printNumber);
+            }
+        
+        }
+        
+        class ClassB {
+            public static void printNumber(int i) {
+                System.out.println(i);
+            }
+        }
+        '''
+
+        Type classA = project.locateType("ClassA")
+
+        Method doStuff = (classA.getMethods() as List<Method>).find { method -> method.name == "public void doStuff()" }
+
+        Type classB = project.locateType("ClassB")
+
+        Method printNumber = (classB.getMethods() as List<Method>).find { method -> method.name == "public static void printNumber(int i)" }
+
+        when:
+        def doStuffResult = new FanCalculator().calculate(doStuff)
+        def printNumberResult = new FanCalculator().calculate(printNumber)
+
+        then:
+        expect doStuffResult, containsMetric("FOut", 1)
+        expect doStuffResult, containsMetric("Si", 2)
+        expect printNumberResult, containsMetric("Fin", 1)
     }
 
     def "properly counts fan-in within a class"() {
