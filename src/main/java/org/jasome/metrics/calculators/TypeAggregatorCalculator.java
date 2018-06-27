@@ -12,11 +12,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MethodMetricAggregator implements Calculator<Type> {
+public class TypeAggregatorCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
 
-
+        //TODO: we lose precision here, not a huge fan of this
         DoubleSummaryStatistics stats = methodMetrics(type.getMethods(), "Ci")
                 .collect(Collectors.summarizingDouble(metric -> metric.getValue().doubleValue()));
 

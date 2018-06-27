@@ -33,8 +33,8 @@ class ProcessorFactory {
 
         processor.registerMethodCalculator(new FanCalculator());
 
-        processor.registerTypeCalculator(new MethodMetricAggregator());
-        processor.registerPackageCalculator(new TypeMetricAggregator());
+        processor.registerTypeCalculator(new TypeAggregatorCalculator());
+        processor.registerPackageCalculator(new PackageAggregatorCalculator());
         return processor;
     }
 }

@@ -2,26 +2,24 @@ package org.jasome.metrics.calculators;
 
 import com.google.common.collect.ImmutableSet;
 import org.jasome.input.Method;
-import org.jasome.input.Type;
+import org.jasome.input.Package;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jscience.mathematics.number.Number;
 
 import java.util.DoubleSummaryStatistics;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import org.jasome.input.Package;
 
-
-public class TypeMetricAggregator implements Calculator<Package> {
+public class PackageAggregatorCalculator implements Calculator<Package> {
     @Override
     public Set<Metric> calculate(Package aPackage) {
 
 
         Stream<Method> allMethods = aPackage.getTypes().stream().flatMap(t->t.getMethods().stream());
 
+        //TODO: we lose precision here, not a huge fan of this
         DoubleSummaryStatistics stats = methodMetrics(allMethods, "Ci")
                 .collect(Collectors.summarizingDouble(metric -> metric.getValue().doubleValue()));
 
