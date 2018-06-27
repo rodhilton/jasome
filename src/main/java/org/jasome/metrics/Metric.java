@@ -1,26 +1,44 @@
 package org.jasome.metrics;
 
 import com.google.common.base.Objects;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Rational;
-import org.jscience.mathematics.number.Real;
+import org.jscience.mathematics.number.*;
+import org.jscience.mathematics.number.Number;
 
-import java.math.BigDecimal;
 import java.math.BigInteger;
 
-public class Metric {
+public class Metric<N extends Number<N>> {
     private String name;
     private String description;
-    private Number value;
+    private N value;
 
-    private Metric(String name, String description, Number value) {
+    private Metric(String name, String description, N value) {
         this.name = name;
         this.description = description;
         this.value = value;
     }
 
-    public static Metric of(String name, String description, Number value) {
-        return new Metric(name, description, value);
+    public static <N extends Number<N>> Metric<N> of(String name, String description, N value) {
+        return new Metric<>(name, description, value);
+    }
+
+    public static Metric<LargeInteger> of(String name, String description, BigInteger value) {
+        return new Metric<>(name, description, LargeInteger.valueOf(value));
+    }
+    
+    public static Metric<LargeInteger> of(String name, String description, LargeInteger value) {
+        return new Metric<>(name, description, value);
+    }
+
+    public static Metric<Rational> of(String name, String description, Rational value) {
+        return new Metric<>(name, description, value);
+    }
+
+    public static Metric<LargeInteger> of(String name, String description, long value) {
+        return new Metric<LargeInteger>(name, description, LargeInteger.valueOf(value));
+    }
+
+    public static Metric<FloatingPoint> of(String name, String description, double value) {
+        return new Metric<FloatingPoint>(name, description, FloatingPoint.valueOf(value));
     }
 
     public String getName() {
@@ -31,8 +49,16 @@ public class Metric {
         return description;
     }
 
-    public Number getValue() {
+    public N getValue() {
         return value;
+    }
+
+    public Metric<N> plus(Metric<N> that) {
+        return new Metric<>("Aggregated", "Aggregated", value.plus(that.getValue()));
+    }
+
+    public boolean isInteger() {
+        return value instanceof LargeInteger;
     }
 
     @Override

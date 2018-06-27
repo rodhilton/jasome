@@ -98,6 +98,10 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Input/Output Variables (IOVars)** - NOP + 1 (0 if void return type) _(method)_"
  - [x] **Data Complexity (Di)** - (IOVars)/(Fout+1) _(method)_
  - [x] **System Complexity (Ci)** - Si + Di _(method)_
+ - [x] **Class Total System Complexity (ClTCi)** - sum(Ci) over all methods in class _(class)_
+ - [x] **Class Relative System Complexity (ClRCi)** - avg(Ci) over all methods in class _(class)_
+ - [x] **Package Total System Complexity (PkgTCi)** - sum(Ci) over all methods in all classes in a package _(package)_
+ - [x] **Package Relative System Complexity (PkgRCi)** - avg(Ci) over all methods in all classes in a package _(package)_
  - [ ] **Number of Collaborations (CRC)** - The number of collaborations between a class and all others _(class)_
  - [ ] **Method Inheritance Factor (MIF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_

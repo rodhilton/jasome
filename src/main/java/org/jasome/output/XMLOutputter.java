@@ -118,14 +118,6 @@ public class XMLOutputter implements Outputter<Document> {
     }
 
     private boolean isInteger(Metric metric) {
-        Number value = metric.getValue();
-        return value instanceof LargeInteger
-                || value instanceof BigInteger
-                || value instanceof Byte
-                || value instanceof Short
-                || value instanceof Long
-                || value instanceof Integer
-                || value instanceof AtomicLong
-                || value instanceof AtomicInteger;
+        return metric.isInteger();
     }
 }

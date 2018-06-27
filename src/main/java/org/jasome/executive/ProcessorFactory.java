@@ -31,7 +31,10 @@ class ProcessorFactory {
 
         processor.registerTypeCalculator(new ClassInheritanceCalculator());
 
-        processor.registerMethodCalculator(new FanCalculator());  //This one is really slow, adds about 2 minutes on a normal project
+        processor.registerMethodCalculator(new FanCalculator());
+
+        processor.registerTypeCalculator(new MethodMetricAggregator());
+        processor.registerPackageCalculator(new TypeMetricAggregator());
         return processor;
     }
 }
