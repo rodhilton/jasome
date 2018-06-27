@@ -106,6 +106,7 @@ Jasome is either currently tracking or planning to track the following metrics:
   
 More metrics coming soon, I plan to gather every metric outlined in the following sources:
 
+ * http://www.aivosto.com/project/help/pm-syscomplexity.html system complexity metrics, sums and avgs of Ci per class? package? 
  * http://support.objecteering.com/objecteering6.1/help/us/metrics/toc.htm
  * http://metrics.sourceforge.net/
  * http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
