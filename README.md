@@ -95,8 +95,9 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Fan-out (Fout)** - The number of methods immediately subordinate to a method _(method)_
  - [x] **Fan-in (Fin)** - The number of methods that invoke a method _(method)_
  - [x] **Structural Complexity (Si)** - Fout^2 _(method)_
- - [ ] **Data Complexity (Di)** - (NOP+1)/(Fout+1) _(method)_
- - [ ] **System Complexity (Ci)** - Si + Di _(method)_
+ - [x] **Input/Output Variables (IOVars)** - NOP + 1 (0 if void return type) _(method)_"
+ - [x] **Data Complexity (Di)** - (IOVars)/(Fout+1) _(method)_
+ - [x] **System Complexity (Ci)** - Si + Di _(method)_
  - [ ] **Number of Collaborations (CRC)** - The number of collaborations between a class and all others _(class)_
  - [ ] **Method Inheritance Factor (MIF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_

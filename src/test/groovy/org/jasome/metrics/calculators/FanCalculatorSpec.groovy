@@ -2,6 +2,8 @@ package org.jasome.metrics.calculators
 
 import org.jasome.input.Method
 import org.jasome.input.Type
+import org.jscience.mathematics.number.LargeInteger
+import org.jscience.mathematics.number.Rational
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -339,4 +341,62 @@ class FanCalculatorSpec extends Specification {
         expect classBgetCResult, containsMetric("Fin", 1)
         expect classCPrintResult, containsMetric("Fin", 1)
     }
+
+    def "properly calculates data complexity"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class ClassA {
+        
+            public void printDoubleVoid(ClassB b, int q) {
+                System.out.println(b.getNumber() * getFactor());            
+            }
+            
+            public int printDoubleInt(ClassB b, int q) {
+                return b.getNumber() * getFactor();            
+            }
+            
+            private int getFactor() {
+                return 3;
+            }
+
+        }
+        
+        class ClassB {
+            private int myNumber;
+            
+            public ClassB(int myNumber) {
+                this.myNumber = myNumber;
+            }
+        
+            public int getNumber() {
+                return myNumber;
+            }
+        }
+        '''
+
+        org.jasome.input.Package aPackage = (project.getPackages() as List<Package>)[0]
+
+        Type classA = (aPackage.getTypes() as List<Type>).find { type -> type.name == "ClassA" }
+
+        Method printDoubleVoid = classA.lookupMethodBySignature("printDoubleVoid(ClassB, int)").get()
+        Method printDoubleInt = classA.lookupMethodBySignature("printDoubleInt(ClassB, int)").get()
+
+        when:
+        def resultVoid = new FanCalculator().calculate(printDoubleVoid);
+        def resultInt = new FanCalculator().calculate(printDoubleInt);
+
+        then:
+
+        expect resultVoid, containsMetric("Fout", 2) //(2 / 3)
+        expect resultInt, containsMetric("Fout", 2) //(2 / 3)
+        expect resultVoid, containsMetric("Di", Rational.valueOf(LargeInteger.valueOf(2), LargeInteger.valueOf(3)))
+        expect resultInt, containsMetric("Di", 1) //((2 + 1)/ 3)
+
+        expect resultVoid, containsMetric("Si", 4)
+        expect resultVoid, containsMetric("Ci", Rational.valueOf(4, 1).plus(Rational.valueOf(LargeInteger.valueOf(2), LargeInteger.valueOf(3))))
+    }
+
 }

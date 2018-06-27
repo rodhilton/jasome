@@ -1,10 +1,15 @@
 package org.jasome.metrics.calculators;
 
-import com.github.javaparser.ast.body.FieldDeclaration;
-import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.type.VoidType;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.graph.ImmutableNetwork;
 import com.google.common.graph.MutableNetwork;
 import com.google.common.graph.Network;
 import com.google.common.graph.NetworkBuilder;
@@ -14,43 +19,28 @@ import org.jasome.input.Project;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.util.CalculationUtils;
 import org.jasome.util.Distinct;
 import org.jscience.mathematics.number.LargeInteger;
 import org.jscience.mathematics.number.Rational;
-import org.pcollections.HashPMap;
-import org.pcollections.HashTreePMap;
-import org.pcollections.PMap;
 
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class FanCalculator implements Calculator<Method> {
 
-    //private Set<Project> cached = new HashSet<>();
-
     @Override
-    public Set<Metric> calculate(Method method) {
+    public synchronized Set<Metric> calculate(Method method) {
 
-        //Project rootProject = method.getParentType().getParentPackage().getParentProject();
-//
-//        if(!cached.contains(rootProject)) {
-//            System.out.println("in cache check for "+rootProject);
-//            cached.add(rootProject);
-//        }
-
-
-        //Network<Method, Distinct<Expression>> methodCalls = buildCallNetwork(rootProject);
-
-
-        Network<Method, Distinct<Expression>> methodCalls = CalculationUtils.callNetwork.getUnchecked(method.getParentType().getParentPackage().getParentProject());
-//        Network<Method, Distinct<Expression>> methodCalls = CalculationUtils.getCallNetwork(rootProject);
+        Network<Method, Distinct<Expression>> methodCalls = callNetwork.getUnchecked(method.getParentType().getParentPackage().getParentProject());
 
         Set<Method> methodsCalled = methodCalls.successors(method);
 
         int fanOut = 0;
 
-        for(Method methodCalled: methodsCalled) {
+        for (Method methodCalled : methodsCalled) {
             Set<Distinct<Expression>> calls = methodCalls.edgesConnecting(method, methodCalled);
             fanOut += calls.size();
         }
@@ -59,60 +49,86 @@ public class FanCalculator implements Calculator<Method> {
 
         int fanIn = 0;
 
-        for(Method methodCalling: methodsCalling) {
+        for (Method methodCalling : methodsCalling) {
             Set<Distinct<Expression>> calls = methodCalls.edgesConnecting(methodCalling, method);
             fanIn += calls.size();
         }
 
+        int returns = method.getSource().getType() instanceof VoidType ? 0 : 1;
+        int parameters = method.getSource().getParameters().size();
+        int iovars = parameters + returns;
 
+        Rational dataComplexity = Rational.valueOf(LargeInteger.valueOf(iovars), LargeInteger.ONE.plus(LargeInteger.valueOf(fanOut)));
+        LargeInteger structuralComplexity = LargeInteger.valueOf(fanOut).pow(2);
+        Rational systemComplexity = dataComplexity.plus(Rational.valueOf(structuralComplexity, LargeInteger.ONE));
 
         return ImmutableSet.of(
                 Metric.of("Fout", "Fan-out", fanOut),
-                Metric.of("Si", "Structural Complexity", LargeInteger.valueOf(fanOut).pow(2) ),
-                Metric.of("Fin", "Fan-in", fanIn)
+                Metric.of("Fin", "Fan-in", fanIn),
+                Metric.of("Si", "Structural Complexity", structuralComplexity),
+                Metric.of("IOVars", "Input/Output Variables", iovars),
+                Metric.of("Di", "Data Complexity", dataComplexity),
+                Metric.of("Ci", "System Complexity", systemComplexity)
         );
 
 
     }
+    
+    private static LoadingCache<Project, Network<Method, Distinct<Expression>>> callNetwork = CacheBuilder.newBuilder()
+        .expireAfterWrite(10, TimeUnit.MINUTES)
+        .build(new CacheLoader<Project, Network<Method, Distinct<Expression>>>() {
+            @Override
+            public Network<Method, Distinct<Expression>> load(Project parentProject) throws Exception {
+                MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
 
-    private Network<Method, Distinct<Expression>> buildCallNetwork(Project rootProject) {
-        MutableNetwork<Method, Distinct<Expression>> network = NetworkBuilder.directed().allowsSelfLoops(true).allowsParallelEdges(true).build();
+                Set<Method> allMethods = parentProject.getPackages()
+                        .stream()
+                        .map(Package::getTypes)
+                        .flatMap(Set::stream).map(Type::getMethods).flatMap(Set::stream).collect(Collectors.toSet());
 
-        Set<Type> allClasses = rootProject.getPackages()
-                .stream()
-                .map(Package::getTypes)
-                .flatMap(Set::stream).collect(Collectors.toSet());
+                for (Method method : allMethods) {
+                    network.addNode(method);
 
-        //Build a map of class names to a list of packages containing that name
-        HashMap<String, List<Type>> classNamesToTypesWithThatName = new HashMap<>();
-        for(Type type: allClasses) {
-            classNamesToTypesWithThatName.putIfAbsent(type.getName(), new ArrayList<>());
-            classNamesToTypesWithThatName.get(type.getName()).add(type);
-        }
+                    List<MethodCallExpr> calls = method.getSource().findAll(MethodCallExpr.class);
 
-        System.out.println(classNamesToTypesWithThatName);
+                    for (MethodCallExpr methodCall : calls) {
 
-        for(Type type: allClasses) {
-            PMap<String, Type> variablesInScope = HashTreePMap.empty();
-            List<FieldDeclaration> fieldDeclarations = type.getSource().getFields();
+                        Optional<Method> methodCalled = getMethodCalledByMethodExpression(method, methodCall);
 
-            Map<String, Type> fields = new HashMap<>();
-            for(FieldDeclaration decl: fieldDeclarations) {
-                com.github.javaparser.ast.type.Type declaredType = decl.getCommonType();
-                for(VariableDeclarator varDecl: decl.getVariables()) {
-                    String name = varDecl.getName().getIdentifier();
-                    //fields.put(name, selectClosestType(declaredType.get))
-                    System.out.println(name);
+                        if (methodCalled.isPresent()) {
+                            network.addEdge(method, methodCalled.orElse(Method.UNKNOWN), Distinct.of(methodCall));
+                        }
+
+                    }
+
+
+                    //TODO: Track these as well
+                    //List<MethodReferenceExpr> references = method.getSource().findAll(MethodReferenceExpr.class);
                 }
+
+
+                return ImmutableNetwork.copyOf(network);
             }
+        });
 
-            //this gives us the types, (not done) but we actually needs methods on those types for a call network
+    private static Optional<Method> getMethodCalledByMethodExpression(Method containingMethod, MethodCallExpr methodCall) {
+        try {
+            ResolvedMethodDeclaration blah = methodCall.resolve();
+            ResolvedReferenceTypeDeclaration declaringType = blah.declaringType();
 
+            Project project = containingMethod.getParentType().getParentPackage().getParentProject();
+            Optional<Package> pkg = project.lookupPackageByName(declaringType.getPackageName());
+            if (!pkg.isPresent()) return Optional.empty();
 
-            //fieldDeclarations.stream().collect(Collectors.toMap(FieldDeclaration::get, item -> item));
+            Optional<Type> typ = pkg.get().lookupTypeByName(declaringType.getName());
 
+            if (!typ.isPresent()) return Optional.empty();
+
+            Optional<Method> method = typ.get().lookupMethodBySignature(blah.getSignature());
+
+            return method;
+        } catch (Exception e) {
+            return Optional.empty();
         }
-
-        return null;
     }
 }
