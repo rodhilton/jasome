@@ -106,12 +106,25 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [ ] **Method Inheritance Factor (MIF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ - [ ] **Method Hiding Factor (MHF)** see MOOD Metrics Abreu et al.,  Evaluating the Impact of Object-Oriented Design on Software Quality.
+ - [ ] **Attribute Hiding Factor (AHF)** ditto
+ - [ ] **Method Inheritance Factor (MIF)** ditto, may be same as MIF above
+ - [ ] **Attribute Inheritance Factor (AIF)** ditto
+ - [ ] **Polymorphism Factor (POF)** ditto, may be same as PF above
+ - [ ] **Coupling Factor (COF)** ditto, may be same as CF above
+ - [ ] **Data Abstraction Coupling (DAC)** - Number of attributes in a class that represent other class types. See Li and Henry
+ - [ ] **Size2 (SIZE2)** - Number of attributes and the number of local methods defined in a class. Li and Henry
+ - [ ] **Data Access Metric (DAM)** - Bansiya and Davis
+ - [ ] **Direct Class Coupling (DCC)** - Bansiya and Davis
+ - [ ] **Measure of Aggregation (MOA)** - Bansiya and Davis
+ 
  
   
 More metrics coming soon, I plan to gather every metric outlined in the following sources:
 
  * http://www.aivosto.com/project/help/pm-syscomplexity.html system complexity metrics, sums and avgs of Ci per class? package? 
  * http://support.objecteering.com/objecteering6.1/help/us/metrics/toc.htm
+ * https://link.springer.com/chapter/10.1007%2F978-3-642-15228-3_7 (debbabi2010metrics) 
  * http://metrics.sourceforge.net/
  * http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
  * http://www.alibris.com/Object-Oriented-Metrics-Measures-of-Complexity-Brian-Henderson-Sellers/book/29695100
