@@ -87,8 +87,8 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
  - [x] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
  - [x] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
- - [ ] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between _(package)_
- - [ ] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. NOL / NOC _(package)_
+ - [x] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between a class and all others _(class)_
+ - [x] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. Sum(NOL) / NOC _(package)_
  - [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
  - [ ] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
  - [ ] **McClure’s Complexity Metric (MCLC)** - NCOMP + NVAR _(method)_

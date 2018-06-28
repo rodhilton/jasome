@@ -53,6 +53,10 @@ public class Project extends Code {
     }
 
     public Optional<Package> lookupPackageByName(String packageName) {
+        if(packageName == null || packageName.trim().equals("")) {
+            packageName = "default";
+        }
+        
         if(packageLookup.containsKey(packageName)) {
             return Optional.of(packageLookup.get(packageName));
         } else {
