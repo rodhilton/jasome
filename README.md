@@ -89,9 +89,9 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
  - [x] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between a class and all others _(class)_
  - [x] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. Sum(NOL) / NOC _(package)_
- - [ ] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
- - [ ] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
- - [ ] **McClure’s Complexity Metric (MCLC)** - NCOMP + NVAR _(method)_
+ - [x] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
+ - [x] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
+ - [x] **McClure’s Complexity Metric (MCLC)** - NCOP + NVAR _(method)_
  - [x] **Fan-out (Fout)** - The number of methods immediately subordinate to a method _(method)_
  - [x] **Fan-in (Fin)** - The number of methods that invoke a method _(method)_
  - [x] **Structural Complexity (Si)** - Fout^2 _(method)_
@@ -130,5 +130,6 @@ More metrics coming soon, I plan to gather every metric outlined in the followin
  * http://www.alibris.com/Object-Oriented-Metrics-Measures-of-Complexity-Brian-Henderson-Sellers/book/29695100
  * http://www.objectmentor.com/resources/articles/oodmetrc.pdf
  * http://www.win.tue.nl/~aserebre/2IS55/2009-2010/10.pdf
+ * Halstead measures (1977) 
  
 And a lot more
