@@ -1,47 +1,48 @@
 package org.jasome.metrics;
 
 import com.google.common.base.Objects;
-import org.jasome.metrics.metrics.IntegerMetric;
-import org.jasome.metrics.metrics.RationalMetric;
-import org.jasome.metrics.metrics.RealMetric;
 import org.jscience.mathematics.number.*;
-import org.jscience.mathematics.number.Number;
 
 import java.math.BigInteger;
+import java.text.DecimalFormat;
 
-public abstract class Metric<N extends Number<N>> {
+public class Metric {
+    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0########");
+
     private String name;
     private String description;
-    private N value;
+    private Real value;
+    private boolean isInteger;
 
-    protected Metric(String name, String description, N value) {
+    protected Metric(String name, String description, Real value, boolean isInteger) {
         this.name = name;
         this.description = description;
         this.value = value;
+        this.isInteger = isInteger;
     }
-//
-//    public static <N extends Number<N>> Metric<N> of(String name, String description, N value) {
-//        return new Metric<>(name, description, value);
-//    }
 
-    public static IntegerMetric of(String name, String description, BigInteger value) {
-        return new IntegerMetric(name, description, LargeInteger.valueOf(value));
+    public static Metric of(String name, String description, Real value) {
+        return new Metric(name, description, value, false);
+    }
+
+    public static Metric of(String name, String description, BigInteger value) {
+        return new Metric(name, description, Real.valueOf(value.toString()), true);
     }
     
-    public static IntegerMetric of(String name, String description, LargeInteger value) {
-        return new IntegerMetric(name, description, value);
+    public static Metric of(String name, String description, LargeInteger value) {
+        return new Metric(name, description, Real.valueOf(value.toString()), true);
     }
 
-    public static RationalMetric of(String name, String description, Rational value) {
-        return new RationalMetric(name, description, value);
+    public static Metric of(String name, String description, Rational value) {
+        return new Metric(name, description, Real.valueOf(value.getDividend().toString()).divide(Real.valueOf(value.getDivisor().toString())), false);
     }
 
-    public static IntegerMetric of(String name, String description, long value) {
-        return new IntegerMetric(name, description, LargeInteger.valueOf(value));
+    public static Metric of(String name, String description, long value) {
+        return new Metric(name, description, Real.valueOf(value), true);
     }
 
-    public static RealMetric of(String name, String description, double value) {
-        return new RealMetric(name, description, FloatingPoint.valueOf(value));
+    public static Metric of(String name, String description, double value) {
+        return new Metric(name, description, Real.valueOf(value), false);
     }
 
     public String getName() {
@@ -52,7 +53,7 @@ public abstract class Metric<N extends Number<N>> {
         return description;
     }
 
-    public N getValue() {
+    public Real getValue() {
         return value;
     }
     
@@ -76,5 +77,11 @@ public abstract class Metric<N extends Number<N>> {
         return Objects.hashCode(name, description, value);
     }
 
-    public abstract String getFormattedValue();
+    public String getFormattedValue() {
+        if(isInteger) {
+            return value.round().toString();
+        } else {
+            return METRIC_VALUE_FORMAT.format(value.doubleValue());
+        }
+    }
 }
