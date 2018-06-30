@@ -105,19 +105,11 @@ public class XMLOutputter implements Outputter<Document> {
 
             metricsElement.setAttribute("name", metric.getName());
             metricsElement.setAttribute("description", metric.getDescription());
-
-            if (isInteger(metric)) {
-                metricsElement.setAttribute("value", metric.getValue().toString());
-            } else {
-                metricsElement.setAttribute("value", METRIC_VALUE_FORMAT.format(metric.getValue().doubleValue()));
-            }
+            metricsElement.setAttribute("value", metric.getFormattedValue());
 
             metricsContainer.appendChild(metricsElement);
         }
         parentElement.appendChild(metricsContainer);
     }
-
-    private boolean isInteger(Metric metric) {
-        return metric.isInteger();
-    }
+    
 }
