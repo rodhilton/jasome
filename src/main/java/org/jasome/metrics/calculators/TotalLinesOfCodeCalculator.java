@@ -16,6 +16,7 @@ import org.jasome.input.Method;
 import org.jasome.input.Package;
 import org.jasome.input.Project;
 import org.jasome.input.Type;
+import org.jasome.metrics.value.NumericValue;
 import org.jscience.mathematics.number.LargeInteger;
 
 import java.util.Optional;
@@ -90,7 +91,7 @@ public class TotalLinesOfCodeCalculator {
 
         @Override
         public Set<Metric> calculate(Project aProject) {
-            LargeInteger total = aProject.getPackages().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
+            NumericValue total = aProject.getPackages().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(NumericValue.ZERO, NumericValue::plus);
 
             return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
@@ -100,7 +101,7 @@ public class TotalLinesOfCodeCalculator {
 
         @Override
         public Set<Metric> calculate(Package aPackage) {
-            LargeInteger total = aPackage.getTypes().stream().map(m -> LargeInteger.valueOf(m.getMetric("TLOC").get().getValue().longValue())).reduce(LargeInteger.ZERO, LargeInteger::plus);
+            NumericValue total = aPackage.getTypes().stream().map(m -> m.getMetric("TLOC").get().getValue()).reduce(NumericValue.ZERO, NumericValue::plus);
 
             return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }

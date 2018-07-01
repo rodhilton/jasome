@@ -1,10 +1,5 @@
 package org.jasome.input;
 
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;

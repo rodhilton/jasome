@@ -31,11 +31,11 @@ public class NumberOfFieldsCalculator implements Calculator<Type> {
         ClassOrInterfaceDeclaration declaration = type.getSource();
 
 
-        long numAttributes = declaration.getFields().stream().count();
+        long numAttributes = declaration.getFields().size();
         long numStaticAttributes = declaration.getFields().stream().filter(f -> f.getModifiers().contains(Modifier.STATIC)).count();
         long numPublicAttributes = declaration.getFields().stream().filter(f -> f.getModifiers().contains(Modifier.PUBLIC)).count();
 
-        long numMethods = declaration.getMethods().stream().count();
+        long numMethods = declaration.getMethods().size();
         long numStaticMethods = declaration.getMethods().stream().filter(f -> f.getModifiers().contains(Modifier.STATIC)).count();
         long numPublicMethods = declaration.getMethods().stream().filter(f -> f.getModifiers().contains(Modifier.PUBLIC)).count();
 

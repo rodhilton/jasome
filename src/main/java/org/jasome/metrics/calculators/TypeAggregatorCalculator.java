@@ -5,35 +5,27 @@ import org.jasome.input.Method;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jscience.mathematics.number.Real;
+import org.jasome.metrics.value.NumericValue;
+import org.jasome.metrics.value.NumericValueSummaryStatistics;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TypeAggregatorCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
 
-        //TODO: we lose precision here, not a huge fan of this
-        List<Real> ci1 = methodMetrics(type.getMethods(), "Ci");
-        Real total = ci1.stream().reduce(Real.ZERO, Real::plus);
-//
-//        DoubleSummaryStatistics stats = ((List<Number>) ci)
-//                .collect(Collectors.summarizingDouble(metric -> metric.getValue().doubleValue()));
-
-        Real avg = total.divide(ci1.size());
+        NumericValueSummaryStatistics ciStats = methodMetrics(type.getMethods(), "Ci").collect(NumericValue.summarizingCollector());
 
         return ImmutableSet.of(
-                Metric.of("ClTCi", "Class Total System Complexity", total),
-                Metric.of("ClRCi", "Class Relative System Complexity", avg)
+                Metric.of("ClTCi", "Class Total System Complexity", ciStats.getSum()),
+                Metric.of("ClRCi", "Class Relative System Complexity", ciStats.getAverage())
         );
 
     }
 
-    private List<Real> methodMetrics(Set<Method> methods, String metricName) {
+    private Stream<NumericValue> methodMetrics(Set<Method> methods, String metricName) {
         return methods.stream().flatMap(method -> {
             Optional<Metric> metric = method.getMetric(metricName);
             if(metric.isPresent()) {
@@ -41,6 +33,6 @@ public class TypeAggregatorCalculator implements Calculator<Type> {
             } else {
                 return Stream.empty();
             }
-        }).collect(Collectors.toList());
+        });
     }
 }

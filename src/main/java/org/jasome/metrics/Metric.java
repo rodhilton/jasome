@@ -1,48 +1,41 @@
 package org.jasome.metrics;
 
 import com.google.common.base.Objects;
+import org.jasome.metrics.value.NumericValue;
 import org.jscience.mathematics.number.*;
+import org.jscience.mathematics.number.Number;
 
 import java.math.BigInteger;
-import java.text.DecimalFormat;
 
 public class Metric {
-    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0########");
-
     private String name;
     private String description;
-    private Real value;
-    private boolean isInteger;
+    private NumericValue value;
 
-    protected Metric(String name, String description, Real value, boolean isInteger) {
+    protected Metric(String name, String description, NumericValue value) {
         this.name = name;
         this.description = description;
         this.value = value;
-        this.isInteger = isInteger;
     }
 
-    public static Metric of(String name, String description, Real value) {
-        return new Metric(name, description, value, false);
+    public static Metric of(String name, String description, NumericValue value) {
+        return new Metric(name, description, value);
+    }
+
+    public static Metric of(String name, String description, Number value) {
+        return new Metric(name, description, NumericValue.valueOf(value));
     }
 
     public static Metric of(String name, String description, BigInteger value) {
-        return new Metric(name, description, Real.valueOf(value.toString()), true);
-    }
-    
-    public static Metric of(String name, String description, LargeInteger value) {
-        return new Metric(name, description, Real.valueOf(value.toString()), true);
-    }
-
-    public static Metric of(String name, String description, Rational value) {
-        return new Metric(name, description, Real.valueOf(value.getDividend().toString()).divide(Real.valueOf(value.getDivisor().toString())), false);
+        return new Metric(name, description, NumericValue.valueOf(LargeInteger.valueOf(value)));
     }
 
     public static Metric of(String name, String description, long value) {
-        return new Metric(name, description, Real.valueOf(value), true);
+        return new Metric(name, description, NumericValue.valueOf(value));
     }
 
     public static Metric of(String name, String description, double value) {
-        return new Metric(name, description, Real.valueOf(value), false);
+        return new Metric(name, description, NumericValue.valueOf(value));
     }
 
     public String getName() {
@@ -53,7 +46,7 @@ public class Metric {
         return description;
     }
 
-    public Real getValue() {
+    public NumericValue getValue() {
         return value;
     }
     
@@ -78,10 +71,6 @@ public class Metric {
     }
 
     public String getFormattedValue() {
-        if(isInteger) {
-            return value.round().toString();
-        } else {
-            return METRIC_VALUE_FORMAT.format(value.doubleValue());
-        }
+        return value.toString();
     }
 }
