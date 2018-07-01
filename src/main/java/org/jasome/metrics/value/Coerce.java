@@ -14,9 +14,8 @@ class Coerce {
     }
 
     public static Real toReal(Rational value) {
-        Rational rationalValue = (Rational)value;
-        Real dividendReal = Real.valueOf(rationalValue.getDividend(), 0, 0);
-        Real divisorReal = Real.valueOf(rationalValue.getDivisor(), 0, 0);
+        Real dividendReal = Real.valueOf(value.getDividend(), 0, 0);
+        Real divisorReal = Real.valueOf(value.getDivisor(), 0, 0);
         return dividendReal.divide(divisorReal);
     }
 }

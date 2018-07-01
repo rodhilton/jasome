@@ -33,19 +33,19 @@ public class NumericValue implements Comparable<NumericValue> {
     public static final NumericValue ZERO=new NumericValue(LargeInteger.ZERO);
     public static final NumericValue ONE=new NumericValue(LargeInteger.ONE);
 
-    public static NumericValue valueOf(long l) {
+    public static NumericValue of(long l) {
         return new NumericValue(LargeInteger.valueOf(l));
     }
 
-    public static NumericValue valueOf(double d) {
+    public static NumericValue of(double d) {
         return new NumericValue(Real.valueOf(d));
     }
 
-    public static NumericValue valueOf(BigInteger value) {
+    public static NumericValue of(BigInteger value) {
         return new NumericValue(LargeInteger.valueOf(value));
     }
 
-    public static NumericValue valueOf(Number n) {
+    public static NumericValue of(Number n) {
         assert(n!=null);
         return new NumericValue(n);
     }

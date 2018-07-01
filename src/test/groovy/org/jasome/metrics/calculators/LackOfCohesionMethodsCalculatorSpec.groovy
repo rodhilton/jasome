@@ -73,7 +73,7 @@ class LackOfCohesionMethodsCalculatorSpec extends Specification {
         def result = new LackOfCohesionMethodsCalculator().calculate(type)
 
         then:
-        expect result, containsMetric("LCOM*", NumericValue.valueOf(1).divide(NumericValue.valueOf(3)));
+        expect result, containsMetric("LCOM*", NumericValue.of(1).divide(NumericValue.of(3)));
     }
 
     def "calculate simple LCOM sees variable use in for loops"() {

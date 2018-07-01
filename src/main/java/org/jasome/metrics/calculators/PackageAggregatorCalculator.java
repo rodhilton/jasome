@@ -26,7 +26,7 @@ public class PackageAggregatorCalculator implements Calculator<Package> {
         NumericValueSummaryStatistics numberOfLinksSummary = typeMetrics(allTypes, "NOL")
                 .collect(NumericValue.summarizingCollector());
 
-        NumericValue classCategoricalRelationalCohesion = NumericValue.valueOf(100).times(numberOfLinksSummary.getAverage());
+        NumericValue classCategoricalRelationalCohesion = NumericValue.of(100).times(numberOfLinksSummary.getAverage());
 
         return ImmutableSet.of(
                 Metric.of("PkgTCi", "Package Total System Complexity", stats.getSum()),

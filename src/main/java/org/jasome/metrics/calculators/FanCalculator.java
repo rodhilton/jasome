@@ -57,8 +57,8 @@ public class FanCalculator implements Calculator<Method> {
         int parameters = method.getSource().getParameters().size();
         int iovars = parameters + returns;
 
-        NumericValue dataComplexity = NumericValue.valueOf(iovars).divide(NumericValue.ONE.plus(NumericValue.valueOf(fanOut)));
-        NumericValue structuralComplexity = NumericValue.valueOf(fanOut).pow(2);
+        NumericValue dataComplexity = NumericValue.of(iovars).divide(NumericValue.ONE.plus(NumericValue.of(fanOut)));
+        NumericValue structuralComplexity = NumericValue.of(fanOut).pow(2);
         NumericValue systemComplexity = dataComplexity.plus(structuralComplexity.divide(NumericValue.ONE));
 
         return ImmutableSet.of(

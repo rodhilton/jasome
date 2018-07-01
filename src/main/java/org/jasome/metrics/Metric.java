@@ -19,11 +19,11 @@ public class Metric {
     }
     
     public static Metric of(String name, String description, long value) {
-        return new Metric(name, description, NumericValue.valueOf(value));
+        return new Metric(name, description, NumericValue.of(value));
     }
 
     public static Metric of(String name, String description, double value) {
-        return new Metric(name, description, NumericValue.valueOf(value));
+        return new Metric(name, description, NumericValue.of(value));
     }
 
     public String getName() {

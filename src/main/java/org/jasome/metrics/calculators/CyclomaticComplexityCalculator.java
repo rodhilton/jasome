@@ -32,7 +32,7 @@ public class CyclomaticComplexityCalculator implements Calculator<Method> {
         List<BinaryExpr> orExprs = method.getSource().getNodesByType(BinaryExpr.class).stream().
                 filter(f -> f.getOperator() == OR).collect(Collectors.toList());
 
-        NumericValue total = NumericValue.valueOf(ifStmts.size() +
+        NumericValue total = NumericValue.of(ifStmts.size() +
                 forStmts.size() +
                 whileStmts.size() +
                 doStmts.size() +

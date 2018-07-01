@@ -257,7 +257,7 @@ public class TotalLinesOfCodeCalculator {
             }
         }
 
-        return NumericValue.valueOf(count);
+        return NumericValue.of(count);
     }
 
 }

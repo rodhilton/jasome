@@ -25,14 +25,14 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     public Set<Metric> calculate(Type type) {
 
 
-        NumericValue depth = NumericValue.valueOf(calculateInheritanceDepth(type));
+        NumericValue depth = NumericValue.of(calculateInheritanceDepth(type));
 
         Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type);
 
-        NumericValue overriddenMethods = NumericValue.valueOf(overloadedAndInheritedOperations.getLeft());
-        NumericValue inheritedMethods = NumericValue.valueOf(overloadedAndInheritedOperations.getRight());
+        NumericValue overriddenMethods = NumericValue.of(overloadedAndInheritedOperations.getLeft());
+        NumericValue inheritedMethods = NumericValue.of(overloadedAndInheritedOperations.getRight());
 
-        NumericValue numberOfMethods = NumericValue.valueOf(type.getMethods().size());
+        NumericValue numberOfMethods = NumericValue.of(type.getMethods().size());
 
         //more good and related ones here http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
 

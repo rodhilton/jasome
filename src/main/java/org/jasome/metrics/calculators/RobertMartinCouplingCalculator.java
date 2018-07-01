@@ -97,7 +97,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         instabilityOpt.ifPresent(i -> metrics.add(Metric.of("I", "Instability", i)));
 
-        NumericValue numberOfAbstractClassesAndInterfacesInPackage = NumericValue.valueOf(
+        NumericValue numberOfAbstractClassesAndInterfacesInPackage = NumericValue.of(
                 aPackage.getTypes()
                         .parallelStream()
                         .filter(type -> type.getSource().isInterface() || type.getSource().isAbstract())
@@ -108,7 +108,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         Optional<NumericValue> abstractnessOpt = Optional.ofNullable(
                 aPackage.getTypes().size() > 0 ?
-                        numberOfAbstractClassesAndInterfacesInPackage.divide(NumericValue.valueOf(aPackage.getTypes().size()))
+                        numberOfAbstractClassesAndInterfacesInPackage.divide(NumericValue.of(aPackage.getTypes().size()))
                         : null
         );
 

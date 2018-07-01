@@ -37,13 +37,13 @@ public class LackOfCohesionMethodsCalculator implements Calculator<Type> {
                 }
             }
 
-            total = total.plus(NumericValue.valueOf(numberOfMethodsAccessingVariable));
+            total = total.plus(NumericValue.of(numberOfMethodsAccessingVariable));
         }
 
 
         try {
-            NumericValue numberOfMethods = NumericValue.valueOf(methods.size());
-            NumericValue numberOfVariables = NumericValue.valueOf(variables.size());
+            NumericValue numberOfMethods = NumericValue.of(methods.size());
+            NumericValue numberOfVariables = NumericValue.of(variables.size());
 
             NumericValue averageNumberOfMethodsAccessingEachVariable = total.divide(numberOfVariables);
 

@@ -36,15 +36,15 @@ public class Matchers {
     }
 
     public static Matcher<Set<Metric>> containsMetric(String name, double value) {
-        return containsMetric(name, NumericValue.valueOf(value));
+        return containsMetric(name, NumericValue.of(value));
     }
 
     public static Matcher<Set<Metric>> containsMetric(String name, long value) {
-        return containsMetric(name, NumericValue.valueOf(value));
+        return containsMetric(name, NumericValue.of(value));
     }
 //
 //    public static Matcher<Set<Metric>> containsMetric(String name, double value) {
-//        return containsMetric(name, Real.valueOf(value));
+//        return containsMetric(name, Real.of(value));
 //    }
 
     public static Matcher<Set<Metric>> doesNotContainMetric(String name) {
