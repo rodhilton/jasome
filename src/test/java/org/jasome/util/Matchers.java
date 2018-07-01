@@ -4,16 +4,14 @@ import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.jasome.metrics.Metric;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Number;
-import org.jscience.mathematics.number.Real;
+import org.jasome.metrics.value.NumericValue;
 
 import java.util.Optional;
 import java.util.Set;
 
 public class Matchers {
 
-    public static Matcher<Set<Metric>> containsMetric(String name, Number value) {
+    public static Matcher<Set<Metric>> containsMetric(String name, NumericValue value) {
         return new BaseMatcher<Set<Metric>>() {
             @Override
             @SuppressWarnings("unchecked")
@@ -38,11 +36,11 @@ public class Matchers {
     }
 
     public static Matcher<Set<Metric>> containsMetric(String name, double value) {
-        return containsMetric(name, Real.valueOf(value));
+        return containsMetric(name, NumericValue.valueOf(value));
     }
 
     public static Matcher<Set<Metric>> containsMetric(String name, long value) {
-        return containsMetric(name, LargeInteger.valueOf(value));
+        return containsMetric(name, NumericValue.valueOf(value));
     }
 //
 //    public static Matcher<Set<Metric>> containsMetric(String name, double value) {

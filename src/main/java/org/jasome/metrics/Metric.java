@@ -2,10 +2,6 @@ package org.jasome.metrics;
 
 import com.google.common.base.Objects;
 import org.jasome.metrics.value.NumericValue;
-import org.jscience.mathematics.number.*;
-import org.jscience.mathematics.number.Number;
-
-import java.math.BigInteger;
 
 public class Metric {
     private String name;
@@ -21,15 +17,7 @@ public class Metric {
     public static Metric of(String name, String description, NumericValue value) {
         return new Metric(name, description, value);
     }
-
-    public static Metric of(String name, String description, Number value) {
-        return new Metric(name, description, NumericValue.valueOf(value));
-    }
-
-    public static Metric of(String name, String description, BigInteger value) {
-        return new Metric(name, description, NumericValue.valueOf(LargeInteger.valueOf(value)));
-    }
-
+    
     public static Metric of(String name, String description, long value) {
         return new Metric(name, description, NumericValue.valueOf(value));
     }

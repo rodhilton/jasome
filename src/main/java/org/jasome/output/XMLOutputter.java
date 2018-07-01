@@ -3,7 +3,6 @@ package org.jasome.output;
 import org.jasome.input.*;
 import org.jasome.input.Package;
 import org.jasome.metrics.Metric;
-import org.jscience.mathematics.number.LargeInteger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -11,11 +10,8 @@ import org.w3c.dom.Node;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {

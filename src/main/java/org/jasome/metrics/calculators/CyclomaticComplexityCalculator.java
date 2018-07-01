@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.input.Method;
-import org.jscience.mathematics.number.LargeInteger;
+import org.jasome.metrics.value.NumericValue;
 
 import java.util.List;
 import java.util.Set;
@@ -32,7 +32,7 @@ public class CyclomaticComplexityCalculator implements Calculator<Method> {
         List<BinaryExpr> orExprs = method.getSource().getNodesByType(BinaryExpr.class).stream().
                 filter(f -> f.getOperator() == OR).collect(Collectors.toList());
 
-        LargeInteger total = LargeInteger.valueOf(ifStmts.size() +
+        NumericValue total = NumericValue.valueOf(ifStmts.size() +
                 forStmts.size() +
                 whileStmts.size() +
                 doStmts.size() +

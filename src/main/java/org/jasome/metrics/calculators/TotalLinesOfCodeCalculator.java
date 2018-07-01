@@ -10,14 +10,13 @@ import com.github.javaparser.ast.stmt.*;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.google.common.collect.ImmutableSet;
-import org.jasome.metrics.Calculator;
-import org.jasome.metrics.Metric;
 import org.jasome.input.Method;
 import org.jasome.input.Package;
 import org.jasome.input.Project;
 import org.jasome.input.Type;
+import org.jasome.metrics.Calculator;
+import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
-import org.jscience.mathematics.number.LargeInteger;
 
 import java.util.Optional;
 import java.util.Set;
@@ -114,7 +113,7 @@ public class TotalLinesOfCodeCalculator {
             Stack<Node> nodeStack = new Stack<Node>();
             nodeStack.add(type.getSource());
 
-            LargeInteger total = performCalculation(nodeStack);
+            NumericValue total = performCalculation(nodeStack);
             return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
@@ -126,12 +125,12 @@ public class TotalLinesOfCodeCalculator {
             Stack<Node> nodeStack = new Stack<Node>();
             nodeStack.add(method.getSource());
 
-            LargeInteger total = performCalculation(nodeStack);
+            NumericValue total = performCalculation(nodeStack);
             return ImmutableSet.of(Metric.of("TLOC", "Total Lines of Code", total));
         }
     }
 
-    private static LargeInteger performCalculation(Stack<Node> nodeStack) {
+    private static NumericValue performCalculation(Stack<Node> nodeStack) {
         long count = 0;
 
         while (!nodeStack.empty()) {
@@ -258,7 +257,7 @@ public class TotalLinesOfCodeCalculator {
             }
         }
 
-        return LargeInteger.valueOf(count);
+        return NumericValue.valueOf(count);
     }
 
 }

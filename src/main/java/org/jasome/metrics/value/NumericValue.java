@@ -5,6 +5,7 @@ import org.jscience.mathematics.number.Number;
 import org.jscience.mathematics.number.Rational;
 import org.jscience.mathematics.number.Real;
 
+import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.util.Collections;
 import java.util.EnumSet;
@@ -38,6 +39,10 @@ public class NumericValue implements Comparable<NumericValue> {
 
     public static NumericValue valueOf(double d) {
         return new NumericValue(Real.valueOf(d));
+    }
+
+    public static NumericValue valueOf(BigInteger value) {
+        return new NumericValue(LargeInteger.valueOf(value));
     }
 
     public static NumericValue valueOf(Number n) {
@@ -172,6 +177,9 @@ public class NumericValue implements Comparable<NumericValue> {
         throw new UnsupportedOperationException("Unable to divide "+value.getClass()+" to "+value.getClass());
     }
 
+    public NumericValue pow(int exp) {
+        return new NumericValue(value.pow(exp));
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -286,6 +294,22 @@ public class NumericValue implements Comparable<NumericValue> {
                 return Collections.unmodifiableSet(EnumSet.of(Collector.Characteristics.IDENTITY_FINISH));
             }
         };
+    }
+
+    public boolean isGreaterThan(NumericValue other) {
+        return this.compareTo(other) > 0;
+    }
+
+    public boolean isLessThan(NumericValue other) {
+        return this.compareTo(other) < 0;
+    }
+
+    public NumericValue abs() {
+        if(this.isLessThan(NumericValue.ZERO)) {
+            return this.negate();
+        } else {
+            return this;
+        }
     }
 }
 

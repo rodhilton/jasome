@@ -1,7 +1,6 @@
 package org.jasome.metrics.calculators
 
-import org.jscience.mathematics.number.LargeInteger
-import org.jscience.mathematics.number.Rational
+import org.jasome.metrics.value.NumericValue
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
@@ -112,7 +111,7 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         expect firstResult, containsMetric("I", 0.5)
         expect firstResult, containsMetric("A", 0.25)
         expect firstResult, containsMetric("DMS", 0.25)
-        expect firstResult, containsMetric("NOI", LargeInteger.ONE)
+        expect firstResult, containsMetric("NOI", NumericValue.ONE)
     }
 
 
@@ -161,16 +160,16 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", Rational.ZERO)
-        expect firstResult, containsMetric("Ca", Rational.ZERO)
+        expect firstResult, containsMetric("Ce", NumericValue.ZERO)
+        expect firstResult, containsMetric("Ca", NumericValue.ZERO)
 
-        expect secondResult, containsMetric("Ce", Rational.ZERO)
-        expect secondResult, containsMetric("Ca", Rational.ZERO)
+        expect secondResult, containsMetric("Ce", NumericValue.ZERO)
+        expect secondResult, containsMetric("Ca", NumericValue.ZERO)
 
         expect firstResult, doesNotContainMetric("I")
-        expect secondResult, containsMetric("Ca", Rational.ZERO)
+        expect secondResult, containsMetric("Ca", NumericValue.ZERO)
         expect firstResult, doesNotContainMetric("DMS")
-        expect firstResult, containsMetric("NOI", Rational.ZERO)
+        expect firstResult, containsMetric("NOI", NumericValue.ZERO)
     }
 
     def "doesn't count non-public classes"() {
@@ -213,16 +212,16 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", Rational.ZERO)
-        expect firstResult, containsMetric("Ca", Rational.ZERO)
+        expect firstResult, containsMetric("Ce", NumericValue.ZERO)
+        expect firstResult, containsMetric("Ca", NumericValue.ZERO)
 
-        expect secondResult, containsMetric("Ce", Rational.ZERO)
-        expect secondResult, containsMetric("Ca", Rational.ZERO)
+        expect secondResult, containsMetric("Ce", NumericValue.ZERO)
+        expect secondResult, containsMetric("Ca", NumericValue.ZERO)
 
         expect firstResult, doesNotContainMetric("I")
-        expect secondResult, containsMetric("Ca", Rational.ZERO)
+        expect secondResult, containsMetric("Ca", NumericValue.ZERO)
         expect firstResult, doesNotContainMetric("DMS")
-        expect firstResult, containsMetric("NOI", Rational.ZERO)
+        expect firstResult, containsMetric("NOI", NumericValue.ZERO)
     }
 
     def "able to see public static classes"() {
@@ -265,10 +264,10 @@ class RobertMartinCouplingCalculatorSpec extends Specification {
         def secondResult = new RobertMartinCouplingCalculator().calculate(secondPackage);
 
         then:
-        expect firstResult, containsMetric("Ce", Rational.ZERO)
-        expect firstResult, containsMetric("Ca", Rational.ONE)
+        expect firstResult, containsMetric("Ce", NumericValue.ZERO)
+        expect firstResult, containsMetric("Ca", NumericValue.ONE)
 
-        expect secondResult, containsMetric("Ce", Rational.ONE)
-        expect secondResult, containsMetric("Ca", Rational.ZERO)
+        expect secondResult, containsMetric("Ce", NumericValue.ONE)
+        expect secondResult, containsMetric("Ca", NumericValue.ZERO)
     }
 }

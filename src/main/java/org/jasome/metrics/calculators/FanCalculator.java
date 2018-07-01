@@ -19,9 +19,8 @@ import org.jasome.input.Project;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
+import org.jasome.metrics.value.NumericValue;
 import org.jasome.util.Distinct;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Rational;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,9 +57,9 @@ public class FanCalculator implements Calculator<Method> {
         int parameters = method.getSource().getParameters().size();
         int iovars = parameters + returns;
 
-        Rational dataComplexity = Rational.valueOf(LargeInteger.valueOf(iovars), LargeInteger.ONE.plus(LargeInteger.valueOf(fanOut)));
-        LargeInteger structuralComplexity = LargeInteger.valueOf(fanOut).pow(2);
-        Rational systemComplexity = dataComplexity.plus(Rational.valueOf(structuralComplexity, LargeInteger.ONE));
+        NumericValue dataComplexity = NumericValue.valueOf(iovars).divide(NumericValue.ONE.plus(NumericValue.valueOf(fanOut)));
+        NumericValue structuralComplexity = NumericValue.valueOf(fanOut).pow(2);
+        NumericValue systemComplexity = dataComplexity.plus(structuralComplexity.divide(NumericValue.ONE));
 
         return ImmutableSet.of(
                 Metric.of("Fout", "Fan-out", fanOut),

@@ -3,12 +3,11 @@ package org.jasome.metrics.calculators;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.google.common.collect.ImmutableSet;
-import org.jasome.metrics.Calculator;
-import org.jasome.metrics.Metric;
 import org.jasome.input.Package;
 import org.jasome.input.Type;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Rational;
+import org.jasome.metrics.Calculator;
+import org.jasome.metrics.Metric;
+import org.jasome.metrics.value.NumericValue;
 
 import java.util.List;
 import java.util.Map;
@@ -32,8 +31,8 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .filter(type -> type.getSource().isPublic())
                 .collect(Collectors.toMap(Type::getName, t -> t));
 
-        LargeInteger afferentCoupling = LargeInteger.ZERO; //The number of classes outside a package that depend on classes inside the package.
-        LargeInteger efferentCoupling = LargeInteger.ZERO; //The number of classes inside a package that depend on classes outside the package.
+        NumericValue afferentCoupling = NumericValue.ZERO; //The number of classes outside a package that depend on classes inside the package.
+        NumericValue efferentCoupling = NumericValue.ZERO; //The number of classes inside a package that depend on classes outside the package.
 
         for (Type typeInsidePackage : aPackage.getTypes()) {
             List<ClassOrInterfaceType> referencedTypes = typeInsidePackage.getSource().getNodesByType(ClassOrInterfaceType.class);
@@ -56,7 +55,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                     ).count();
 
             if (numberOfTypesReferencedThatAreInsideAnotherPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideAnotherPackage > 0) {
-                efferentCoupling = efferentCoupling.plus(LargeInteger.ONE);
+                efferentCoupling = efferentCoupling.plus(NumericValue.ONE);
             }
         }
 
@@ -81,7 +80,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                         ).count();
 
                 if (numberOfTypesReferencedThatAreInsideThisPackage + numberOfSimpleNamesReferencedThatCorrespondToTypesInsideThisPackage > 0) {
-                    afferentCoupling = afferentCoupling.plus(LargeInteger.ONE);
+                    afferentCoupling = afferentCoupling.plus(NumericValue.ONE);
                 }
             }
         }
@@ -90,15 +89,15 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
                 .add(Metric.of("Ca", "Afferent Coupling", afferentCoupling))
                 .add(Metric.of("Ce", "Efferent Coupling", efferentCoupling));
 
-        Optional<Rational> instabilityOpt = Optional.ofNullable(
-                afferentCoupling.plus(efferentCoupling).isGreaterThan(LargeInteger.ZERO) ?
-                        Rational.valueOf(efferentCoupling, afferentCoupling.plus(efferentCoupling))
+        Optional<NumericValue> instabilityOpt = Optional.ofNullable(
+                afferentCoupling.plus(efferentCoupling).isGreaterThan(NumericValue.ZERO) ?
+                        efferentCoupling.divide(afferentCoupling.plus(efferentCoupling))
                         : null
         );
 
         instabilityOpt.ifPresent(i -> metrics.add(Metric.of("I", "Instability", i)));
 
-        LargeInteger numberOfAbstractClassesAndInterfacesInPackage = LargeInteger.valueOf(
+        NumericValue numberOfAbstractClassesAndInterfacesInPackage = NumericValue.valueOf(
                 aPackage.getTypes()
                         .parallelStream()
                         .filter(type -> type.getSource().isInterface() || type.getSource().isAbstract())
@@ -107,9 +106,9 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
         metrics.add(Metric.of("NOI", "Number of Interfaces and Abstract Classes", numberOfAbstractClassesAndInterfacesInPackage));
 
-        Optional<Rational> abstractnessOpt = Optional.ofNullable(
+        Optional<NumericValue> abstractnessOpt = Optional.ofNullable(
                 aPackage.getTypes().size() > 0 ?
-                        Rational.valueOf(numberOfAbstractClassesAndInterfacesInPackage, LargeInteger.valueOf(aPackage.getTypes().size()))
+                        numberOfAbstractClassesAndInterfacesInPackage.divide(NumericValue.valueOf(aPackage.getTypes().size()))
                         : null
         );
 
@@ -118,7 +117,7 @@ public class RobertMartinCouplingCalculator implements Calculator<Package> {
 
 
         if (instabilityOpt.isPresent() && abstractnessOpt.isPresent()) {
-            metrics.add(Metric.of("DMS", "Normalized Distance from Main Sequence", abstractnessOpt.get().plus(instabilityOpt.get()).minus(Rational.ONE).abs()));
+            metrics.add(Metric.of("DMS", "Normalized Distance from Main Sequence", abstractnessOpt.get().plus(instabilityOpt.get()).minus(NumericValue.ONE).abs()));
         }
 
         return metrics.build();

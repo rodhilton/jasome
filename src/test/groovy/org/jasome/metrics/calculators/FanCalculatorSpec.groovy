@@ -2,8 +2,7 @@ package org.jasome.metrics.calculators
 
 import org.jasome.input.Method
 import org.jasome.input.Type
-import org.jscience.mathematics.number.LargeInteger
-import org.jscience.mathematics.number.Rational
+import org.jasome.metrics.value.NumericValue
 import spock.lang.Ignore
 import spock.lang.Specification
 
@@ -392,11 +391,11 @@ class FanCalculatorSpec extends Specification {
 
         expect resultVoid, containsMetric("Fout", 2) //(2 / 3)
         expect resultInt, containsMetric("Fout", 2) //(2 / 3)
-        expect resultVoid, containsMetric("Di", Rational.valueOf(LargeInteger.valueOf(2), LargeInteger.valueOf(3)))
+        expect resultVoid, containsMetric("Di", NumericValue.valueOf(2).divide(NumericValue.valueOf(3)))
         expect resultInt, containsMetric("Di", 1) //((2 + 1)/ 3)
 
         expect resultVoid, containsMetric("Si", 4)
-        expect resultVoid, containsMetric("Ci", Rational.valueOf(4, 1).plus(Rational.valueOf(LargeInteger.valueOf(2), LargeInteger.valueOf(3))))
+        expect resultVoid, containsMetric("Ci", NumericValue.valueOf(4).plus(NumericValue.valueOf(2).divide(NumericValue.valueOf(3))))
     }
 
 }

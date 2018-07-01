@@ -2,8 +2,6 @@ package org.jasome.metrics.calculators;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Graph;
-import org.jasome.input.Package;
-import org.jasome.input.Project;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;

@@ -9,11 +9,8 @@ import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
 import org.jasome.metrics.value.NumericValueSummaryStatistics;
 
-import java.util.DoubleSummaryStatistics;
-import java.util.LongSummaryStatistics;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class PackageAggregatorCalculator implements Calculator<Package> {

@@ -9,9 +9,8 @@ import org.jasome.input.Method;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
+import org.jasome.metrics.value.NumericValue;
 import org.jasome.util.CalculationUtils;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Rational;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,7 @@ public class LackOfCohesionMethodsCalculator implements Calculator<Type> {
 
         List<MethodDeclaration> methods = type.getMethods().stream().map(Method::getSource).collect(Collectors.toList());
 
-        LargeInteger total = LargeInteger.ZERO;
+        NumericValue total = NumericValue.ZERO;
 
         for (VariableDeclarator variable : variables) {
             int numberOfMethodsAccessingVariable = 0;
@@ -38,22 +37,22 @@ public class LackOfCohesionMethodsCalculator implements Calculator<Type> {
                 }
             }
 
-            total = total.plus(numberOfMethodsAccessingVariable);
+            total = total.plus(NumericValue.valueOf(numberOfMethodsAccessingVariable));
         }
 
 
         try {
-            LargeInteger numberOfMethods = LargeInteger.valueOf(methods.size());
-            LargeInteger numberOfVariables = LargeInteger.valueOf(variables.size());
+            NumericValue numberOfMethods = NumericValue.valueOf(methods.size());
+            NumericValue numberOfVariables = NumericValue.valueOf(variables.size());
 
-            Rational averageNumberOfMethodsAccessingEachVariable = Rational.valueOf(total, numberOfVariables);
+            NumericValue averageNumberOfMethodsAccessingEachVariable = total.divide(numberOfVariables);
 
-            Rational numberOfMethodsAsRational = Rational.valueOf(numberOfMethods, LargeInteger.ONE);
-            Rational numerator = averageNumberOfMethodsAccessingEachVariable.minus(numberOfMethodsAsRational);
+            NumericValue numberOfMethodsAsRational = numberOfMethods.divide(NumericValue.ONE);
+            NumericValue numerator = averageNumberOfMethodsAccessingEachVariable.minus(numberOfMethodsAsRational);
 
-            Rational denominator = Rational.ONE.minus(numberOfMethodsAsRational);
+            NumericValue denominator = NumericValue.ONE.minus(numberOfMethodsAsRational);
 
-            Rational lackOfCohesionMethods = numerator.divide(denominator);
+            NumericValue lackOfCohesionMethods = numerator.divide(denominator);
             return ImmutableSet.of(Metric.of("LCOM*", "Lack of Cohesion Methods (H-S)", lackOfCohesionMethods));
         } catch (ArithmeticException e) {
             return ImmutableSet.of();

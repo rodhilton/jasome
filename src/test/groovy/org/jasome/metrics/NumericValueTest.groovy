@@ -3,6 +3,7 @@ package org.jasome.metrics
 import com.google.common.collect.ImmutableList
 import org.jasome.metrics.value.NumericValueSummaryStatistics
 import org.jasome.metrics.value.NumericValue
+import org.jscience.mathematics.number.LargeInteger
 import org.jscience.mathematics.number.Rational
 import org.jscience.mathematics.number.Real
 import spock.lang.Specification
@@ -110,6 +111,19 @@ class NumericValueTest extends Specification {
         real.divide(real).toString() == "1.0"
     }
 
+    def "can exponentiate"() {
+
+        given:
+        def integer = NumericValue.valueOf(10)
+        def rational = NumericValue.valueOf(Rational.valueOf(5,3))
+        def real = NumericValue.valueOf(3.1415)
+
+        expect:
+        integer.pow(2) == NumericValue.valueOf(LargeInteger.valueOf(10).pow(2))
+        rational.pow(2) == NumericValue.valueOf(Rational.valueOf(5, 3).pow(2))
+        real.pow(2) == NumericValue.valueOf(Real.valueOf(3.1415).pow(2))
+    }
+
     def "can compare"() {
 
         given:
@@ -165,6 +179,23 @@ class NumericValueTest extends Specification {
 
         NumericValue.min(integer, real) == real
         NumericValue.min(real, integer) == real
+    }
+
+    def "can abs"() {
+
+        given:
+        def integer = NumericValue.valueOf(10)
+        def rational = NumericValue.valueOf(Rational.valueOf(5,3))
+        def real = NumericValue.valueOf(3.1415)
+
+        expect:
+        integer.abs() == integer
+        rational.abs() == rational
+        real.abs() == real
+
+        NumericValue.ZERO.minus(integer).abs() == integer
+        NumericValue.ZERO.minus(rational).abs() == rational
+        NumericValue.ZERO.minus(real).abs() == real
     }
 
     def "can collect"() {

@@ -1,6 +1,6 @@
 package org.jasome.metrics.calculators
 
-import org.jscience.mathematics.number.Rational
+import org.jasome.metrics.value.NumericValue
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
@@ -73,7 +73,7 @@ class LackOfCohesionMethodsCalculatorSpec extends Specification {
         def result = new LackOfCohesionMethodsCalculator().calculate(type)
 
         then:
-        expect result, containsMetric("LCOM*", Rational.valueOf(1, 3))
+        expect result, containsMetric("LCOM*", NumericValue.valueOf(1).divide(NumericValue.valueOf(3)));
     }
 
     def "calculate simple LCOM sees variable use in for loops"() {

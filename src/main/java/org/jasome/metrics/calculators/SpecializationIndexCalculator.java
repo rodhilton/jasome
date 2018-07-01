@@ -1,21 +1,16 @@
 package org.jasome.metrics.calculators;
 
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.type.ClassOrInterfaceType;
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 import com.google.common.graph.Graph;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import org.jasome.input.Method;
+import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.input.Method;
-import org.jasome.input.Package;
-import org.jasome.input.Type;
+import org.jasome.metrics.value.NumericValue;
 import org.jasome.util.CalculationUtils;
-import org.jscience.mathematics.number.LargeInteger;
-import org.jscience.mathematics.number.Rational;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,14 +25,14 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     public Set<Metric> calculate(Type type) {
 
 
-        LargeInteger depth = LargeInteger.valueOf(calculateInheritanceDepth(type));
+        NumericValue depth = NumericValue.valueOf(calculateInheritanceDepth(type));
 
         Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type);
 
-        LargeInteger overriddenMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getLeft());
-        LargeInteger inheritedMethods = LargeInteger.valueOf(overloadedAndInheritedOperations.getRight());
+        NumericValue overriddenMethods = NumericValue.valueOf(overloadedAndInheritedOperations.getLeft());
+        NumericValue inheritedMethods = NumericValue.valueOf(overloadedAndInheritedOperations.getRight());
 
-        LargeInteger numberOfMethods = LargeInteger.valueOf(type.getMethods().size());
+        NumericValue numberOfMethods = NumericValue.valueOf(type.getMethods().size());
 
         //more good and related ones here http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf
 
@@ -48,9 +43,9 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
                 .add(Metric.of("NMI", "Number of Inherited Methods", inheritedMethods))
                 .add(Metric.of("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods)));
 
-        if (numberOfMethods.isGreaterThan(LargeInteger.ZERO)) {
-            LargeInteger numerator = overriddenMethods.times(depth);
-            Rational specializationIndex = Rational.valueOf(numerator, numberOfMethods);
+        if (numberOfMethods.compareTo(NumericValue.ZERO) > 0) {
+            NumericValue numerator = overriddenMethods.times(depth);
+            NumericValue specializationIndex = numerator.divide(numberOfMethods);
             metricBuilder = metricBuilder.add(Metric.of("SIX", "Specialization Index", specializationIndex));
         }
 
