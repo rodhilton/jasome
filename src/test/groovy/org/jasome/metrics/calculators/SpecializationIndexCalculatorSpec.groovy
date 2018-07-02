@@ -1,6 +1,7 @@
 package org.jasome.metrics.calculators
 
 import org.jasome.input.Type
+import org.jasome.metrics.value.NumericValue
 import spock.lang.Specification
 
 import static org.jasome.util.Matchers.containsMetric
@@ -348,7 +349,5 @@ class SpecializationIndexCalculatorSpec extends Specification {
         expect result, containsMetric("NMA", 1)
         expect result, containsMetric("NMI", 1)
     }
-
-
 }
 

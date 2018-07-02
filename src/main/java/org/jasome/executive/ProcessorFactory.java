@@ -23,6 +23,7 @@ class ProcessorFactory {
         processor.registerPackageCalculator(new NumberOfClassesCalculator());
 
         processor.registerTypeCalculator(new SpecializationIndexCalculator());
+        processor.registerTypeCalculator(new MethodInheritanceCalculator());
 
         processor.registerPackageCalculator(new RobertMartinCouplingCalculator());
 

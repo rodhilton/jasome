@@ -69,6 +69,19 @@ Jasome is either currently tracking or planning to track the following metrics:
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
  - [x] **Specialization Index (SIX)** - How specialized a class is, defined as ![(DIT * NORM) / NOM](http://mathurl.com/jvbqdor.png) _(class)_
+ - [x] **Number of Methods Inherited Total (Mit)** - Methods inherited overall _(class)_
+ - [x] **Number of Methods Inherited (Mi)** - Methods inherited but not overridden _(class)_
+ - [x] **Number of Methods Defined (Md)** - Methods defined within class (same as NMA) _(class)_
+ - [x] **Number of Methods Overidden (Mo)** - Methods in class that override an otherwise-inherited method _(class)_
+ - [x] **Number of Methods (All) (Ma)** - Methods that can be invoked on a class (inherited, overridden, defined). Ma = Md + Mi Same as NORM. _(class)_
+ - [x] **Method Inheritance Factor (MIF)** - Mi / Ma _(class)_
+ - [x] **Number of Public Methods (PMd)** - Number of defined methods that are public _(class)_ 
+ - [x] **Number of Public Methods (PMi)** - Number of inherited (but not overridden) methods that are public _(class)_
+ - [x] **Method Hiding Factor (MHF)** (PMd+PMi)/(Md+Mi) _(class)_
+ - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ - [ ] **Attribute Hiding Factor (AHF)** ditto
+ - [ ] **Attribute Inheritance Factor (AIF)** ditto
  - [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
      through code _(method)_
  - [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
@@ -103,15 +116,6 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Package Total System Complexity (PkgTCi)** - sum(Ci) over all methods in all classes in a package _(package)_
  - [x] **Package Relative System Complexity (PkgRCi)** - avg(Ci) over all methods in all classes in a package _(package)_
  - [ ] **Number of Collaborations (CRC)** - The number of collaborations between a class and all others _(class)_
- - [ ] **Method Inheritance Factor (MIF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Method Hiding Factor (MHF)** see MOOD Metrics Abreu et al.,  Evaluating the Impact of Object-Oriented Design on Software Quality.
- - [ ] **Attribute Hiding Factor (AHF)** ditto
- - [ ] **Method Inheritance Factor (MIF)** ditto, may be same as MIF above
- - [ ] **Attribute Inheritance Factor (AIF)** ditto
- - [ ] **Polymorphism Factor (POF)** ditto, may be same as PF above
- - [ ] **Coupling Factor (COF)** ditto, may be same as CF above
  - [ ] **Data Abstraction Coupling (DAC)** - Number of attributes in a class that represent other class types. See Li and Henry
  - [ ] **Size2 (SIZE2)** - Number of attributes and the number of local methods defined in a class. Li and Henry
  - [ ] **Data Access Metric (DAM)** - Bansiya and Davis
