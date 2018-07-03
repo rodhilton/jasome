@@ -37,6 +37,10 @@ public class NumericValue implements Comparable<NumericValue> {
         return new NumericValue(LargeInteger.valueOf(l));
     }
 
+    public static NumericValue ofRational(long numerator, long denominator) {
+        return new NumericValue(Rational.valueOf(numerator, denominator));
+    }
+
     public static NumericValue of(double d) {
         return new NumericValue(Real.valueOf(d));
     }

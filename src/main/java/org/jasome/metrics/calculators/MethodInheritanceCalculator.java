@@ -95,6 +95,7 @@ public class MethodInheritanceCalculator implements Calculator<Type> {
 
         Set<Method> inheritedAndNotOverridden = inheritedMethods.stream()
                 .filter(im -> !overriddenMethodSignatures.contains(im.getSource().getSignature().asString()))
+                .filter(im -> !im.getSource().isPrivate())
                 .collect(Collectors.toSet());
 
         Set<Method> allMethods = Sets.union(definedMethods, inheritedAndNotOverridden);
@@ -103,9 +104,16 @@ public class MethodInheritanceCalculator implements Calculator<Type> {
                 .filter(dm->dm.getSource().isPublic())
                 .collect(Collectors.toSet());
 
-        Set<Method> publicInheritedNotOverridenMethods = inheritedAndNotOverridden.stream()
+        Set<Method> publicInheritedNotOverriddenMethods = inheritedAndNotOverridden.stream()
                 .filter(dm->dm.getSource().isPublic())
                 .collect(Collectors.toSet());
+
+        Set<Method> hiddenInheritedNotOverridden = Sets.difference(inheritedAndNotOverridden, publicInheritedNotOverriddenMethods)
+                .stream()
+                .filter(method -> method.getSource().isDefault() || method.getSource().isProtected()) //Private methods aren't 'inherited' because they can't be called
+                .collect(Collectors.toSet());
+        
+        Set<Method> hiddenDefined = Sets.difference(definedMethods, publicDefinedMethods);
 
         ImmutableSet.Builder<Metric> metricBuilder = ImmutableSet.<Metric>builder()
                 .add(Metric.of("Mit", "Number of Methods Inherited (Total)", inheritedMethods.size()))
@@ -113,13 +121,19 @@ public class MethodInheritanceCalculator implements Calculator<Type> {
                 .add(Metric.of("Md", "Number of Methods Defined", definedMethods.size()))
                 .add(Metric.of("Mo", "Number of Methods Overridden", overriddenMethods.size()))
                 .add(Metric.of("Ma", "Number of Methods (All)", allMethods.size()))
-                .add(Metric.of("PMi", "Number of Public Methods Inherited and Not Overridden", publicInheritedNotOverridenMethods.size()))
-                .add(Metric.of("PMd", "Number of Public Methods Defined", publicDefinedMethods.size()));
+                .add(Metric.of("PMi", "Number of Public Methods Inherited and Not Overridden", publicInheritedNotOverriddenMethods.size()))
+                .add(Metric.of("PMd", "Number of Public Methods Defined", publicDefinedMethods.size()))
+                .add(Metric.of("HMi", "Number of Hidden Methods Inherited and Not Overridden", hiddenInheritedNotOverridden.size()))
+                .add(Metric.of("HMd", "Number of Hidden Methods Defined", hiddenDefined.size()));
 
         if(!allMethods.isEmpty()) {
             metricBuilder.add(Metric.of("MIF", "Method Inheritance Factor", NumericValue.of(inheritedAndNotOverridden.size()).divide(NumericValue.of(allMethods.size()))));
-            NumericValue publicMethods = NumericValue.of(publicInheritedNotOverridenMethods.size()).plus(NumericValue.of(publicDefinedMethods.size()));
-            metricBuilder.add(Metric.of("MHF", "Method Hiding Factor", publicMethods.divide(NumericValue.of(allMethods.size()))));
+            NumericValue publicMethods = NumericValue.of(publicInheritedNotOverriddenMethods.size()).plus(NumericValue.of(publicDefinedMethods.size()));
+            metricBuilder.add(Metric.of("PMR", "Public Methods Ratio", publicMethods.divide(NumericValue.of(allMethods.size()))));
+        }
+        
+        if(!definedMethods.isEmpty()) {
+            metricBuilder.add(Metric.of("MHF", "Method Hiding Factor", NumericValue.of(publicDefinedMethods.size()).divide(NumericValue.of(definedMethods.size()))));
         }
 
         return metricBuilder.build();

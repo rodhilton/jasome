@@ -75,12 +75,15 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Methods Overidden (Mo)** - Methods in class that override an otherwise-inherited method _(class)_
  - [x] **Number of Methods (All) (Ma)** - Methods that can be invoked on a class (inherited, overridden, defined). Ma = Md + Mi Same as NORM. _(class)_
  - [x] **Method Inheritance Factor (MIF)** - Mi / Ma _(class)_
- - [x] **Number of Public Methods (PMd)** - Number of defined methods that are public _(class)_ 
- - [x] **Number of Public Methods (PMi)** - Number of inherited (but not overridden) methods that are public _(class)_
- - [x] **Method Hiding Factor (MHF)** (PMd+PMi)/(Md+Mi) _(class)_
+ - [x] **Number of Public Methods Defined (PMd)** - Number of defined methods that are public _(class)_ 
+ - [x] **Number of Public Methods Inherited (PMi)** - Number of inherited (but not overridden) methods that are public _(class)_
+ - [x] **Public Methods Ratio (PMR)** (PMd+PMi)/(Md+Mi) _(class)_
+ - [x] **Number of Hidden Methods Defined (HMd)** - Number of defined methods that are non-public _(class)_
+ - [x] **Number of Hidden Methods Inherited (HMi)** - Number of inherited (but not overridden) methods that are non-public _(class)_
+ - [x] **Method Hiding Factor (MHF)** PMd / Md _(class)_
  - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Attribute Hiding Factor (AHF)** ditto
+ - [ ] **Attribute Hiding Factor (AHF)** coming soon - limited value since java code typically hides all attributes
  - [ ] **Attribute Inheritance Factor (AIF)** ditto
  - [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
      through code _(method)_
