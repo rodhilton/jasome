@@ -27,7 +27,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
 
         NumericValue depth = NumericValue.of(calculateInheritanceDepth(type));
 
-        Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverriddenAndInheritedOperations(type);
+        Pair<Integer, Integer> overloadedAndInheritedOperations = calculateOverloadedAndInheritedOperations(type);
 
         NumericValue overriddenMethods = NumericValue.of(overloadedAndInheritedOperations.getLeft());
         NumericValue inheritedMethods = NumericValue.of(overloadedAndInheritedOperations.getRight());
@@ -41,8 +41,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
                 .add(Metric.of("NORM", "Number of Overridden Methods", overriddenMethods))
                 .add(Metric.of("NM", "Number of Methods", numberOfMethods))
                 .add(Metric.of("NMI", "Number of Inherited Methods", inheritedMethods))
-                .add(Metric.of("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods)))
-                .add(Metric.of("MIF", "Number of Inherited Methods", inheritedMethods.minus(overriddenMethods).divide(numberOfMethods)));
+                .add(Metric.of("NMA", "Number of Methods Added to Inheritance", numberOfMethods.minus(overriddenMethods)));
 
         if (numberOfMethods.compareTo(NumericValue.ZERO) > 0) {
             NumericValue numerator = overriddenMethods.times(depth);
@@ -53,7 +52,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
         return metricBuilder.build();
     }
 
-    private Pair<Integer, Integer> calculateOverriddenAndInheritedOperations(Type type) {
+    private Pair<Integer, Integer> calculateOverloadedAndInheritedOperations(Type type) {
 
         Set<Triple<com.github.javaparser.ast.type.Type, String, List<com.github.javaparser.ast.type.Type>>> parentMethods = new HashSet<>();
 
