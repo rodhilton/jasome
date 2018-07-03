@@ -9,7 +9,7 @@ import static org.jasome.util.Matchers.doesNotContainMetric
 import static org.jasome.util.TestUtil.projectFromSnippet
 import static spock.util.matcher.HamcrestSupport.expect
 
-class MethodInheritanceCalculatorTest extends Specification {
+class MethodAndAttributeInheritanceCalculatorTest extends Specification {
 
     def "calculates inheritance factor"() {
 
@@ -62,12 +62,12 @@ class MethodInheritanceCalculatorTest extends Specification {
         Type interfaceQ = project.locateType("Q")
 
         when:
-        def resultA = new MethodInheritanceCalculator().calculate(typeA);
-        def resultB = new MethodInheritanceCalculator().calculate(typeB);
-        def resultC = new MethodInheritanceCalculator().calculate(typeC);
-        def resultD = new MethodInheritanceCalculator().calculate(typeD);
-        def resultI = new MethodInheritanceCalculator().calculate(interfaceI);
-        def resultQ = new MethodInheritanceCalculator().calculate(interfaceQ);
+        def resultA = new MethodAndAttributeInheritanceCalculator().calculate(typeA);
+        def resultB = new MethodAndAttributeInheritanceCalculator().calculate(typeB);
+        def resultC = new MethodAndAttributeInheritanceCalculator().calculate(typeC);
+        def resultD = new MethodAndAttributeInheritanceCalculator().calculate(typeD);
+        def resultI = new MethodAndAttributeInheritanceCalculator().calculate(interfaceI);
+        def resultQ = new MethodAndAttributeInheritanceCalculator().calculate(interfaceQ);
 
         then:
         expect resultA, containsMetric("Mit", 0)
@@ -166,12 +166,12 @@ class MethodInheritanceCalculatorTest extends Specification {
         Type interfaceQ = project.locateType("Q")
 
         when:
-        def resultA = new MethodInheritanceCalculator().calculate(typeA);
-        def resultB = new MethodInheritanceCalculator().calculate(typeB);
-        def resultC = new MethodInheritanceCalculator().calculate(typeC);
-        def resultD = new MethodInheritanceCalculator().calculate(typeD);
-        def resultI = new MethodInheritanceCalculator().calculate(interfaceI);
-        def resultQ = new MethodInheritanceCalculator().calculate(interfaceQ);
+        def resultA = new MethodAndAttributeInheritanceCalculator().calculate(typeA);
+        def resultB = new MethodAndAttributeInheritanceCalculator().calculate(typeB);
+        def resultC = new MethodAndAttributeInheritanceCalculator().calculate(typeC);
+        def resultD = new MethodAndAttributeInheritanceCalculator().calculate(typeD);
+        def resultI = new MethodAndAttributeInheritanceCalculator().calculate(interfaceI);
+        def resultQ = new MethodAndAttributeInheritanceCalculator().calculate(interfaceQ);
 
         then:
         expect resultA, containsMetric("PMd", 2)
@@ -215,5 +215,116 @@ class MethodInheritanceCalculatorTest extends Specification {
         expect resultD, containsMetric("MHF", 1)
         expect resultI, doesNotContainMetric("MHF")
         expect resultQ, containsMetric("MHF", 0)
+    }
+
+    def "calculates attribute factors"() {
+
+        given:
+        def project = projectFromSnippet '''
+        package org.whatever.stuff;
+
+        class A {
+            public int doStuff = 5;
+            protected String moreStuff = "more stuff";
+            public String forFree = "for free";
+        }
+        
+        interface I {
+            int getThing = 15;   
+        }
+        
+        class B implements I {
+            public String doBStuff = "doBStuff";
+            public int doStuff = 4;
+            public int getThing = 666;
+        }
+        
+        class C extends B {
+            //Does not override doStuff
+            //gets forFree free
+            //has moreStuff but it's not public
+        }
+        
+        class D extends C {
+            public int doStuff = 19;
+            //Has the same stuff as C but does override doStuff
+        }
+        
+        interface Q {
+            int q=5;
+        }
+        '''
+
+        Type typeA = project.locateType("A")
+        Type typeB = project.locateType("B")
+        Type typeC = project.locateType("C")
+        Type typeD = project.locateType("D")
+        Type interfaceI = project.locateType("I")
+        Type interfaceQ = project.locateType("Q")
+
+        when:
+        def resultA = new MethodAndAttributeInheritanceCalculator().calculate(typeA);
+        def resultB = new MethodAndAttributeInheritanceCalculator().calculate(typeB);
+        def resultC = new MethodAndAttributeInheritanceCalculator().calculate(typeC);
+        def resultD = new MethodAndAttributeInheritanceCalculator().calculate(typeD);
+        def resultI = new MethodAndAttributeInheritanceCalculator().calculate(interfaceI);
+        def resultQ = new MethodAndAttributeInheritanceCalculator().calculate(interfaceQ);
+
+        then:
+        expect resultA, containsMetric("Ait", 0)
+        expect resultB, containsMetric("Ait", 1)
+        expect resultC, containsMetric("Ait", 3)
+        expect resultD, containsMetric("Ait", 3)
+        expect resultI, containsMetric("Ait", 0)
+        expect resultQ, containsMetric("Ait", 0)
+
+        expect resultA, containsMetric("Ai", 0)
+        expect resultB, containsMetric("Ai", 0)
+        expect resultC, containsMetric("Ai", 3)
+        expect resultD, containsMetric("Ai", 2)
+        expect resultI, containsMetric("Ai", 0)
+        expect resultQ, containsMetric("Ai", 0)
+
+        expect resultA, containsMetric("Ad", 3)
+        expect resultB, containsMetric("Ad", 3)
+        expect resultC, containsMetric("Ad", 0)
+        expect resultD, containsMetric("Ad", 1)
+        expect resultI, containsMetric("Ad", 1)
+        expect resultQ, containsMetric("Ad", 1)
+
+        expect resultA, containsMetric("Ao", 0)
+        expect resultB, containsMetric("Ao", 1)
+        expect resultC, containsMetric("Ao", 0)
+        expect resultD, containsMetric("Ao", 1)
+        expect resultI, containsMetric("Ao", 0)
+        expect resultQ, containsMetric("Ao", 0)
+
+        expect resultA, containsMetric("Aa", 3)
+        expect resultB, containsMetric("Aa", 3)
+        expect resultC, containsMetric("Aa", 3)
+        expect resultD, containsMetric("Aa", 3)
+        expect resultI, containsMetric("Aa", 1)
+        expect resultQ, containsMetric("Aa", 1)
+
+        expect resultA, containsMetric("AIF", 0)
+        expect resultB, containsMetric("AIF", 0)
+        expect resultC, containsMetric("AIF", 1)
+        expect resultD, containsMetric("AIF", NumericValue.ofRational(2, 3))
+        expect resultI, containsMetric("AIF", 0)
+        expect resultQ, containsMetric("AIF", 0)
+
+        expect resultA, containsMetric("Av", 2)
+        expect resultB, containsMetric("Av", 3)
+        expect resultC, containsMetric("Av", 0)
+        expect resultD, containsMetric("Av", 1)
+        expect resultI, containsMetric("Av", 1)
+        expect resultQ, containsMetric("Av", 1)
+
+        expect resultA, containsMetric("AHF", NumericValue.ofRational(2, 3))
+        expect resultB, containsMetric("AHF", 1)
+        expect resultC, doesNotContainMetric("AHF")
+        expect resultD, containsMetric("AHF", 1)
+        expect resultI, containsMetric("AHF", 1)
+        expect resultQ, containsMetric("AHF", 1)
     }
 }

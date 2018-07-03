@@ -68,7 +68,7 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Methods Added to Inheritance (NMA)** - The number of methods a
    class inherits adds to the inheritance hierarchy; methods defined on the class
    that it did not override or inherit _(class)_
- - [x] **Specialization Index (SIX)** - How specialized a class is, defined as ![(DIT * NORM) / NOM](http://mathurl.com/jvbqdor.png) _(class)_
+ - [x] **Specialization Index (SIX)** - How specialized a class is, defined as (DIT * NORM) / NOM _(class)_
  - [x] **Number of Methods Inherited Total (Mit)** - Methods inherited overall _(class)_
  - [x] **Number of Methods Inherited (Mi)** - Methods inherited but not overridden _(class)_
  - [x] **Number of Methods Defined (Md)** - Methods defined within class (same as NMA) _(class)_
@@ -83,8 +83,15 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Method Hiding Factor (MHF)** PMd / Md _(class)_
  - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
  - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Attribute Hiding Factor (AHF)** coming soon - limited value since java code typically hides all attributes
- - [ ] **Attribute Inheritance Factor (AIF)** ditto
+ - [x] **Number of Attributes Inherited Total (Ait)** - Attrobites inherited overall _(class)_
+ - [x] **Number of Attributes Inherited (Ai)** - Attributes inherited but not overridden _(class)_
+ - [x] **Number of Attributes Defined (Ad)** - Attributes defined within class (same as NMA) _(class)_
+ - [x] **Number of Attributes Overidden (Ao)** - Attributes in class that override an otherwise-inherited attributes _(class)_
+ - [x] **Number of Attributes (All) (Aa)** - Attributes that can be referenced in a class (inherited, overridden, defined). Aa = Ad + Ai _(class)_
+ - [x] **Attributes Inheritance Factor (AIF)** - Ai / Aa _(class)_
+ - [x] **Number of Public Attributes Defined (Av)** - Number of defined attributes that are public _(class)_ 
+ - [x] **Number of Hidden Attributes Defined (Ah)** - Number of defined attributes that are non-public _(class)_
+ - [x] **Method Hiding Factor (AHF)** Ah / Ad _(class)_
  - [x] **McCabe Cyclomatic Complexity (VG)** - The number of unique possible paths
      through code _(method)_
  - [x] **Weighed Methods per Class (WMC)** - The summation of all of the cyclomatic
@@ -95,9 +102,9 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Interfaces (NOI)** - The number of abstract classes (and interfaces) in a package _(package)_
  - [x] **Afferent Coupling (Ca)** - Number of classes outside a package that depend on it _(package)_
  - [x] **Efferent Coupling (Ca)** - Number of classes inside a package that depend on classes outside of it _(package)_
- - [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, ![Ce/(Ce+Ca)](http://mathurl.com/hreh4qe.png) _(package)_
+ - [x] **Instability (I)** - Effectively the riskiness of a package, how often it has a reason to change, Ce/(Ce+Ca) _(package)_
  - [x] **Abstractness (A)** - The number of abstract classes (and interfaces) divided by the total number of types in a package, NOI / NOC _(package)_
- - [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  ![| A + I - 1 |](http://mathurl.com/hboczlg.png), _(package)_
+ - [x] **Normalized Distance from Main Sequence (DMS)** - Robert Martin's metric for a packages distance from ideal,  | A + I - 1 | _(package)_
  - [x] **Nested Block Depth (NBD)** - The maximum depth of the deepest level of nesting within a method _(method)_
  - [x] **Number of Children (NOCh)** - Number of classes that directly extend this class _(class)_
  - [x] **Number of Parents (NOPa)** - Number of classes that this class directly extends _(class)_
