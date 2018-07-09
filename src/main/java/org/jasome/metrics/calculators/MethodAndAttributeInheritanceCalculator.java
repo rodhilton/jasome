@@ -126,6 +126,10 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
                 .add(Metric.of("HMi", "Number of Hidden Methods Inherited and Not Overridden", hiddenInheritedNotOverridden.size()))
                 .add(Metric.of("HMd", "Number of Hidden Methods Defined", hiddenDefined.size()));
 
+        if(inheritableMethods.size() > 0) {
+            metricBuilder.add(Metric.of("NMIR", "Number of Methods Inherited Ratio", NumericValue.ofRational(inheritedAndNotOverriddenMethods.size(), inheritableMethods.size()).times(NumericValue.of(100))));
+        }
+
         if(!allMethods.isEmpty()) {
             metricBuilder.add(Metric.of("MIF", "Method Inheritance Factor", NumericValue.of(inheritedAndNotOverriddenMethods.size()).divide(NumericValue.of(allMethods.size()))));
             NumericValue publicMethods = NumericValue.of(publicInheritedNotOverriddenMethods.size()).plus(NumericValue.of(publicDefinedMethods.size()));

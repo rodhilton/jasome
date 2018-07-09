@@ -111,6 +111,20 @@ class MethodAndAttributeInheritanceCalculatorTest extends Specification {
         expect resultD, containsMetric("MIF", NumericValue.of(2).divide(NumericValue.of(5)))
         expect resultI, doesNotContainMetric("MIF")
         expect resultQ, containsMetric("MIF", 0)
+
+        expect resultA, doesNotContainMetric("NMIR")
+        expect resultB, doesNotContainMetric("NMIR")
+        expect resultC, containsMetric("NMIR", 100)
+        expect resultD, containsMetric("NMIR", NumericValue.ofRational(1,2).times(NumericValue.of(100)))
+        expect resultI, doesNotContainMetric("NMIR")
+        expect resultQ, doesNotContainMetric("NMIR")
+
+        expect resultA, doesNotContainMetric("PF")
+        expect resultB, doesNotContainMetric("PF")
+        expect resultC, doesNotContainMetric("PF")
+        expect resultD, doesNotContainMetric("PF")
+        expect resultI, doesNotContainMetric("PF")
+        expect resultQ, doesNotContainMetric("PF")
     }
 
     def "calculates method hiding factor and public methods ratio"() {

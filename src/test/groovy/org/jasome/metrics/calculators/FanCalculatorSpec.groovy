@@ -397,5 +397,6 @@ class FanCalculatorSpec extends Specification {
         expect resultVoid, containsMetric("Si", 4)
         expect resultVoid, containsMetric("Ci", NumericValue.of(4).plus(NumericValue.of(2).divide(NumericValue.of(3))))
     }
+    
 
 }

@@ -30,7 +30,7 @@ public abstract class Code {
     }
 
     public Optional<Metric> getMetric(String name) {
-        return Optional.of(this.metrics.get(name));
+        return Optional.ofNullable(this.metrics.get(name));
     }
 
     public Map<String, String> getAttributes() {

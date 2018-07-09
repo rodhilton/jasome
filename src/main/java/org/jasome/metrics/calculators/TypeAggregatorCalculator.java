@@ -18,10 +18,24 @@ public class TypeAggregatorCalculator implements Calculator<Type> {
 
         NumericValueSummaryStatistics ciStats = methodMetrics(type.getMethods(), "Ci").collect(NumericValue.summarizingCollector());
 
-        return ImmutableSet.of(
-                Metric.of("ClTCi", "Class Total System Complexity", ciStats.getSum()),
-                Metric.of("ClRCi", "Class Relative System Complexity", ciStats.getAverage())
-        );
+        ImmutableSet.Builder<Metric> metricBuilder = ImmutableSet.<Metric>builder()
+            .add(Metric.of("ClTCi", "Class Total System Complexity", ciStats.getSum()))
+            .add(Metric.of("ClRCi", "Class Relative System Complexity", ciStats.getAverage()))
+        ;
+        
+        Optional<Metric> nodOpt = type.getMetric("NOD");
+        Optional<Metric> moOpt = type.getMetric("Mo");
+        Optional<Metric> mdOpt = type.getMetric("Md");
+
+        //NOD * Md
+        NumericValue polyFactorDenom = mdOpt.map(Metric::getValue).flatMap(md -> nodOpt.map(Metric::getValue).map(nod->nod.times(md))).orElse(NumericValue.ZERO);
+
+        if(polyFactorDenom.isGreaterThan(NumericValue.ZERO)) {
+            // Mo / (Md * NOD)
+            moOpt.ifPresent(mo -> metricBuilder.add(Metric.of("PF", "Polymorphism Factor", mo.getValue().divide(polyFactorDenom))));
+        }
+
+        return metricBuilder.build();
 
     }
 

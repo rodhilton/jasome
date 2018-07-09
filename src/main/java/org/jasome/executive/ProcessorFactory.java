@@ -23,7 +23,6 @@ class ProcessorFactory {
         processor.registerPackageCalculator(new NumberOfClassesCalculator());
 
         processor.registerTypeCalculator(new SpecializationIndexCalculator());
-        processor.registerTypeCalculator(new MethodAndAttributeInheritanceCalculator());
 
         processor.registerPackageCalculator(new RobertMartinCouplingCalculator());
 
@@ -31,6 +30,8 @@ class ProcessorFactory {
         processor.registerTypeCalculator(new LackOfCohesionMethodsCalculator());
 
         processor.registerTypeCalculator(new ClassInheritanceCalculator());
+        
+        processor.registerTypeCalculator(new MethodAndAttributeInheritanceCalculator());
 
         processor.registerMethodCalculator(new FanCalculator());
         processor.registerTypeCalculator(new LinkCalculator());

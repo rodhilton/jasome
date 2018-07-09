@@ -81,14 +81,15 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Hidden Methods Defined (HMd)** - Number of defined methods that are non-public _(class)_
  - [x] **Number of Hidden Methods Inherited (HMi)** - Number of inherited (but not overridden) methods that are non-public _(class)_
  - [x] **Method Hiding Factor (MHF)** PMd / Md _(class)_
- - [ ] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
- - [ ] **Polymorphism Factor (PF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf _(class)_
+ - [x] **Number of Methods Inherited Ratio (NMIR)** (Mi / Mit) * 100 (from Lorenz and Kidd, renamed here for distinction from NMI) _(class)_
+ - [x] **Coupling Factor (CF)** - see http://www.cs.kent.edu/~jmaletic/cs63901/lectures/SoftwareMetrics.pdf (note: defining this differntly than the text. text divides by TC^2-TC for the total number of relationships. that is a system level metric, but this metric is as the class level, which means the total number of relationships is 2(TC-1). if a class uses every other class and is used by every other class, that is its value for a CF of 1)_(class)_
+ - [x] **Polymorphism Factor (PF)** - Mo / (Md * NOD) _(class)_
  - [x] **Number of Attributes Inherited Total (Ait)** - Attrobites inherited overall _(class)_
  - [x] **Number of Attributes Inherited (Ai)** - Attributes inherited but not overridden _(class)_
  - [x] **Number of Attributes Defined (Ad)** - Attributes defined within class (same as NMA) _(class)_
  - [x] **Number of Attributes Overidden (Ao)** - Attributes in class that override an otherwise-inherited attributes _(class)_
  - [x] **Number of Attributes (All) (Aa)** - Attributes that can be referenced in a class (inherited, overridden, defined). Aa = Ad + Ai _(class)_
- - [x] **Attributes Inheritance Factor (AIF)** - Ai / Aa _(class)_
+ - [x] **Attribute Inheritance Factor (AIF)** - Ai / Aa _(class)_
  - [x] **Number of Public Attributes Defined (Av)** - Number of defined attributes that are public _(class)_ 
  - [x] **Number of Hidden Attributes Defined (Ah)** - Number of defined attributes that are non-public _(class)_
  - [x] **Method Hiding Factor (AHF)** Ah / Ad _(class)_
@@ -111,6 +112,8 @@ Jasome is either currently tracking or planning to track the following metrics:
  - [x] **Number of Descendants (NOD)** - Total number of classes that have this class as an ancestor _(class)_
  - [x] **Number of Ancestors (NOA)** - Total number of classes that have this class as a descendant _(class)_
  - [x] **Number of Links (NOL)** - Number of links (associations, generalizations, use links) between a class and all others _(class)_
+ - [x] **Number of Dependants (NODa)** - Total number of classes that depend on this class  _(class)_
+ - [x] **Number of Dependencies (NODe)** - Total number of classes that a class depends on (same as NOL) _(class)_
  - [x] **Class Category Relational Cohesion (CCRC)** - The rate of cohesion between a package's classes. Sum(NOL) / NOC _(package)_
  - [x] **Number of Comparisons (NCOMP)** - Number of comparisons in a method _(method)_
  - [x] **Number of Control Variables (NVAR)** - Number of control variables referenced in a method _(method)_
