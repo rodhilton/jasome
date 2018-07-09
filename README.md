@@ -138,7 +138,8 @@ Jasome is either currently tracking or planning to track the following metrics:
  
   
 More metrics coming soon, I plan to gather every metric outlined in the following sources:
-
+ 
+ 
  * http://www.aivosto.com/project/help/pm-syscomplexity.html system complexity metrics, sums and avgs of Ci per class? package? 
  * http://support.objecteering.com/objecteering6.1/help/us/metrics/toc.htm
  * https://link.springer.com/chapter/10.1007%2F978-3-642-15228-3_7 (debbabi2010metrics) 
@@ -150,3 +151,5 @@ More metrics coming soon, I plan to gather every metric outlined in the followin
  * Halstead measures (1977) 
  
 And a lot more
+
+MOOD metrics note: MOOD are system level metrics. where possible these are calculated for lower entities such as classes
