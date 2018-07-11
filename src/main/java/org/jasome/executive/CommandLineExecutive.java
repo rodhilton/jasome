@@ -87,14 +87,19 @@ public class CommandLineExecutive {
 
                 StreamResult result;
                 if (line.hasOption("output")) {
+
                     String outputLocation = line.getOptionValue("output");
-                    result = new StreamResult(new File(outputLocation));
-                    System.out.println("Operation completed in "+((endTime - startTime)/1000)+" seconds, output written to "+outputLocation);
+                    File tempOutputFile = new File(outputLocation + ".tmp");
+                    File finalOutputFile = new File(outputLocation);
+
+                    result = new StreamResult(tempOutputFile);
+                    transformer.transform(source, result);
+                    tempOutputFile.renameTo(finalOutputFile);
+                    System.out.println("Operation completed in "+((endTime - startTime)/1000)+" seconds, output written to "+finalOutputFile);
                 } else {
                     result = new StreamResult(System.out);
+                    transformer.transform(source, result);
                 }
-
-                transformer.transform(source, result);
             } catch (TransformerConfigurationException e) {
                 e.printStackTrace();
             } catch (TransformerException e) {

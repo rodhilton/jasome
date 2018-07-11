@@ -16,8 +16,6 @@ import java.util.stream.Collectors;
 
 public class XMLOutputter implements Outputter<Document> {
 
-    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0########");
-
     @Override
     public Document output(Project project) {
         try {
