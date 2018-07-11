@@ -286,7 +286,7 @@ public class CalculationUtils {
                                 closestType.ifPresent(c ->
                                         graph.putEdge(c, type)
                                 );
-                            } catch (UnsolvedSymbolException e) {
+                            } catch (Exception e) {
                                 //Ignore if a symbol can't be resolved
                             }
 
