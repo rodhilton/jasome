@@ -1,5 +1,6 @@
 package org.jasome.executive;
 
+import com.google.common.collect.ImmutableSet;
 import org.apache.commons.cli.*;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
@@ -15,6 +16,7 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public class CommandLineExecutive {
@@ -59,12 +61,7 @@ public class CommandLineExecutive {
             File scanDir = new File(fileParam);
             FileScanner scanner = new FileScanner(scanDir);
 
-            IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(new RegexFileFilter(Pattern.compile("(Test|Spec)\\.java$")));
-            IOFileFilter isNotInTestSubDirectory = FileFilterUtils.asFileFilter(pathname -> {
-                return !pathname.getPath().contains("/src/test/java");
-            });
-
-            IOFileFilter fileFilter = line.hasOption("excludetests") ? FileFilterUtils.and(doesNotHaveTestSuffix, isNotInTestSubDirectory) : FileFilterUtils.trueFileFilter();
+            IOFileFilter fileFilter = line.hasOption("excludetests") ? new ExcludeTestsFilter() : FileFilterUtils.trueFileFilter();
 
             scanner.setFilter(fileFilter);
 
@@ -95,7 +92,7 @@ public class CommandLineExecutive {
                     result = new StreamResult(tempOutputFile);
                     transformer.transform(source, result);
                     tempOutputFile.renameTo(finalOutputFile);
-                    System.out.println("Operation completed in "+((endTime - startTime)/1000)+" seconds, output written to "+finalOutputFile);
+                    System.out.println("Operation completed in " + ((endTime - startTime) / 1000) + " seconds, output written to " + finalOutputFile);
                 } else {
                     result = new StreamResult(System.out);
                     transformer.transform(source, result);
@@ -107,6 +104,59 @@ public class CommandLineExecutive {
             }
 
 
+        }
+    }
+
+    private static class ExcludeTestsFilter implements IOFileFilter {
+        private static Set<String> testSuffixes = ImmutableSet.of(
+                "Test",
+                "Spec",
+                "Tests",
+                "Specs",
+                "Suite",
+                "TestCase"
+        );
+
+        private static Set<String> testDirectories = ImmutableSet.of(
+                "test",
+                "tests",
+                "examples",
+                "example"
+        );
+
+
+        private IOFileFilter underlyingFilter;
+
+        public ExcludeTestsFilter() {
+            IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(FileFilterUtils.asFileFilter(pathname -> {
+                for(String testSuffix: testSuffixes) {
+                    if(pathname.getName().endsWith(testSuffix+".java")) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
+
+            IOFileFilter isNotInTestSubDirectory = new NotFileFilter(FileFilterUtils.asFileFilter(pathname -> {
+                for(String testDirectory: testDirectories) {
+                    if(pathname.getPath().contains(File.separator+testDirectory+File.separator)) {
+                        return true;
+                    }
+                }
+                return false;
+            }));
+
+            this.underlyingFilter = FileFilterUtils.and(doesNotHaveTestSuffix, isNotInTestSubDirectory);
+        }
+
+        @Override
+        public boolean accept(File file) {
+            return underlyingFilter.accept(file);
+        }
+
+        @Override
+        public boolean accept(File dir, String name) {
+            return underlyingFilter.accept(dir, name);
         }
     }
 }

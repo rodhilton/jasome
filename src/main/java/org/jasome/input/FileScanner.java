@@ -16,8 +16,11 @@ import java.util.stream.Collectors;
 
 public class FileScanner extends Scanner {
     private File scanDir;
-    private IOFileFilter filter = FileFilterUtils.and(new SuffixFileFilter(".java"), CanReadFileFilter.CAN_READ);
-    ;
+    private IOFileFilter filter = FileFilterUtils.and(
+            new SuffixFileFilter(".java"),
+            CanReadFileFilter.CAN_READ,
+            HiddenFileFilter.VISIBLE
+    );
 
     public FileScanner(File scanDir) {
         this.scanDir = scanDir;
@@ -26,7 +29,7 @@ public class FileScanner extends Scanner {
     public Project scan() {
 
         Collection<File> inputFiles = gatherFilesFrom(scanDir, filter);
-        
+
         Collection<Pair<String, Map<String, String>>> sourceCodeWithAttributes = inputFiles
                 .stream()
                 .<Optional<Pair<String, Map<String, String>>>>map(file -> {

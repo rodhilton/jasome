@@ -108,8 +108,8 @@ public abstract class Scanner<T> {
 
             } catch(ParseProblemException e) {
                 String file = attributes.get("sourceFile");
-                System.err.format("Unable to parse code from file %s, ignoring", file);
-                System.err.print(e.getProblems());
+                System.err.format("Unable to parse code from file %s, ignoring\n", file);
+                System.err.println(e.getProblems());
             }
         }
 
@@ -158,8 +158,8 @@ public abstract class Scanner<T> {
                 }
             } catch(ParseProblemException e) {
                 String file = attributes.get("sourceFile");
-                System.err.format("Unable to parse code from file %s, ignoring", file);
-                System.err.print(e.getProblems());
+                System.err.format("Unable to parse code from file %s, ignoring\n", file);
+                System.err.println(e.getProblems());
             }
         }
 
