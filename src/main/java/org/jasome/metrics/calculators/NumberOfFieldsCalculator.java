@@ -3,9 +3,9 @@ package org.jasome.metrics.calculators;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.google.common.collect.ImmutableSet;
+import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.input.Type;
 
 import java.util.Set;
 

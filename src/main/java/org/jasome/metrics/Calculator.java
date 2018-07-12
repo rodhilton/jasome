@@ -1,6 +1,7 @@
 package org.jasome.metrics;
 
 import org.jasome.input.Code;
+import org.jasome.util.ProjectMetadata;
 
 import java.util.Set;
 

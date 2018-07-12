@@ -10,7 +10,6 @@ import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
-import org.jasome.util.CalculationUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -94,7 +93,7 @@ public class SpecializationIndexCalculator implements Calculator<Type> {
     }
 
     private Set<Type> getParentTypes(Type type) {
-        Graph<Type> typeGraph = CalculationUtils.inheritanceGraph.getUnchecked(type.getParentPackage().getParentProject());
+        Graph<Type> typeGraph = type.getParentPackage().getParentProject().getMetadata().getInheritanceGraph();
         return typeGraph.predecessors(type);
     }
 

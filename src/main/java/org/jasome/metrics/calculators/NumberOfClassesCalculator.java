@@ -1,9 +1,9 @@
 package org.jasome.metrics.calculators;
 
 import com.google.common.collect.ImmutableSet;
+import org.jasome.input.Package;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.input.Package;
 
 import java.util.Set;
 

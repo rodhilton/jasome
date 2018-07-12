@@ -5,7 +5,6 @@ import com.google.common.graph.Graph;
 import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.util.CalculationUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,7 +13,7 @@ import java.util.Stack;
 public class ClassInheritanceCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
-        Graph<Type> inheritanceGraph = CalculationUtils.inheritanceGraph.getUnchecked(type.getParentPackage().getParentProject());
+        Graph<Type> inheritanceGraph = type.getParentPackage().getParentProject().getMetadata().getInheritanceGraph();
 
         Set<Type> parents = inheritanceGraph.predecessors(type);
         Set<Type> children = inheritanceGraph.successors(type);

@@ -2,6 +2,7 @@ package org.jasome.input;
 
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver;
+import org.jasome.util.ProjectMetadata;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -12,15 +13,21 @@ public class Project extends Code {
 
     private JavaSymbolSolver symbolSolver;
     private Map<String, Package> packageLookup;
+    private ProjectMetadata metadata;
 
     public Project(String name) {
         super(name);
         packageLookup = new HashMap<>();
+        metadata = new ProjectMetadata(this);
     }
     
     @SuppressWarnings("unchecked")
     public Set<Package> getPackages() {
         return (Set<Package>)(Set<?>)getChildren();
+    }
+
+    public ProjectMetadata getMetadata() {
+        return metadata;
     }
 
     public void addPackage(Package aPackage) {

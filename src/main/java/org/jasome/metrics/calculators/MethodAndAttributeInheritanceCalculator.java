@@ -14,7 +14,6 @@ import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
-import org.jasome.util.CalculationUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +23,7 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
 
     @Override
     public Set<Metric> calculate(Type type) {
-        Graph<Type> inheritanceGraph = CalculationUtils.inheritanceGraph.getUnchecked(type.getParentPackage().getParentProject());
+        Graph<Type> inheritanceGraph = type.getParentPackage().getParentProject().getMetadata().getInheritanceGraph();
 
         ClassOrInterfaceDeclaration declaration = type.getSource();
 

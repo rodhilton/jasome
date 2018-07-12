@@ -6,14 +6,13 @@ import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
-import org.jasome.util.CalculationUtils;
 
 import java.util.Set;
 
 public class CouplingFactorCalculator implements Calculator<Type> {
     @Override
     public Set<Metric> calculate(Type type) {
-        Graph<Type> unchecked = CalculationUtils.clientNetwork.getUnchecked(type.getParentPackage().getParentProject());
+        Graph<Type> unchecked = type.getParentPackage().getParentProject().getMetadata().getClientGraph();
         
         Set<Type> clientRelationships = unchecked.successors(type);
         Set<Type> serverRelationships = unchecked.predecessors(type);

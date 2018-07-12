@@ -1,33 +1,23 @@
 package org.jasome.metrics.calculators;
 
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.type.VoidType;
-import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
-import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.Network;
 import org.jasome.input.Method;
-import org.jasome.input.Package;
-import org.jasome.input.Project;
-import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
-import org.jasome.util.CalculationUtils;
 import org.jasome.util.Distinct;
 
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FanCalculator implements Calculator<Method> {
 
     @Override
     public synchronized Set<Metric> calculate(Method method) {
 
-        Network<Method, Distinct<Expression>> methodCalls = CalculationUtils.callNetwork.getUnchecked(method.getParentType().getParentPackage().getParentProject());
+        Network<Method, Distinct<Expression>> methodCalls = method.getParentType().getParentPackage().getParentProject().getMetadata().getCallNetwork();
 
         Set<Method> methodsCalled = methodCalls.successors(method);
 

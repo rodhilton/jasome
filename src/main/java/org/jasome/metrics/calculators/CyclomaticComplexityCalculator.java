@@ -4,9 +4,9 @@ import com.github.javaparser.ast.expr.BinaryExpr;
 import com.github.javaparser.ast.expr.ConditionalExpr;
 import com.github.javaparser.ast.stmt.*;
 import com.google.common.collect.ImmutableSet;
+import org.jasome.input.Method;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
-import org.jasome.input.Method;
 import org.jasome.metrics.value.NumericValue;
 
 import java.util.List;

@@ -2,6 +2,7 @@ package org.jasome.input;
 
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
+import org.jasome.util.ProjectMetadata;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -38,6 +39,8 @@ public class Processor {
     }
 
     public void process(Project project) {
+
+        ProjectMetadata metadata = new ProjectMetadata(project);
 
         project.getPackages().parallelStream().forEach(aPackage -> {
 
