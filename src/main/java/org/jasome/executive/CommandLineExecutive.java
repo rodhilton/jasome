@@ -58,7 +58,7 @@ public class CommandLineExecutive {
             System.exit(0);
         } else {
             String fileParam = line.getArgs()[0];
-            File scanDir = new File(fileParam);
+            File scanDir = new File(fileParam).getAbsoluteFile();
             FileScanner scanner = new FileScanner(scanDir);
 
             IOFileFilter fileFilter = line.hasOption("excludetests") ? new ExcludeTestsFilter() : FileFilterUtils.trueFileFilter();
