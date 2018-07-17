@@ -88,6 +88,7 @@ public class CommandLineExecutive {
                     String outputLocation = line.getOptionValue("output");
                     File tempOutputFile = new File(outputLocation + ".tmp");
                     File finalOutputFile = new File(outputLocation);
+                    finalOutputFile.getParentFile().mkdirs();
 
                     result = new StreamResult(tempOutputFile);
                     transformer.transform(source, result);
