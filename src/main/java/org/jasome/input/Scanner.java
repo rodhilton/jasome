@@ -44,6 +44,9 @@ public abstract class Scanner<T> {
                     type.addAttribute(attribute);
                 }
 
+                type.addAttribute("lineStart", ""+classDefinition.getBegin().get().line);
+                type.addAttribute("lineEnd", ""+classDefinition.getEnd().get().line);
+
                 //We need to convert the constructor declarations to method declarations because we treat them the same, but javaparser don't have them sharing a useful common type
                 for (ConstructorDeclaration constructorDeclaration : classDefinition.findAll(ConstructorDeclaration.class)) {
                     MethodDeclaration constructorMethodDeclaration = new MethodDeclaration(

@@ -6,6 +6,7 @@ import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
 import org.apache.commons.io.filefilter.RegexFileFilter;
+import org.apache.commons.lang3.StringUtils;
 import org.jasome.input.FileScanner;
 import org.jasome.input.Project;
 import org.jasome.output.XMLOutputter;
@@ -61,7 +62,7 @@ public class CommandLineExecutive {
             File scanDir = new File(fileParam).getAbsoluteFile();
             FileScanner scanner = new FileScanner(scanDir);
 
-            IOFileFilter fileFilter = line.hasOption("excludetests") ? new ExcludeTestsFilter() : FileFilterUtils.trueFileFilter();
+            IOFileFilter fileFilter = line.hasOption("excludetests") ? new ExcludeTestsFilter(scanDir) : FileFilterUtils.trueFileFilter();
 
             scanner.setFilter(fileFilter);
 
@@ -87,8 +88,10 @@ public class CommandLineExecutive {
 
                     String outputLocation = line.getOptionValue("output");
                     File tempOutputFile = new File(outputLocation + ".tmp");
-                    File finalOutputFile = new File(outputLocation);
-                    finalOutputFile.getParentFile().mkdirs();
+                    File finalOutputFile = new File(outputLocation).getAbsoluteFile();
+                    if(finalOutputFile.getParentFile()!=null) {
+                        finalOutputFile.getParentFile().mkdirs();
+                    }
 
                     result = new StreamResult(tempOutputFile);
                     transformer.transform(source, result);
@@ -122,25 +125,30 @@ public class CommandLineExecutive {
                 "test",
                 "tests",
                 "examples",
-                "example"
+                "example",
+                "samples",
+                "sample"
         );
 
 
         private IOFileFilter underlyingFilter;
 
-        public ExcludeTestsFilter() {
-            IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(FileFilterUtils.asFileFilter(pathname -> {
+        public ExcludeTestsFilter(File baseDir) {
+            String baseDirPath = baseDir.getPath();
+            IOFileFilter doesNotHaveTestSuffix = new NotFileFilter(FileFilterUtils.asFileFilter(path -> {
                 for(String testSuffix: testSuffixes) {
-                    if(pathname.getName().endsWith(testSuffix+".java")) {
+                    if(path.getName().endsWith(testSuffix+".java")) {
                         return true;
                     }
                 }
                 return false;
             }));
 
-            IOFileFilter isNotInTestSubDirectory = new NotFileFilter(FileFilterUtils.asFileFilter(pathname -> {
+            IOFileFilter isNotInTestSubDirectory = new NotFileFilter(FileFilterUtils.asFileFilter(path -> {
+                String pathName = path.getPath();
+                String relativePath = StringUtils.removeStart(pathName, baseDirPath);
                 for(String testDirectory: testDirectories) {
-                    if(pathname.getPath().contains(File.separator+testDirectory+File.separator)) {
+                    if(relativePath.contains(File.separator+testDirectory+File.separator)) {
                         return true;
                     }
                 }
