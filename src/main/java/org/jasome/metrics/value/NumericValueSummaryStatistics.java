@@ -6,7 +6,7 @@ public class NumericValueSummaryStatistics {
     private NumericValue count = NumericValue.ZERO;
 
     public NumericValue getSum() {
-        return total;
+        return total != null ? total : NumericValue.ZERO;
     }
 
     public NumericValue getCount() {
@@ -14,15 +14,15 @@ public class NumericValueSummaryStatistics {
     }
 
     public NumericValue getMax() {
-        return max;
+        return max != null ? max : NumericValue.ZERO;
     }
 
     public NumericValue getMin() {
-        return min;
+        return min != null ? min : NumericValue.ZERO;
     }
 
     public NumericValue getAverage() {
-        return total.divide(count);
+        return total != null ? total.divide(count) : NumericValue.ZERO;
     }
 
     private NumericValue max = null;
