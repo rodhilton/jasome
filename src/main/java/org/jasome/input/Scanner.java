@@ -40,12 +40,12 @@ public abstract class Scanner<T> {
                 Type type = new Type(classDefinition);
                 aPackage.addType(type);
 
-                for(Map.Entry<String, String> attribute: attributes.entrySet()) {
+                for (Map.Entry<String, String> attribute : attributes.entrySet()) {
                     type.addAttribute(attribute);
                 }
 
-                type.addAttribute("lineStart", ""+classDefinition.getBegin().get().line);
-                type.addAttribute("lineEnd", ""+classDefinition.getEnd().get().line);
+                type.addAttribute("lineStart", "" + classDefinition.getBegin().get().line);
+                type.addAttribute("lineEnd", "" + classDefinition.getEnd().get().line);
 
                 //We need to convert the constructor declarations to method declarations because we treat them the same, but javaparser don't have them sharing a useful common type
                 for (ConstructorDeclaration constructorDeclaration : classDefinition.findAll(ConstructorDeclaration.class)) {
@@ -63,8 +63,8 @@ public abstract class Scanner<T> {
                     Method constructor = new Method(constructorMethodDeclaration);
                     type.addMethod(constructor);
 
-                    constructor.addAttribute("lineStart", ""+constructorDeclaration.getBegin().get().line);
-                    constructor.addAttribute("lineEnd", ""+constructorDeclaration.getEnd().get().line);
+                    constructor.addAttribute("lineStart", "" + constructorDeclaration.getBegin().get().line);
+                    constructor.addAttribute("lineEnd", "" + constructorDeclaration.getEnd().get().line);
                     constructor.addAttribute("constructor", "true");
                 }
 
@@ -72,8 +72,8 @@ public abstract class Scanner<T> {
                     Method method = new Method(methodDeclaration);
                     type.addMethod(method);
 
-                    method.addAttribute("lineStart", ""+methodDeclaration.getBegin().get().line);
-                    method.addAttribute("lineEnd", ""+methodDeclaration.getEnd().get().line);
+                    method.addAttribute("lineStart", "" + methodDeclaration.getBegin().get().line);
+                    method.addAttribute("lineEnd", "" + methodDeclaration.getEnd().get().line);
                     method.addAttribute("constructor", "false");
 
                 }
@@ -99,8 +99,8 @@ public abstract class Scanner<T> {
 
                 Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
 
-                if(packageName.isPresent()) {
-                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator)+"/";
+                if (packageName.isPresent()) {
+                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
                     String sourceDir = FilenameUtils.getPath(sourceFileName);
                     String baseSourceDir = sourceDir.replace(packagePrefix, "");
                     String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
@@ -109,7 +109,7 @@ public abstract class Scanner<T> {
                     sourceDirs.add(new File(FilenameUtils.getPath(sourceFileName)));
                 }
 
-            } catch(ParseProblemException e) {
+            } catch (ParseProblemException e) {
                 String file = attributes.get("sourceFile");
                 System.err.format("Unable to parse code from file %s, ignoring\n", file);
                 System.err.println(e.getProblems());
@@ -122,8 +122,13 @@ public abstract class Scanner<T> {
         CombinedTypeSolver combinedTypeSolver = new CombinedTypeSolver();
         combinedTypeSolver.add(reflectionTypeSolver);
 
-        for(File sourceDir: sourceDirs) {
-            combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
+        for (File sourceDir : sourceDirs) {
+            try {
+                combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
+            } catch (IllegalStateException e) {
+                System.err.format("Unable to parse code from dir %s, ignoring\n", sourceDir);
+                e.printStackTrace();
+            }
         }
 
         JavaSymbolSolver symbolSolver = new JavaSymbolSolver(combinedTypeSolver);
@@ -144,7 +149,7 @@ public abstract class Scanner<T> {
         for (Pair<String, Map<String, String>> sourceFile : sourcesAndAttributes) {
             String sourceCode = sourceFile.getLeft();
             Map<String, String> attributes = sourceFile.getRight();
-            
+
             try {
                 CompilationUnit cu = JavaParser.parse(sourceCode);
 
@@ -159,7 +164,7 @@ public abstract class Scanner<T> {
                 for (ClassOrInterfaceDeclaration clazz : classes) {
                     packages.get(packageName).add(Pair.of(clazz, attributes));
                 }
-            } catch(ParseProblemException e) {
+            } catch (ParseProblemException e) {
                 String file = attributes.get("sourceFile");
                 System.err.format("Unable to parse code from file %s, ignoring\n", file);
                 System.err.println(e.getProblems());
