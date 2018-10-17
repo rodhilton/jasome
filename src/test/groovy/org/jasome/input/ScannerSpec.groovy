@@ -20,4 +20,30 @@ class ScannerSpec extends Specification {
         fineType != null
     }
 
+    def "correctly handles parseble files with UNIX path separators"() {
+        given:
+        def project = projectFromResources("org/jasome/resolver")
+
+        when:
+        Type aType = project.locateType("A")
+        Type testType = project.locateType("Test")
+
+        then:
+        aType != null
+        testType != null
+    }
+
+    def "correctly handles parseble files with Windows path separators"() {
+        given:
+        def project = projectFromResources("org\\jasome\\resolver")
+
+        when:
+        Type aType = project.locateType("A")
+        Type testType = project.locateType("Test")
+
+        then:
+        aType != null
+        testType != null
+    }
+
 }

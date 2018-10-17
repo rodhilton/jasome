@@ -58,7 +58,7 @@ class TestUtil {
 
         return new FileScanner(srcPath).scan();
     }
-    
+
 
     static Project projectFromSnippet(String... sourceCodes) {
 
@@ -75,8 +75,8 @@ class TestUtil {
             if(packageDecOpt.isPresent()) {
                 PackageDeclaration packageDeclaration = packageDecOpt.get()
                 String packageName = packageDeclaration.name.asString()
-                String targetDir = packageName.replaceAll("[.]", File.separator)
-                File targetFile = new File(tempDir, targetDir);
+                String targetDir = packageName.replaceAll("[.]", "/")
+                File targetFile = new File(tempDir, PathUtils.toSystemPath(targetDir));
                 targetFile.mkdirs()
                 rootDir = targetFile;
             } else {
