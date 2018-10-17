@@ -14,6 +14,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.jasome.util.PathUtils;
 
 import java.io.File;
 import java.util.*;
@@ -95,18 +96,18 @@ public abstract class Scanner<T> {
             try {
                 CompilationUnit cu = JavaParser.parse(sourceCodeContent);
 
-                String sourceFileName = attributes.get("sourceFile");
+                String sourceFileName = PathUtils.toUnixPath(attributes.get("sourceFile"));
 
                 Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
 
                 if (packageName.isPresent()) {
-                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
+                    String packagePrefix = packageName.get().replaceAll("[.]", "/") + "/";
                     String sourceDir = FilenameUtils.getPath(sourceFileName);
                     String baseSourceDir = sourceDir.replace(packagePrefix, "");
-                    String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
-                    sourceDirs.add(new File(finalSourceBaseDir));
+                    String finalSourceBaseDir = baseSourceDir.replace(".", PathUtils.toUnixPath(projectPath));
+                    sourceDirs.add(new File(PathUtils.toSystemPath(finalSourceBaseDir)));
                 } else {
-                    sourceDirs.add(new File(FilenameUtils.getPath(sourceFileName)));
+                    sourceDirs.add(new File(PathUtils.toSystemPath(FilenameUtils.getPath(PathUtils.toUnixPath(sourceFileName)))));
                 }
 
             } catch (ParseProblemException e) {
