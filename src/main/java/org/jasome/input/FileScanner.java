@@ -5,6 +5,8 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.filefilter.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +17,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class FileScanner extends Scanner {
+    private static final Logger logger = LoggerFactory.getLogger(FileScanner.class);
+
     private File scanDir;
     private IOFileFilter filter = FileFilterUtils.and(
             new SuffixFileFilter(".java"),
@@ -62,14 +66,14 @@ public class FileScanner extends Scanner {
             Collection<File> javaFiles = FileUtils.listFiles(file, filter, TrueFileFilter.INSTANCE);
 
             if (javaFiles.size() == 0) {
-                System.err.println("No .java files found in " + file.toString());
+                logger.error("No .java files found in " + file.toString());
                 System.exit(-1);
             }
 
             filesToScan = javaFiles;
         } else {
             if (!filter.accept(file)) {
-                System.err.println("Not a .java source file: " + file.toString());
+                logger.error("Not a .java source file: " + file.toString());
                 System.exit(-1);
             }
 

@@ -14,11 +14,16 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.*;
 
 public abstract class Scanner<T> {
+    private static final Logger logger = LoggerFactory.getLogger(Scanner.class);
 
     protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
 
@@ -111,8 +116,8 @@ public abstract class Scanner<T> {
 
             } catch (ParseProblemException e) {
                 String file = attributes.get("sourceFile");
-                System.err.format("Unable to parse code from file %s, ignoring\n", file);
-                System.err.println(e.getProblems());
+                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+                logger.warn(e.getProblems().toString());
             }
         }
 
@@ -126,8 +131,10 @@ public abstract class Scanner<T> {
             try {
                 combinedTypeSolver.add(new JavaParserTypeSolver(sourceDir));
             } catch (IllegalStateException e) {
-                System.err.format("Unable to parse code from dir %s, ignoring\n", sourceDir);
-                e.printStackTrace();
+                logger.warn("Unable to parse code from dir %s, ignoring\n", sourceDir);
+                StringWriter sw = new StringWriter();
+                e.printStackTrace(new PrintWriter(sw));
+                logger.warn(sw.toString());
             }
         }
 
@@ -166,8 +173,8 @@ public abstract class Scanner<T> {
                 }
             } catch (ParseProblemException e) {
                 String file = attributes.get("sourceFile");
-                System.err.format("Unable to parse code from file %s, ignoring\n", file);
-                System.err.println(e.getProblems());
+                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+                logger.warn(e.getProblems().toString());
             }
         }
 

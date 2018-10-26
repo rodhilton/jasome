@@ -8,7 +8,10 @@ import org.jscience.mathematics.number.Rational
 import org.jscience.mathematics.number.Real
 import spock.lang.Specification
 
+import java.text.DecimalFormat
+
 class NumericValueTest extends Specification {
+    private static final DecimalFormat METRIC_VALUE_FORMAT = new DecimalFormat("0.0########")
 
     def "can add"() {
 
@@ -18,17 +21,17 @@ class NumericValueTest extends Specification {
         def real = NumericValue.of(3.1415)
 
         expect:
-        integer.plus(integer) == NumericValue.of(20);
-        integer.plus(rational) == NumericValue.of(Rational.valueOf(5,3).plus(Rational.valueOf(10,1)));
-        integer.plus(real).toString() == "13.1415"
+        integer + integer == NumericValue.of(20)
+        integer + rational == NumericValue.of(Rational.valueOf(5, 3) + Rational.valueOf(10, 1))
+        (integer + real).toString() == METRIC_VALUE_FORMAT.format(13.1415)
 
-        rational.plus(integer) == integer.plus(rational)
-        rational.plus(rational) == NumericValue.of(Rational.valueOf(5,3).plus(Rational.valueOf(5,3)));
-        rational.plus(real).toString() == "4.808166667"
+        rational + integer == integer + rational
+        rational + rational == NumericValue.of(Rational.valueOf(5, 3) + Rational.valueOf(5, 3))
+        (rational + real).toString() == METRIC_VALUE_FORMAT.format(4.808166667)
 
-        real.plus(integer) == integer.plus(real)
-        real.plus(rational) == rational.plus(real);
-        real.plus(real).toString() == "6.283"
+        real + integer == integer + real
+        real + rational == rational + real
+        (real + real).toString() == METRIC_VALUE_FORMAT.format(6.283)
     }
 
     def "can negate"() {
@@ -53,17 +56,17 @@ class NumericValueTest extends Specification {
         def real = NumericValue.of(3.1415)
 
         expect:
-        integer.minus(integer) == NumericValue.of(0);
-        integer.minus(rational) == NumericValue.of(Rational.valueOf(25,3))
-        integer.minus(real).toString() == "6.8585"
+        integer - integer == NumericValue.of(0)
+        integer - rational == NumericValue.of(Rational.valueOf(25,3))
+        (integer - real).toString() == METRIC_VALUE_FORMAT.format(6.8585)
 
-        rational.minus(integer) == NumericValue.of(Rational.valueOf(-25,3))
-        rational.minus(rational) == NumericValue.of(Rational.valueOf(0,1))
-        rational.minus(real).toString() == "-1.474833333"
+        rational - integer == NumericValue.of(Rational.valueOf(-25,3))
+        rational - rational == NumericValue.of(Rational.valueOf(0,1))
+        (rational - real).toString() == METRIC_VALUE_FORMAT.format(-1.474833333)
 
-        real.minus(integer).toString() == "-6.8585"
-        real.minus(rational).toString() == "1.474833333"
-        real.minus(real) == NumericValue.of(Real.ZERO)
+        (real - integer).toString() == METRIC_VALUE_FORMAT.format(-6.8585)
+        (real - rational).toString() == METRIC_VALUE_FORMAT.format(1.474833333)
+        real - real == NumericValue.of(Real.ZERO)
     }
 
     def "can multiply"() {
@@ -79,12 +82,12 @@ class NumericValueTest extends Specification {
         integer.times(real) == NumericValue.of(31.415)
 
         rational.times(integer) == integer.times(rational)
-        rational.times(rational) == NumericValue.of(Rational.valueOf(25,9));
-        rational.times(real).toString() == "5.235833333"
+        rational.times(rational) == NumericValue.of(Rational.valueOf(25,9))
+        rational.times(real).toString() == METRIC_VALUE_FORMAT.format(5.235833333)
 
         real.times(integer) == integer.times(real)
-        real.times(rational) == rational.times(real);
-        real.times(real).toString() == "9.86902225"
+        real.times(rational) == rational.times(real)
+        real.times(real).toString() == METRIC_VALUE_FORMAT.format(9.86902225)
     }
 
     def "can divide"() {
@@ -100,15 +103,15 @@ class NumericValueTest extends Specification {
         expect:
         integer.divide(integer3) == NumericValue.of(Rational.valueOf(10,3))
         integer.divide(rational) == NumericValue.of(Rational.valueOf(6,1))
-        integer.divide(real).toString() == "3.183192742"
+        integer.divide(real).toString() == METRIC_VALUE_FORMAT.format(3.183192742)
 
         rational.divide(integer) == NumericValue.of(Rational.valueOf(5, 30))
-        rational.divide(rationalFourSevenths) == NumericValue.of(Rational.valueOf(35,12));
-        rational.divide(real).toString() == "0.530532124"
+        rational.divide(rationalFourSevenths) == NumericValue.of(Rational.valueOf(35,12))
+        rational.divide(real).toString() == METRIC_VALUE_FORMAT.format(0.530532124)
 
         real.divide(integer) == NumericValue.of(0.31415)
         real.divide(rational) == NumericValue.of(1.8849)
-        real.divide(real).toString() == "1.0"
+        real.divide(real).toString() == METRIC_VALUE_FORMAT.format(1.0)
     }
 
     def "can exponentiate"() {
@@ -132,17 +135,17 @@ class NumericValueTest extends Specification {
         def real = NumericValue.of(3.1415)
 
         expect:
-        integer.compareTo(integer) == 0
-        integer.compareTo(rational) > 0
-        integer.compareTo(real) > 0
+        integer == integer
+        integer > rational
+        integer > real
 
-        rational.compareTo(integer) < 0
-        rational.compareTo(rational) == 0
-        rational.compareTo(real) < 0
+        rational < integer
+        rational == rational
+        rational < real
 
-        real.compareTo(integer) < 0
-        real.compareTo(rational) > 0
-        real.compareTo(real) == 0
+        real < integer
+        real > rational
+        real == real
     }
 
     def "can max"() {
@@ -193,9 +196,9 @@ class NumericValueTest extends Specification {
         rational.abs() == rational
         real.abs() == real
 
-        NumericValue.ZERO.minus(integer).abs() == integer
-        NumericValue.ZERO.minus(rational).abs() == rational
-        NumericValue.ZERO.minus(real).abs() == real
+        (NumericValue.ZERO - integer).abs() == integer
+        (NumericValue.ZERO - rational).abs() == rational
+        (NumericValue.ZERO - real).abs() == real
     }
 
     def "can collect"() {
@@ -215,11 +218,11 @@ class NumericValueTest extends Specification {
         NumericValueSummaryStatistics stats = vals.stream().collect(NumericValue.summarizingCollector())
 
         then:
-        stats.getAverage().toString() == "77.154761905"
+        stats.getAverage().toString() == METRIC_VALUE_FORMAT.format(77.154761905)
         stats.getCount() == NumericValue.of(7)
         stats.getSum() == NumericValue.of(540.083333333)
-        stats.getMax() == NumericValue.of(529.083333333);
-        stats.getMin() == NumericValue.of(1.0);
+        stats.getMax() == NumericValue.of(529.083333333)
+        stats.getMin() == NumericValue.of(1.0)
     }
 
 
