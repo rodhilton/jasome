@@ -17,6 +17,8 @@ import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
@@ -85,6 +87,8 @@ import java.util.Stack;
  * @since 0.1
  */
 public class TotalLinesOfCodeCalculator {
+
+    private static final Logger logger = LoggerFactory.getLogger(TotalLinesOfCodeCalculator.class);
 
     public static class ProjectCalculator implements Calculator<Project> {
 
@@ -251,9 +255,8 @@ public class TotalLinesOfCodeCalculator {
                 SwitchEntryStmt switchEntryStmt = (SwitchEntryStmt) node;
                 nodeStack.addAll(switchEntryStmt.getStatements());
             } else {
-                //TODO: logger?
-                System.err.println("Encountered type I'm not ready for: " + node.getClass());
-                System.err.println("Lines " + node.getBegin().get().line + " to " + node.getEnd().get().line + "\n");
+                logger.warn("Encountered type I'm not ready for: " + node.getClass());
+                logger.warn("Lines " + node.getBegin().get().line + " to " + node.getEnd().get().line + "\n");
             }
         }
 
