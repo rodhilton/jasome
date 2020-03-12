@@ -42,6 +42,9 @@ Download the latest distribution and unzip, change into directory, then run:
 JaSoMe will gather metrics and output them to the console.  You can save the XML
 to a file using the `--output <file>` option.
 
+JaSoMe runs in Linux and MacOS - Windows is not supported and there are reports that
+it will not run properly in Windows.
+
 # Metrics
 
 Jasome is either currently tracking or planning to track the following metrics:
