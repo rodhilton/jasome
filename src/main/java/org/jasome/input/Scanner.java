@@ -105,7 +105,14 @@ public abstract class Scanner<T> {
                 Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
 
                 if (packageName.isPresent()) {
-                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
+                    //String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
+                    String packagePrefix = "";
+                    String[] pieces = packageName.get().split("\\.");
+                    for (String piece : pieces) {
+                        packagePrefix = packagePrefix.concat(piece).concat(File.separator);
+                    }
+                    
+                    
                     String sourceDir = FilenameUtils.getPath(sourceFileName);
                     String baseSourceDir = sourceDir.replace(packagePrefix, "");
                     String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
