@@ -24,6 +24,9 @@ public class CommandLineExecutive {
 
         Options options = new Options();
         
+//        args = new String[1];
+//        args[0] = "C:\\Users\\gleip\\Documents\\ufjf";
+                
         {
 
             //TODO: still need a way to do excludes, regex or something.  joda has an example package I want to ignore

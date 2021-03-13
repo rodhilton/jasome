@@ -122,9 +122,10 @@ public abstract class Scanner<T> {
                 }
 
             } catch (ParseProblemException e) {
-                String file = attributes.get("sourceFile");
-                logger.warn("Unable to parse code from file %s, ignoring\n", file);
-                logger.warn(e.getProblems().toString());
+                //TODO
+//                String file = attributes.get("sourceFile");
+//                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+//                logger.warn(e.getProblems().toString());
             }
         }
 
@@ -179,9 +180,10 @@ public abstract class Scanner<T> {
                     packages.get(packageName).add(Pair.of(clazz, attributes));
                 }
             } catch (ParseProblemException e) {
-                String file = attributes.get("sourceFile");
-                logger.warn("Unable to parse code from file %s, ignoring\n", file);
-                logger.warn(e.getProblems().toString());
+                //TODO
+//                String file = attributes.get("sourceFile");
+//                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+//                logger.warn(e.getProblems().toString());
             }
         }
 
