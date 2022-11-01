@@ -5,7 +5,6 @@ import org.apache.commons.cli.*;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
 import org.apache.commons.io.filefilter.NotFileFilter;
-import org.apache.commons.io.filefilter.RegexFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.jasome.input.FileScanner;
 import org.jasome.input.Project;
@@ -18,14 +17,16 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 public class CommandLineExecutive {
 
     public static void main(String[] args) throws IOException, ParseException {
 
         Options options = new Options();
-
+        
+//        args = new String[1];
+//        args[0] = "C:\\Users\\gleip\\Documents\\ufjf";
+                
         {
 
             //TODO: still need a way to do excludes, regex or something.  joda has an example package I want to ignore

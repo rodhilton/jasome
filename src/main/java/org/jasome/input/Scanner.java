@@ -105,7 +105,14 @@ public abstract class Scanner<T> {
                 Optional<String> packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString());
 
                 if (packageName.isPresent()) {
-                    String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
+                    //String packagePrefix = packageName.get().replaceAll("[.]", File.separator) + "/";
+                    String packagePrefix = "";
+                    String[] pieces = packageName.get().split("\\.");
+                    for (String piece : pieces) {
+                        packagePrefix = packagePrefix.concat(piece).concat(File.separator);
+                    }
+                    
+                    
                     String sourceDir = FilenameUtils.getPath(sourceFileName);
                     String baseSourceDir = sourceDir.replace(packagePrefix, "");
                     String finalSourceBaseDir = baseSourceDir.replace(".", projectPath);
@@ -115,9 +122,10 @@ public abstract class Scanner<T> {
                 }
 
             } catch (ParseProblemException e) {
-                String file = attributes.get("sourceFile");
-                logger.warn("Unable to parse code from file %s, ignoring\n", file);
-                logger.warn(e.getProblems().toString());
+                //TODO
+//                String file = attributes.get("sourceFile");
+//                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+//                logger.warn(e.getProblems().toString());
             }
         }
 
@@ -172,9 +180,10 @@ public abstract class Scanner<T> {
                     packages.get(packageName).add(Pair.of(clazz, attributes));
                 }
             } catch (ParseProblemException e) {
-                String file = attributes.get("sourceFile");
-                logger.warn("Unable to parse code from file %s, ignoring\n", file);
-                logger.warn(e.getProblems().toString());
+                //TODO
+//                String file = attributes.get("sourceFile");
+//                logger.warn("Unable to parse code from file %s, ignoring\n", file);
+//                logger.warn(e.getProblems().toString());
             }
         }
 
