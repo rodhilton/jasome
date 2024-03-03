@@ -190,9 +190,9 @@ public class TotalLinesOfCodeCalculator {
             } else if (node instanceof ForStmt) {
                 count = count + 2; //2 for the opening and closing of the for statement, we ignore complexity within the loop condition itself
                 nodeStack.add(((ForStmt) node).getBody());
-            } else if (node instanceof ForeachStmt) {
+            } else if (node instanceof ForEachStmt) {
                 count = count + 2; //2 for the opening and closing of the foreach statement
-                nodeStack.add(((ForeachStmt) node).getBody());
+                nodeStack.add(((ForEachStmt) node).getBody());
             } else if (node instanceof WhileStmt) {
                 count = count + 2; //2 for the opening and closing of the while statement
                 nodeStack.add(((WhileStmt) node).getBody());
