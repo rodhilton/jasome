@@ -14,6 +14,7 @@ import org.jasome.input.Type;
 import org.jasome.metrics.Calculator;
 import org.jasome.metrics.Metric;
 import org.jasome.metrics.value.NumericValue;
+import org.jasome.util.CalculationUtils;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -187,7 +188,7 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
         Set<Attribute> attributes = new HashSet<>();
         List<FieldDeclaration> declarations = type.getSource().getFields();
         for(FieldDeclaration declaration: declarations) {
-            EnumSet<Modifier> modifiers = declaration.getModifiers();
+            Set<Modifier.Keyword> modifiers = CalculationUtils.getModifierKeywords(declaration);
             NodeList<VariableDeclarator> variables = declaration.getVariables();
             for(VariableDeclarator variableDeclarator: variables) {
                 com.github.javaparser.ast.type.Type variableType = variableDeclarator.getType();
@@ -202,11 +203,11 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
     private class Attribute {
 
         private Type parentType;
-        private EnumSet<Modifier> modifiers;
+        private Set<Modifier.Keyword> modifiers;
         private com.github.javaparser.ast.type.Type variableType;
         private SimpleName name;
 
-        public Attribute(Type parentType, EnumSet<Modifier> modifiers, com.github.javaparser.ast.type.Type variableType, SimpleName name) {
+        public Attribute(Type parentType, Set<Modifier.Keyword> modifiers, com.github.javaparser.ast.type.Type variableType, SimpleName name) {
             this.parentType = parentType;
             this.modifiers = modifiers;
             this.variableType = variableType;
@@ -218,15 +219,15 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
         }
 
         public boolean isProtected() {
-            return modifiers.contains(Modifier.PROTECTED);
+            return modifiers.contains(Modifier.Keyword.PROTECTED);
         }
 
         public boolean isPrivate() {
-            return modifiers.contains(Modifier.PRIVATE);
+            return modifiers.contains(Modifier.Keyword.PRIVATE);
         }
 
         public boolean isPublic() {
-            return modifiers.contains(Modifier.PUBLIC);
+            return modifiers.contains(Modifier.Keyword.PUBLIC);
         }
 
         @Override
@@ -244,7 +245,7 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
         }
 
         public boolean isPublicish() {
-            return !modifiers.contains(Modifier.PRIVATE) && !modifiers.contains(Modifier.PROTECTED); //Public and default are both public enough
+            return !modifiers.contains(Modifier.Keyword.PRIVATE) && !modifiers.contains(Modifier.Keyword.PROTECTED); //Public and default are both public enough
         }
     }
 }

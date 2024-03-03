@@ -22,7 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
-public abstract class Scanner<T> {
+public abstract class Scanner {
     private static final Logger logger = LoggerFactory.getLogger(Scanner.class);
 
     protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {

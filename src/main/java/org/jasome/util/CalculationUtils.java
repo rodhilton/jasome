@@ -1,10 +1,12 @@
 package org.jasome.util;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithAccessModifiers;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -178,4 +180,9 @@ public class CalculationUtils {
         }
     }
 
+    public static <T extends Node> Set<Modifier.Keyword> getModifierKeywords(NodeWithAccessModifiers<T> field) {
+        return field.getModifiers().stream()
+                .map(Modifier::getKeyword)
+                .collect(Collectors.toSet());
+    }
 }
