@@ -172,8 +172,8 @@ public class CalculationUtils {
 
     public static Optional<Type> lookupType(Project parentProject, ResolvedReferenceType refType) {
         try {
-            Optional<Package> optPackage = parentProject.lookupPackageByName(refType.getTypeDeclaration().getPackageName());
-            return optPackage.flatMap(pkg -> pkg.lookupTypeByName(refType.getTypeDeclaration().getClassName()));
+            Optional<Package> optPackage = parentProject.lookupPackageByName(refType.getTypeDeclaration().get().getPackageName());
+            return optPackage.flatMap(pkg -> pkg.lookupTypeByName(refType.getTypeDeclaration().get().getClassName()));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();

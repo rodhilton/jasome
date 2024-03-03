@@ -141,8 +141,8 @@ public class ProjectMetadata {
 
                 try {
                     ResolvedType declaration = parameter.resolve();
-                    String packageName = declaration.asReferenceType().asReferenceType().getTypeDeclaration().getPackageName();
-                    String className = declaration.asReferenceType().asReferenceType().getTypeDeclaration().getName();
+                    String packageName = declaration.asReferenceType().asReferenceType().getTypeDeclaration().get().getPackageName();
+                    String className = declaration.asReferenceType().asReferenceType().getTypeDeclaration().get().getName();
 
                     project.
                             lookupPackageByName(packageName)
