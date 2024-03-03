@@ -154,7 +154,7 @@ public class CalculationUtils {
 
                         for (ClassOrInterfaceType parentType : parentTypes) {
                             try {
-                                ResolvedReferenceType refType = parentType.resolve();
+                                ResolvedReferenceType refType = parentType.resolve().asReferenceType();
                                 Optional<Type> closestType = CalculationUtils.lookupType(parentProject, refType);
 
                                 closestType.ifPresent(c ->

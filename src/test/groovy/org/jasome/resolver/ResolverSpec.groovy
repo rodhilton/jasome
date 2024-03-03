@@ -3,7 +3,6 @@ package org.jasome.resolver
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
-import com.github.javaparser.symbolsolver.javaparser.Navigator
 import org.jasome.input.Project
 import org.jasome.input.Type
 import org.jasome.metrics.calculators.TotalLinesOfCodeCalculator

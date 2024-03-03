@@ -72,7 +72,7 @@ public class ProjectMetadata {
 
             for (ClassOrInterfaceType parentType : parentTypes) {
                 try {
-                    ResolvedReferenceType refType = parentType.resolve();
+                    ResolvedReferenceType refType = parentType.resolve().asReferenceType();
                     Optional<Type> closestType = CalculationUtils.lookupType(project, refType);
 
                     closestType.ifPresent(c ->
