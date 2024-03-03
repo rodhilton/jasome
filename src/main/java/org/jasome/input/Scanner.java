@@ -60,7 +60,6 @@ public abstract class Scanner {
                             constructorDeclaration.getTypeParameters(),
                             JavaParser.parseClassOrInterfaceType(classDefinition.getName().getIdentifier()),
                             constructorDeclaration.getName(),
-                            false,
                             constructorDeclaration.getParameters(),
                             constructorDeclaration.getThrownExceptions(),
                             constructorDeclaration.getBody()
