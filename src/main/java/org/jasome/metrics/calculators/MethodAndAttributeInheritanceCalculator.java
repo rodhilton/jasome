@@ -156,15 +156,6 @@ public class MethodAndAttributeInheritanceCalculator implements Calculator<Type>
                 .filter(attribute->attribute.isPublicish())
                 .collect(Collectors.toSet());
 
-//        Set<Attribute> publicInheritedNotOverriddenAttributes = inheritedNotOverriddenAttributes.stream()
-//                .filter(attribute->attribute.isPublic())
-//                .collect(Collectors.toSet());
-
-//        Set<Attribute> hiddenInheritedNotOverriddenAttributes = Sets.difference(inheritedNotOverriddenAttributes, publicInheritedNotOverriddenAttributes)
-//                .stream()
-//                .filter(attribute -> attribute.isProtected()) //Private methods aren't 'inherited' because they can't be called
-//                .collect(Collectors.toSet());
-
         metricBuilder
                 .add(Metric.of("Ait", "Number of Attributes Inherited (Total)", inheritableAttributes.size()))
                 .add(Metric.of("Ai", "Number of Attributes Inherited and Not Overridden", inheritedNotOverriddenAttributes.size()))
