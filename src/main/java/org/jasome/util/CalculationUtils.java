@@ -1,10 +1,12 @@
 package org.jasome.util;
 
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
 import com.github.javaparser.ast.expr.NameExpr;
+import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithAccessModifiers;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.resolution.types.ResolvedReferenceType;
@@ -152,7 +154,7 @@ public class CalculationUtils {
 
                         for (ClassOrInterfaceType parentType : parentTypes) {
                             try {
-                                ResolvedReferenceType refType = parentType.resolve();
+                                ResolvedReferenceType refType = parentType.resolve().asReferenceType();
                                 Optional<Type> closestType = CalculationUtils.lookupType(parentProject, refType);
 
                                 closestType.ifPresent(c ->
@@ -170,12 +172,17 @@ public class CalculationUtils {
 
     public static Optional<Type> lookupType(Project parentProject, ResolvedReferenceType refType) {
         try {
-            Optional<Package> optPackage = parentProject.lookupPackageByName(refType.getTypeDeclaration().getPackageName());
-            return optPackage.flatMap(pkg -> pkg.lookupTypeByName(refType.getTypeDeclaration().getClassName()));
+            Optional<Package> optPackage = parentProject.lookupPackageByName(refType.getTypeDeclaration().get().getPackageName());
+            return optPackage.flatMap(pkg -> pkg.lookupTypeByName(refType.getTypeDeclaration().get().getClassName()));
         } catch (Exception e) {
             e.printStackTrace();
             return Optional.empty();
         }
     }
 
+    public static <T extends Node> Set<Modifier.Keyword> getModifierKeywords(NodeWithAccessModifiers<T> field) {
+        return field.getModifiers().stream()
+                .map(Modifier::getKeyword)
+                .collect(Collectors.toSet());
+    }
 }

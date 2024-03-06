@@ -7,8 +7,8 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.ConstructorDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
-import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
@@ -22,8 +22,10 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.*;
 
-public abstract class Scanner<T> {
+public abstract class Scanner {
     private static final Logger logger = LoggerFactory.getLogger(Scanner.class);
+
+    private JavaParser parser;
 
     protected Project doScan(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
 
@@ -58,9 +60,8 @@ public abstract class Scanner<T> {
                             constructorDeclaration.getModifiers(),
                             constructorDeclaration.getAnnotations(),
                             constructorDeclaration.getTypeParameters(),
-                            JavaParser.parseClassOrInterfaceType(classDefinition.getName().getIdentifier()),
+                            parser.parseClassOrInterfaceType(classDefinition.getName().getIdentifier()).getResult().get(),
                             constructorDeclaration.getName(),
-                            false,
                             constructorDeclaration.getParameters(),
                             constructorDeclaration.getThrownExceptions(),
                             constructorDeclaration.getBody()
@@ -93,12 +94,14 @@ public abstract class Scanner<T> {
     private JavaSymbolSolver configureParserAndResolver(Collection<Pair<String, Map<String, String>>> sourceCode, String projectPath) {
         Set<File> sourceDirs = new HashSet<>();
 
+        JavaParser bootstrapParser = new JavaParser();
+
         for (Pair<String, Map<String, String>> sourceFile : sourceCode) {
             String sourceCodeContent = sourceFile.getLeft();
             Map<String, String> attributes = sourceFile.getRight();
 
             try {
-                CompilationUnit cu = JavaParser.parse(sourceCodeContent);
+                CompilationUnit cu = bootstrapParser.parse(sourceCodeContent).getResult().get();
 
                 String sourceFileName = attributes.get("sourceFile");
 
@@ -144,7 +147,7 @@ public abstract class Scanner<T> {
         ParserConfiguration parserConfiguration = new ParserConfiguration()
                 .setAttributeComments(false)
                 .setSymbolResolver(symbolSolver);
-        JavaParser.setStaticConfiguration(parserConfiguration);
+        parser = new JavaParser(parserConfiguration);
         return symbolSolver;
     }
 
@@ -158,7 +161,7 @@ public abstract class Scanner<T> {
             Map<String, String> attributes = sourceFile.getRight();
 
             try {
-                CompilationUnit cu = JavaParser.parse(sourceCode);
+                CompilationUnit cu = parser.parse(sourceCode).getResult().get();
 
                 String packageName = cu.getPackageDeclaration().map((p) -> p.getName().asString()).orElse("default");
 

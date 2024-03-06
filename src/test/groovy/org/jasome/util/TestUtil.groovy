@@ -67,9 +67,10 @@ class TestUtil {
         File tempDir = new File(Files.createTempDir(), new Faker().letterify("Test?????"))
         tempDir.mkdirs()
         System.err.println("Running tests using source dir "+tempDir)
+        JavaParser parser = new JavaParser()
 
         for(String sourceCode: sourceCodes) {
-            CompilationUnit cu = JavaParser.parse(sourceCode);
+            CompilationUnit cu = parser.parse(sourceCode).getResult().get();
             Optional<PackageDeclaration> packageDecOpt = cu.getPackageDeclaration();
             File rootDir;
             if(packageDecOpt.isPresent()) {

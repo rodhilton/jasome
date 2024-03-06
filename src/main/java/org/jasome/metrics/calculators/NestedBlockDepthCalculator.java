@@ -19,7 +19,7 @@ public class NestedBlockDepthCalculator implements Calculator<Method> {
     @Override
     public Set<Metric> calculate(Method method) {
         List<BlockStmt> blocks = method.getSource().getNodesByType(BlockStmt.class);
-        List<SwitchEntryStmt> switchEntries = method.getSource().getNodesByType(SwitchEntryStmt.class);
+        List<SwitchEntry> switchEntries = method.getSource().getNodesByType(SwitchEntry.class);
 
         List<Node> allNestedBlocks = new ArrayList<>();
         allNestedBlocks.addAll(blocks);
@@ -32,7 +32,7 @@ public class NestedBlockDepthCalculator implements Calculator<Method> {
             while (theNode != method.getSource()) {
                 if (
                     theNode instanceof IfStmt
-                            || theNode instanceof SwitchEntryStmt
+                            || theNode instanceof SwitchEntry
                             || theNode instanceof SwitchStmt
                             || theNode instanceof TryStmt
                             || theNode instanceof ForStmt

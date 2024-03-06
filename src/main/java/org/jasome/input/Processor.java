@@ -71,25 +71,5 @@ public class Processor {
             Set<Metric> projectMetrics = projectMetricCalculator.calculate(project);
             project.addMetrics(projectMetrics);
         });
-
-
-//        for (Package aPackage : project.getPackages()) {
-//            System.out.println(aPackage.getName());
-//            System.out.println("+" + aPackage.getMetrics());
-//
-//            for (Type type : aPackage.getTypes()) {
-//
-//                System.out.println("  " + type.getName());
-//                System.out.println("  +" + type.getMetrics());
-//
-//                for (Method method : type.getMethods()) {
-//
-//                    System.out.println("    " + method.getName());
-//                    System.out.println("    +" + aPackage.getMetrics());
-//
-//                }
-//            }
-//
-//        }
     }
 }
